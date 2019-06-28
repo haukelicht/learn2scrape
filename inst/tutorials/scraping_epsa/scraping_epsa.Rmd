@@ -1,0 +1,98 @@
+---
+title: "Scraping EPSA"
+output: 
+  learnr::tutorial:
+    progressive: false
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(dplyr)
+library(rvest)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+This is an exercise for scraping the program of the [2019 EPSA Conference](https://www.epsanet.org/conference-2019/). The exercise format assumes you already have some experience with HTML - so try your best and refer back to the other exercises if things do not work out.
+
+## Scraping the conference program
+
+### First steps
+
+Proceeding as before, first load dplyr, define the [starting pageurl](https://app.oxfordabstracts.com/events/772/programme-builder/view/sort/title?view=published) and parse it into a new object.
+
+```{r generate-urls, exercise=TRUE}
+"https://app.oxfordabstracts.com/events/772/programme-builder/view/sort/title?view=published"
+```
+
+```{r generate-urls-solution}
+library(rvest)
+pageurl<-"https://app.oxfordabstracts.com/events/772/programme-builder/view/sort/title?view=published"
+page<-read_html(pageurl)
+```
+
+### Extracting information
+
+There is a number of things we might be interested in:
+
+- **paper titles**
+- **authors**
+- **sections** (based on the time)
+- **institutions**
+- abstracts
+- potentially, other thinks like time slots...
+
+Try to find CSS selectors for the bold items! We'll worry about the abstracts a bit later.
+
+```{r selectors,exercise=T}
+title_select <-
+time_select <-
+author_select <-
+institution_select <-
+
+```
+
+```{r selectors-solution}
+title_select<-".card__subtitle--program-abstract-title p"
+time_select<-".card__datum--programme-time"
+author_select<-".card__copy--authors-wrap"
+institution_select<-".card__copy--affiliations"
+```
+
+Now, extract the information from the parsed HTML page.
+
+*Tip: You can include trim=T inside html_text() to clean the results.*
+
+```{r extraction,exercise=T}
+titles
+authors
+sections
+institutions
+```
+
+```{r extraction-solution,eval=F}
+titles<-page %>% html_nodes(title_select) %>% html_text(trim=T) 
+authors<-page %>% html_nodes(author_select) %>% html_text(trim=T)
+sections<-page %>% html_nodes(time_select) %>% html_text(trim=T) 
+institutions<-page %>% html_nodes(institution_select) %>% html_text(trim=T)
+```
+
+## Looping through the abstracts
+
+
+Getting the abstracts is a bit more complicated. Since they are not on the page we scraped, we will have to collect and follow the links to the details of each paper.
+
+Let us start by just extracting all links contained on the page - for that, just run the first line.
+
+Seems like there are some false matches. We have two options how to exclude them:
+
+a) we sort them afterwards by only keeping links that confirm to a certain pattern
+b) we sort them beforehand by modifying our CSS selector to only include certain patterns
+
+paper_links<-page %>% html_nodes("body a[href^='/stages']") %>% html_attr("href") %>% str_trim()
+
+
+
+Now, it is time to scrape the abstracts.
+
+## Wrap-up

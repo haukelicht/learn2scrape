@@ -1,0 +1,11 @@
+Package: learn2scrape
+Title: Learning To Webscrape
+Version: 0.0.0.9000
+Authors@R: person("Theresa", "Gessler", email = "gessler@ipz.uzh.ch",
+                  role = c("aut", "cre"))
+Maintainer: Theresa Gessler <gessler@ipz.uzh.ch>
+Description: This package is there to create an interactive webscraping tutorial that can be run via learnr. Examples are drawn with a political science background in mind but tools are applicable more widely.
+Depends: R (>= 3.5.0)
+License: GPL-3
+Encoding: UTF-8
+LazyData: true

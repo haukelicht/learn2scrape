@@ -1,0 +1,146 @@
+---
+title: "CSS Selectors"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+library(rvest)
+library(dplyr)
+```
+
+
+## Understanding CSS Selectors
+
+For this tutorial, I have preloaded **rvest**.
+
+### Basic selectors
+
+<table>
+<tr>
+<td>element</td>
+<td>Type selector</td>
+<td>Matches an element</td>
+</tr>
+<tr>
+<td>.class</td>
+<td>Class selector</td>
+<td>Matches the value of a class attribute</td>
+<td></td>
+</tr>
+<tr>
+<td>#id</td>
+<td>ID selector</td>
+<td>Matches the value of an id attribute</td>
+<td></td>
+</tr>
+<tr>
+<td>*</td>
+<td>universal selector</td>
+<td>Matches everything.</td>
+<td></td>
+</tr>
+</table>
+
+### Attribute selectors
+
+<table>
+<tr>
+<td>&lsqb;attribute&rsqb;</td>
+<td></td>
+<td>Matches elements containing a given attribute</td>
+<td></td>
+</tr>
+<tr>
+<td>&lsqb;attribute=value&rsqb;</td>
+<td></td>
+<td>Matches elements containing a given attribute with a given value</td>
+<td></td>
+</tr>
+
+</table>
+
+### More complex attribute selectors
+
+<table>
+<tr>
+<td>&lsqb;attribute*=value&rsqb;</td>
+<td>Matches elements with an attribute that contains a given value</td>
+<td>a&lsqb;href*="pressrelease"&rsqb;</td>
+</tr>
+<tr>
+<td>&lsqb;attribute^="value"&rsqb;</td>
+<td>Matches elements with an attribute that starts with a given value</td>
+<td>a&lsqb;href*="/press/"&rsqb;</td>
+</tr>
+<tr>
+<td>&lsqb;attribute&dollar;="value"&rsqb;</td>
+<td>Matches elements with an attribute that ends with a given value</td>
+<td>&lsqb;href$=".pdf"&rsqb;</td>
+</tr>
+</table>
+
+
+## Practicing
+
+## Combining CSS Selectors
+
+There are several ways to combine CSS Selectors:
+
+<table>
+<tr><td>element,element 	</td>
+<td>div, p 	</td>
+<td>Selects all &lt;>div&gt; elements and all &lt;>p&gt; elements</td> </tr>
+<tr><td>element element 	</td>
+<td>div p 	</td>
+<td>Selects all &lt;>p&gt; elements inside &lt;>div&gt; elements</td> </tr>
+<tr><td>element>element 	</td>
+<td>div > p 	</td>
+<td>Selects all &lt;>p&gt; elements where the parent is a &lt;>div&gt; element</td> </tr>
+<tr><td>element+element 	</td>
+<td>div + p 	</td>
+<td>Selects all &lt;>p&gt; elements that are placed immediately after &lt;>div&gt; elements</td> </tr>
+<tr><td>element1~element2 	</td>
+<td>p ~ ul 	</td>
+<td>Selects every &lt;ul&gt; element that are preceded by a &lt;p&gt; element</td> </tr>
+</table>
+
+If you want to practice CSS Selectors, the [w3schools](https://www.w3schools.com/cssref/trysel.asp) has a test playground where you can try out lots of more complex selectors and read up on them.
+
+
+## How to use CSS Selectors in your scraping routines
+
+When we scrape content from different domains, CSS selectors are likely to change all the time, while our scraping routines might not change. That means, it is useful to define URLs and CSS selectors outside of the functions we use to scrape. Rewrite the following function so that it includes a variable instead of a hard-coded CSS Selector.
+
+```{r function}
+
+
+```
+
+```{r function-solution}
+
+```
+
+
+## Alternatives: xpaths
+
+XPath uses path expressions to select nodes in an XML document. Below, you find some of the most important specifications. If you are interested in using xpaths - whether it is because xpath has **more power** or you just find it more intuitive - check the [w3school's extensive xpath documentation](https://www.w3schools.com/xml/xpath_nodes.asp).
+
+<table>
+<tr><td>Expression 	</td>
+<td>Description</td></tr>
+<tr><td>nodename 	</td>
+<td>Selects all nodes with the name "nodename"</td></tr>
+<tr><td>/ 	</td>
+<td>Selects from the root node</td></tr>
+<tr><td>// 	</td>
+<td>Selects nodes in the document from the current node that match the selection no matter where they are</td></tr>
+<tr><td>. 	</td>
+<td>Selects the current node</td></tr>
+<tr><td>.. 	</td>
+<td>Selects the parent of the current node</td></tr>
+<tr><td>@ 	</td>
+<td>Selects attributes</td></tr>
+</table>

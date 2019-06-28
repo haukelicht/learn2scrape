@@ -1,0 +1,223 @@
+---
+title: "Introduction to Webscraping"
+author: "Theresa Gessler"
+date: "July 2019"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE,
+                      eval=F)
+```
+
+
+## Plan of this afternoon
+
+- general introduction to webscraping
+- we will focus on *static pages* without interactivity
+- we work with different exercise files, depending on your level
+
+
+## What is webscraping?
+
+- extracting data from webpages
+    - anything from the summer school page to social media
+    - lots of different techniques
+- why should you scrape?
+    - masses of data
+    - reproducible and renewable data collection
+    - once you learned it: simpler
+
+## Experiences with webscraping?
+
+Do you have...
+
+- experience with HTML?
+- experience with scraping?
+- any ideas that involve scraping?
+
+## How To
+
+### Three packages
+
+- rvest
+    - our tool for scraping
+- learnr
+    - our tool for practicing what we learned
+    - not needed for webscraping but for generating interactive HTML pages
+- learn2scrape
+    - package for this course that contains all exercises
+    - we will install this package together
+
+## learnr & learn2scrape
+
+- everything we do today, including content of most of my slides, included as a tutorial
+- if you do not want to code along, the final file is also included 
+
+### Steps
+
+- install learnr package (done!?)
+- install learn2scrape
+
+```{r,echo=T,eval=F}
+install.packages("path/to/tar/file", source = TRUE, repos=NULL)
+```
+
+- run tutorial through learnr package
+
+```{r,eval=F,echo=T}
+library(learnr)
+run_tutorial("introduction",package="learn2scrape")
+```
+
+## HTML: The basics
+
+- **H**yper **T**ext **M**arkup **L**anguage
+    - *markup*: 
+- use of HTML tags to specify behaviour of text
+- [example page](http://quotes.toscrape.com/)
+
+<img src="quotes2scrape.png" style="width:60%">
+
+```{r,eval=T}
+include_graphics("quotes2scrape.png")
+```
+
+## Example: Quotes to scrape Webpage
+
+```{r,eval=T}
+include_graphics("quotes2scrape_code.png")
+```
+
+## Browsing vs. scraping
+
+- browsing
+    - you click on something
+    - browser sends request to server that hosts webpage
+    - server returns resource (e.g. HTML document)
+    - browser interprets HTML and renders it in a nice fashion
+- scraping with R
+    - you manually specify a resource
+    - R sends request to server that hosts website
+    - server returns resource
+    - R parses HTML (i.e., interprets the structure), but does not render it in a nice fashion
+    - you tell R which parts of the structure to focus on and what to extract
+
+## Basics of webscraping
+
+**Web scraping** is the process of extracting data from webpages. Normally, we do that intuitively - we scan a webpages with our eyes and read only those parts that are important to us. This is more complicated when we want R to read pages for us - R does not know what is important. So we have to tell R exactly where to look!
+
+But don't worry, we will go step by step. Let's start with something simple. Imagine, we want to scrape this simple webpage full of quotes. Its address is [http://quotes.toscrape.com/](http://quotes.toscrape.com/) Just have a look at the webpage.
+
+**First**, we need to load the package we'll use for most of our scraping. It is called *rvest*. Please load it with the library() command.
+
+**Next**, to read the page into R, we need to tell R the address - please create a character vector named url that contains the URL http://quotes.toscrape.com/
+
+## Exercise
+
+```{r package, exercise=TRUE}
+http://quotes.toscrape.com/
+```
+
+```{r package-solution}
+library(rvest)
+url<-"http://quotes.toscrape.com/"
+```
+
+Now, we start by reading (sometimes called parsing) the webpage. To tell R to read the webpage, we can use the function read_html. Apply the function to the url object we just created!
+
+```{r read, exercise=TRUE}
+
+```
+
+```{r read-solution}
+read_html(url)
+```
+
+The output does not look like you expected? You would be surprised to see that the [original webpage](http://quotes.toscrape.com/) looks quite similar. Have a look at the webpage source code. Depending on your browser, you can probably select 'view source' after a right mouse click. If you have trouble, [google has an up-to-date explanation](https://www.google.com/search?hl=&site=&q=how+to+view+webpage+source+code+in+browser).
+
+Just if you were wondering, of course, we could have also skipped creating a variable with the URL. Try to apply the read_html() function directly to the URL http://quotes.toscrape.com/ and save the result to an object called page.
+
+```{r page, exercise=TRUE}
+page
+```
+
+```{r page-solution}
+page<-read_html("http://quotes.toscrape.com/")
+```
+
+The function read_html parses the html code, similar to what our browser does. Still, it gives us the entire document including the HTML commands. You can use the function html_text() to extract the Webpage text. 
+
+Remember, that we assigned the parsed HTML page to the object page? Try applying html_text() to the object page.
+
+```{r text, exercise=TRUE}
+
+```
+
+```{r text-solution}
+html_text(page)
+```
+
+Did you find the quotes from before? Admittedly, this still looks very messy. 
+Maybe you are thinking: If only, there would be a way to tell R to just get the text of the quotes!
+
+Luckily there is! The html_nodes() command allows us to select specific 'nodes', that is, elements of the HTML Code. Please have a look at the documentation of the html_nodes() command.
+
+```{r documentation,exercise=TRUE}
+?html_nodes
+```
+
+So, we need xpath or CSS selectors! If you have not used HTML before, this might sound complicated. It helps to get a bit into the structure of HTML. [Click on this link to read an introduction to HTML](https://www.w3schools.com/html/default.asp)
+
+While understanding HTML helps, we often do not need to engage with the code because there are lots of tools to help us. For example, SelectorGadget is a JavaScript bookmarklet that allows you to interactively figure out what css selector you need to extract parts of the page. If you have not heard of selectorgadget, check its [webpage](https://selectorgadget.com/) - there is even a video.
+
+We will try to use SelectorGadget now.[ Install SelectorGadget in your browser]() and use it to select all quotes on the quotes webpage we have used.
+
+1. Click on the element you want to select. SelectorGadget will make a first guess at what css selector you want and mark all similar elements. It's likely to be a bad guess since it only has one example to learn from, but it's a start. Elements that match the selector will be highlighted in yellow.
+2. Click on elements that shouldn't be selected. They will turn red.  Click on elements that *should* be selected but are not so far. They will turn green.
+3. Iterate until only the elements you want are selected.  SelectorGadget is not perfect and sometimes will not be able to find a useful css selector. Sometimes starting from a different element helps.
+
+What is the selector you receive?
+
+```{r selector-practice, echo=FALSE}
+quiz(caption= "Quiz about selectors",
+question("Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?",
+  answer(".quote",message="Almost but we did not want to include the author and tags!"),
+  answer(".tags .tag"),
+  answer(".text", correct = TRUE),
+  answer("h2"),
+  allow_retry=TRUE
+),
+question("Try finding the CSS Selektor for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?",
+  answer(".quote"),
+  answer(".tags .tag", correct = TRUE),
+  answer(".text"),
+  answer("h2"),
+  allow_retry=TRUE
+))
+```
+
+Now, we try to use these CSS Selectors with the html_nodes() command. Use the CSS selector for the quotes to select only the quotes from the parsed HTML (remember - the object was called page) and assign them to a new object selected_nodes. Then, inspect the results by calling the object!
+
+``{r nodes, exercise=TRUE}
+
+```
+
+```{r nodes-solution}
+selected_nodes<-html_nodes(page,".text")
+selected_nodes
+```
+
+This already looks more structured - but we should get rid of the HTML commands. As a last step, try applying the html_text() command we used before to the nodes which we selected in the last step. This way, we get just the text from the nodes we selected.
+
+
+```{r textnodes}
+selected_nodes %>% html_text()
+```
+
+```{r textnodes-solution}
+selected_nodes %>% html_text()
+```
+
+**Congratulations! You scraped your first webpage!**

@@ -1,0 +1,92 @@
+---
+title: "Scraping multiple pages"
+output: 
+  learnr::tutorial:
+    progressive: false
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(learn2scrape)
+library(rvest)
+knitr::opts_chunk$set(echo = FALSE)
+page<-system.file("extdata", "quotepage.html", package = "learn2scrape") %>% read_html()
+```
+
+
+
+## Introduction
+
+*Last revised: `r Sys.Date()`*
+
+So, you have learned how to use some of the basic functions of the `rvest` package: `read_html()`, `html_nodes()` and `html_text()`. If we really want to scrape a lot of pages, we need another step: We have to learn to follow links without actually opening the browser and clicking.
+
+In this part of the tutorial, you will learn two things:
+
+- to extract links from webpages
+- some methods to automate following these links.
+
+You will see that in the end, webscraping is a function of programming in R. The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data.
+
+## Extracting links from webpages
+
+To extract links, we need another command. Remember we said hyperlinks are an *attribute* of the text? Because of that, the `rvest` command is called `html_attr()`. We can use it to extract different attributes, so you will have to tell rvest that what we are interested in is a link. Remember what links looked like?
+
+`<a href=></a>`
+
+*href* stands for hyperreference and signifies the webpage the link leads to. You can specify `name="href"` inside the `html_attr()` command to extract the link. For example:
+
+`html_attr(parsed_page,"href")`
+
+However, this will only work on individual HTML tags, so we will use `html_nodes()` again. Please try on the [quotes2scrape webpage](http://quotes.toscrape.com/). 
+
+- first, you can extract potential links from all tags by using the universal selector (`html_nodes("*)`)
+- second, look up the selector of the tags again and extract the links to all tabs
+
+The parsed page is stored in an object called `page`.
+
+```{r links,exercise=TRUE}
+
+
+
+
+```
+
+```{r links-solution}
+# all pages
+page %>% html_nodes("*") %>% html_attr("href")
+# tags
+page %>% html_nodes(".tags .tag") %>% html_attr("href")
+```
+
+
+
+Do you notice something about the links? They are missing a part. That is because they are relative links within the directory structure of the webpage. To 'repair' them, we need to add the **base url** of the webpage. 
+
+This is sometimes just the url of the webpage we originally scraped from, sometimes (if we already started from a page other than the starting page) we need to cut the path to the base url. For this, we can use the function `paste()` that pastes together two character vectors. I recommend using `paste0()` which pastes the vectors together without inserting a white space between the vectors. If you have never used paste, try it out
+
+```{r pastetest,exercise=T}
+paste("a","b")
+paste0("a","b")
+```
+
+Now, completing the paths of the URLs we scraped should not be a problem for you. Copy-paste the code you used to extract the links of the tags, assign it to a new object and copy-paste the base url (http://quotes.toscrape.com/) in front of it.
+
+**Watch out for the slashes between the base url and the address of your page - having none or too many is a typical problem!**
+
+```{r paste, exercise=T}
+
+
+```
+
+```{r paste-solution}
+urls<-page %>% html_nodes(".tags .tag") %>% html_attr("href")
+paste0("http://quotes.toscrape.com",urls)
+```
+
+
+
+## Automating the following of links
+
+

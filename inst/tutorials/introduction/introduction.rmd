@@ -1,0 +1,189 @@
+---
+title: "Introduction to Webscraping"
+output: 
+  learnr::tutorial:
+    progressive: false
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(learn2scrape)
+library(rvest)
+knitr::opts_chunk$set(echo = FALSE)
+quotepage<-system.file("extdata", "quotepage.html", package = "learn2scrape")
+```
+
+## Welcome
+
+*Last revised: `r Sys.Date()`*
+
+Welcome to webscraping with learn2scrape!  This is a first attempt at making this class more interactive and fun - if you have any feedback, let [me know](mailto:gessler@ipz.uzh.ch)!
+
+You will see explanations but there are also some parts where you'll be asked to write code. Some notes about the format:
+
+- this is an interactive tutorial
+- If you don't know the answer, you can click on the *Hint*-button (where available) or the *Solution* button to see the solution.
+- You can test your code by clicking on *Run Code*
+- Be cautious about the *Start over*-button: Clicking on it will delete the code you wrote
+- unlike in a normal markdown document, all chunks are independent. That means: If you create something in one chunk, it won't be available in the other chunks
+
+If you prefer using [swirl](https://swirlstats.com/), this first lesson is also available as a swirl-course. As things get more complex later on, I'll ask you to switch to the browser-version!
+
+## Basics of webscraping
+
+**Web scraping** is the process of extracting data from webpages. Normally, we do that intuitively - we scan a webpages with our eyes and read only those parts that are important to us. This is more complicated when we want R to read pages for us - R does not know what is important. So we have to tell R exactly where to look!
+
+But don't worry, we will go step by step. Let's start with something simple. Imagine, we want to scrape this simple webpage full of quotes. Its address is [http://quotes.toscrape.com/](http://quotes.toscrape.com/) Just have a look at the webpage.
+
+**First**, we need to load the package we'll use for most of our scraping. It is called *rvest*. Please load it with the `library()` command.
+
+**Next**, to read the page into R, we need to tell R its address - please create a character vector named `url` that contains the URL http://quotes.toscrape.com/ . You can see if it worked by calling the object `url`.
+
+```{r package, exercise=TRUE,exercise.lines=3}
+"http://quotes.toscrape.com/"
+```
+
+```{r package-solution}
+library(rvest)
+url<-"http://quotes.toscrape.com/"
+```
+### Parsing
+
+Now, we start by reading (sometimes called parsing) the webpage. To tell R to read the webpage, we can use the function `read_html()`. Apply the function to the url object we just created!
+
+```{r read, exercise=TRUE,exercise.lines=3}
+library(rvest)
+url<-"http://quotes.toscrape.com/"
+```
+
+```{r read-hint}
+library(rvest)
+url<-"http://quotes.toscrape.com/"
+read_html(url)
+```
+
+
+```{r read-solution}
+library(rvest)
+url<-"http://quotes.toscrape.com/"
+read_html(url)
+```
+
+The output does not look like you expected? You would be surprised to see that the [original webpage](http://quotes.toscrape.com/) looks quite similar. Have a look at the webpage source code. Depending on your browser, you can probably select 'view source' after a right mouse click. If you have trouble, [google has an up-to-date explanation](https://www.google.com/search?hl=&site=&q=how+to+view+webpage+source+code+in+browser). 
+
+
+## Extracting elements
+
+### Extracting Text
+
+Just if you were wondering, of course, we could have also skipped creating a variable with the URL. Try to apply the read_html() function directly to the URL http://quotes.toscrape.com/ and save the result to an object called `page`.
+
+The function read_html parses the html code, similar to what our browser does. Still, it gives us the entire document including the HTML commands. You can use the function html_text() to extract the Webpage text. 
+
+Remember, we just assigned the parsed HTML page to the object page? Try applying html_text() to the object page.
+
+
+
+
+```{r text, exercise=TRUE,exercise.lines=2}
+
+```
+
+```{r text-solution}
+page<-read_html("http://quotes.toscrape.com/")
+html_text(page)
+```
+
+Did you find the quotes from before? Admittedly, this still looks very messy. 
+Maybe you are thinking: If only, there would be a way to tell R to just get the text of the quotes!
+
+### CSS Selectors
+
+Luckily there is! The html_nodes() command allows us to select specific 'nodes', that is, elements of the HTML Code. Please have a look at the documentation of the html_nodes() command.
+
+```{r documentation,exercise=TRUE}
+library(rvest)
+?html_nodes
+```
+
+So, we need xpath or CSS selectors! If you have not used HTML before, this might sound complicated. It helps to get a bit into the structure of HTML. [Click on this link to read an introduction to HTML](https://www.w3schools.com/html/default.asp)
+
+### SelectorGadget
+
+While understanding HTML helps, we often do not need to engage with the code because there are lots of tools to help us. For example, SelectorGadget is a JavaScript bookmarklet that allows you to interactively figure out what css selector you need to extract parts of the page. If you have not heard of selectorgadget, check its [webpage](https://selectorgadget.com/) - there is even a video:
+
+![](https://vimeo.com/52055686)
+
+We will try to use SelectorGadget now.[ Install SelectorGadget in your browser]() and use it to select all quotes on the quotes webpage we have used.
+
+1. Click on the element you want to select. SelectorGadget will make a first guess at what css selector you want and mark all similar elements. It's likely to be a bad guess since it only has one example to learn from, but it's a start. Elements that match the selector will be highlighted in yellow.
+2. Click on elements that shouldn't be selected. They will turn red.  Click on elements that *should* be selected but are not so far. They will turn green.
+3. Iterate until only the elements you want are selected.  SelectorGadget is not perfect and sometimes will not be able to find a useful css selector. Sometimes starting from a different element helps.
+
+What is the selector you receive?
+
+```{r selector-practice, echo=FALSE}
+quiz(caption= "Quiz about selectors",
+question("Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?",
+  answer(".quote",message="Almost but we did not want to include the author and tags!"),
+  answer(".tags .tag"),
+  answer(".text", correct = TRUE),
+  answer("h2"),
+  allow_retry=TRUE
+),
+question("Try finding the CSS Selektor for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?",
+  answer(".quote"),
+  answer(".tags .tag", correct = TRUE),
+  answer(".text"),
+  answer("h2"),
+  allow_retry=TRUE
+))
+```
+
+
+### Applying CSS Selectors
+
+Now, we try to use these CSS Selectors with the `html_nodes()` command. Use the CSS selector for the quotes to select only the quotes from the parsed HTML (remember - the object was called page) and assign them to a new object `selected_nodes`. Then, inspect the results by calling the object!
+
+**From here on, the parsed page is stored in the object page, so you can skip these steps.**
+
+
+```{r page-setup}
+page<-read_html(quotepage)
+```
+
+
+```{r nodes, exercise=TRUE,exercise.setup="page-setup"}
+
+```
+
+```{r nodes-solution,exercise.setup='page-setup'}
+selected_nodes<-html_nodes(page,".text")
+selected_nodes
+```
+
+This already looks more structured - but we should get rid of the HTML commands. As a last step, try applying the `html_text()` command we used before to the nodes which we selected in the last step. This way, we get just the text from the nodes we selected. Please copy the code you used to extract the nodes and continue working on that!
+
+```{r textnodes, exercise=TRUE, exercise.setup='page-setup'}
+
+
+```
+
+```{r textnodes-solution,exercise.setup='page-setup'}
+selected_nodes<-html_nodes(page,".text")
+selected_nodes %>% html_text()
+```
+
+## Wrap-up
+
+**Congratulations! If you completed this lesson, you scraped your first webpage!**
+
+To continue, you can run the following lessons from your R console:
+
+<!--- Scraping Tables: run_tutorial("Tables",package="learn2scrape")-->
+<!--- Scraping files: run_tutorial("Files",package="learn2scrape")-->
+<!-- - Learning CSS Selectors: run_tutorial("CSS",package="learn2scrape")-->
+- Scraping multiple pages: run_tutorial("scraping_pages",package="learn2scrape")
+- EPSA conference scraping project: run_tutorial("scraping_epsa",package="learn2scrape")
+

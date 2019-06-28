@@ -1,0 +1,314 @@
+---
+title: "Introduction to Webscraping"
+author: "Theresa Gessler"
+date: "July 2019"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = FALSE,
+                      eval=F)
+```
+
+
+## Plan of this afternoon
+
+- general introduction to webscraping
+- we will focus on *static pages* without interactivity
+- work on different exercise files, depending on your previous knowledge
+
+--
+
+
+## What is webscraping?
+
+- extracting data from webpages
+    - anything from the summer school page to social media
+    - lots of different techniques
+
+--
+
+- why should you scrape?
+    - masses of data
+    - reproducible and renewable data collection
+    - once you learned it: simpler than manual data collection
+
+---
+
+
+## Experiences with webscraping?
+
+Do you have...
+
+- experience with HTML?
+- experience with scraping?
+- any ideas that involve scraping?
+
+---
+
+
+## How To
+
+### Three packages
+
+- rvest
+    - most basic package for scraping    
+- learnr
+    - tool for practicing what we learned
+    - not needed for webscraping but for generating interactive HTML tutorials  
+- learn2scrape
+    - package for this course that contains all exercises
+    - we will install this package together
+    - package will expand over next weeks to include more advanced techniques
+
+---
+
+
+## learnr & learn2scrape
+
+- everything we do today, including content of most of my slides, included as a tutorial
+- if you do not want to code along, the final file is also included 
+
+### Steps
+
+- install learnr package (done!?)
+- download & install learn2scrape
+    - download learn2scrape & install it from local file
+    - OR: download and install learn2scrape from github (if you have devtools installed)
+
+```{r,echo=T,eval=F}
+install.packages("path/to/tar/file", source = TRUE, repos=NULL)
+# OR
+devtools::install_github("theresagessler/learn2scrape")
+```
+
+- run tutorial through learnr package
+
+```{r,eval=F,echo=T}
+library(learnr)
+run_tutorial("introduction",package="learn2scrape")
+```
+
+---
+
+
+## Browsing vs. scraping
+
+- browsing
+    - you click on something
+    - browser sends request to server that hosts webpage
+    - server returns resource (e.g. HTML document)
+    - browser interprets HTML and renders it in a nice fashion
+    
+--
+    
+- scraping with R
+    - you manually specify a resource
+    - R sends request to server that hosts website
+    - server returns resource
+    - R parses HTML (i.e., interprets the structure), but does not render it in a nice fashion
+    - you tell R which parts of the structure to focus on and what to extract
+
+---
+
+## HTML: The basics
+
+- **H**yper **T**ext **M**arkup **L**anguage
+    - *markup*: additional description of formatting beyond the content of the text
+- language consists of **HTML tags** to specify character / behaviour of text
+- HTML tags typically consist of a starting and an end tag
+
+Example:
+
+ `<tagname>Content goes here...</tagname> `
+
+- [example page we will use](http://quotes.toscrape.com/)
+
+
+---
+
+
+## Example: In the browser
+
+```{r,eval=T}
+include_graphics("quotes2scrape.png")
+```
+
+---
+
+
+## Example: HTML Code
+
+```{r,eval=T}
+include_graphics("quotes2scrape_code.png")
+```
+
+---
+
+## Basic HTML tags
+
+- we are mostly interested in **body**, that is, the content of a webpage
+
+``` 
+<html> 
+    <head> 
+        <title>Title of your web page</title> 
+    </head> 
+    <body> HTML web page contents </body> 
+</html> 
+```
+---
+
+## Basic HTML Tags: Headings
+
+**Headings** are defined by numbered h tags:
+
+Examples:
+
+`<h1> your heading</h1>`
+<h1> your heading</h1>
+
+`<h2> a smaller heading</h2>`
+<h2> a smaller heading</h2>
+
+`<h3> an even smaller heading</h3>`
+<h3> an even smaller heading</h3>
+
+`<h4> an even smaller heading</h4>`
+<h4> an even smaller heading</h4>
+
+---
+
+## Basic HTML Tags: Paragraphs
+
+**Paragraphs** are defined by div or p tags.
+
+Examples:
+
+`<p>this is a paragraph.</p><p>and this is the next.</p>`
+<p>this is a paragraph.</p><p>and this is the next.</p>
+
+--
+
+`<div>this is a paragraph.</div><div>and this is the next.</div>`
+<div>this is a paragraph.</div><div>and this is the next.</div>
+
+---
+
+## Basic HTML Tags: Attributes
+
+- All HTML elements can have attributes
+- Attributes provide additional information about an element
+
+--
+
+### Usage
+
+- they are always specified in the starting tag
+    - e.g. `<title attribute="x"> Title </title>`
+- Attributes usually come in name and value pairs
+    - e.g. attributename="attributevalue"
+
+---
+
+## Basic HTML Tags: Attributes - Links
+
+- Most common case of attributes: **links**
+    - content turned into a link with a tag (*anchor*)
+    - link specified as href attribute (*hyperreference*)
+
+Example:
+
+`This is text <a href="http://quotes.toscrape.com/">with a link</a>.`
+
+This is text <a href="http://quotes.toscrape.com/">with a link.</a>
+
+---
+
+## Basic HTML Tags: Attributes
+
+- other examples of attributes
+    - alt: descriptions, e.g. for images
+        - when image is missing, they will be written out
+        - descriptions for users with visual impairments
+    - styles: formatting
+
+Examples:
+
+` <img src="no_smiley.jpg" alt="Image that does not exist."> `
+ <img src="no_smiley.jpg" alt="Image that does not exist."> 
+
+` <p style="color:red">This is a paragraph.</p> `
+ <p style="color:red">This is a paragraph.</p> 
+
+
+---
+
+## Basic HTML Tags: Classes
+
+- **Classes** are another special case of attributes that is used for formatting 
+    - usage within tags:
+
+`<div class="container"> This is the text</div> `
+
+<div class="container"> This is the text</div> 
+
+--
+
+### Styling with Classes
+
+We can define **Styles** and apply them to classes across the whole webpage. This use of classes is very common because it reduces the risk of accidentally formatting something differently.
+
+```
+<style>
+p.error {
+  color: red;   border: 1px solid red;
+} 
+</style>
+<p class="error">Red highlight</p>
+```
+<style>
+p.error {
+  color: red; border: 1px solid red;
+} 
+</style>
+<p class="error">Red highlight</p>
+
+
+
+---
+
+## Example: Quotes to scrape Webpage
+
+Have another look at the webpage - do you understand more now?
+
+```{r,eval=T}
+include_graphics("quotes2scrape_code.png")
+```
+
+---
+
+## Scraping step by step
+
+For the actual scraping, we will use **learnr**
+
+- run **introduction** tutorial through learnr package
+
+```{r,eval=F,echo=T}
+library(learnr)
+run_tutorial("introduction",package="learn2scrape")
+```
+
+- If you are already more advanced, you can go through the first tutorial quickly or skip it and instead work on the **EPSA Scraping Project**:
+
+```{r,eval=F,echo=T}
+library(learnr)
+run_tutorial("scraping_epsa",package="learn2scrape")
+```
