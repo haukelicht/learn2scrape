@@ -190,4 +190,4 @@ dfm_lookup(epsa_dfm, newsmap_dict, levels = 1) %>% dfm_group("section") %>% dfm_
 ```
 
 
-Of course, there is a lot more to learn about dictionaries - for example, you can combine them with [weighting]() and receive quantities like the relative frequency of your dictionary entries or dichotomize the results into match / no match. This all depends on your research question, so please explore and feel free to ask. We now proceed to creating our own dictionary in order to practice classifying texts.
+Of course, there is a lot more to learn about dictionaries - for example, you can combine them with [weighting](https://quanteda.io/reference/dfm_weight.html){target="_blank"} and receive quantities like the relative frequency of your dictionary entries or dichotomize the results into match / no match. This all depends on your research question, so please explore and feel free to ask. We now proceed to creating our own dictionary in order to practice classifying texts.

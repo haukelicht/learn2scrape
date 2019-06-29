@@ -48,7 +48,7 @@ if (window.hljs) {
 
 <div id="section-introduction" class="section level2">
 <h2>Introduction</h2>
-<p><em>Last revised: 2019-06-28</em></p>
+<p><em>Last revised: 2019-06-29</em></p>
 <p>So, you have learned how to use some of the basic functions of the <code>rvest</code> package: <code>read_html()</code>, <code>html_nodes()</code> and <code>html_text()</code>. If we really want to scrape a lot of pages, we need another step: We have to learn to follow links without actually opening the browser and clicking.</p>
 <p>In this part of the tutorial, you will learn two things:</p>
 <ul>
@@ -63,7 +63,7 @@ if (window.hljs) {
 <p><code>&lt;a href=&gt;&lt;/a&gt;</code></p>
 <p><em>href</em> stands for hyperreference and signifies the webpage the link leads to. You can specify <code>name="href"</code> inside the <code>html_attr()</code> command to extract the link. For example:</p>
 <p><code>html_attr(parsed_page,"href")</code></p>
-<p>However, this will only work on individual HTML tags, so we will use <code>html_nodes()</code> again. Please try on the <a href="http://quotes.toscrape.com/">quotes2scrape webpage</a>.</p>
+<p>However, this will only work on individual HTML tags, so we will use <code>html_nodes()</code> again. Please try on the <a href="http://quotes.toscrape.com/" target="_blank">quotes2scrape webpage</a>.</p>
 <ul>
 <li>first, you can extract potential links from all tags by using the universal selector (<code>html_nodes("*)</code>)</li>
 <li>second, look up the selector of the tags again and extract the links to all tabs</li>
@@ -114,18 +114,32 @@ page&lt;-read_html(urls[1])
 selected_nodes&lt;-html_nodes(page,&quot;.text&quot;)
 pagetext&lt;-html_text(selected_nodes)</code></pre>
 </div>
-<p>Now, try to re-write the scraping of the pages into a function. Think about which parts you want to put into the function and which parts you should leave outside. Also, think about what elements you should give as arguments to the function. Then, try to apply the function to the pages we downloaded.</p>
+<p>Now, try to re-write the scraping of the pages into a function called <code>scrape_page</code>. Think about which parts you want to put into the function and which parts you should leave outside. Also, think about what elements you should give as arguments to the function. Then, try to apply the function to the pages we downloaded. To save you the way back to the last section, I already pasted some code that gets us the list of urls.</p>
+<p>The easiest way to do this is to use <code>sapply()</code>, which is a simplified and user-friendly version of the <a href="https://www.r-bloggers.com/the-r-apply-function-a-tutorial-with-examples/">apply-function</a>. Basically, you tell R to apply a function (like the one we are defining) to a vector (like the list of webpages). It works like this:</p>
+<p><code>sapply(vector,function,potential-arguments)</code></p>
+<p>Here, the potential arguments would be other variables you have outsourced in your function.</p>
+<p>Then, run the entire thing and hopefully enjoy the list of quotes for all tags…</p>
 <div class="tutorial-exercise" data-label="function" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="10">
+<pre class="text"><code>urls&lt;-page %&gt;% html_nodes(&quot;.tags .tag&quot;) %&gt;% html_attr(&quot;href&quot;)
+urls&lt;-paste0(&quot;http://quotes.toscrape.com&quot;,urls)</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="function-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>scrape_page&lt;-function(pageurl,node){
+<pre class="text"><code>urls&lt;-page %&gt;% html_nodes(&quot;.tags .tag&quot;) %&gt;% html_attr(&quot;href&quot;)
+urls&lt;-paste0(&quot;http://quotes.toscrape.com&quot;,urls)
+scrape_page&lt;-function(pageurl,node){
   page&lt;-read_html(pageurl)
   selected_nodes&lt;-html_nodes(page,node)
   pagetext&lt;-html_text(selected_nodes)
-}</code></pre>
+}
+sapply(urls,scrape_page,&quot;.text&quot;)</code></pre>
 </div>
-<p>The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at R.</p>
+<p>If you had a peak at the solution, you will see that I put the CSS selector as a variable - that is because CSS Selectors will vary between pages while the function of scraping the text out of a page will remain the same for many uses. So this way, you already have a function written-up when you plan your actual scraping project…</p>
+</div>
+<div id="section-wrap-up" class="section level2">
+<h2>Wrap-up</h2>
+<p>Fantastic, you’re done with this lesson!</p>
+<p>The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at scraping in R.</p>
 
 <script type="application/shiny-prerendered" data-context="server-start">
 library(learnr)

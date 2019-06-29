@@ -114,25 +114,41 @@ selected_nodes<-html_nodes(page,".text")
 pagetext<-html_text(selected_nodes)
 ```
 
-Now, try to re-write the scraping of the pages into a function. Think about which parts you want to put into the function and which parts you should leave outside. Also, think about what elements you should give as arguments to the function.
-Then, try to apply the function to the pages we downloaded.
+Now, try to re-write the scraping of the pages into a function called `scrape_page`. Think about which parts you want to put into the function and which parts you should leave outside. Also, think about what elements you should give as arguments to the function.
+Then, try to apply the function to the pages we downloaded. To save you the way back to the last section, I already pasted some code that gets us the list of urls.
+
+The easiest way to do this is to use `sapply()`, which is a simplified and user-friendly version of the [apply-function](https://www.r-bloggers.com/the-r-apply-function-a-tutorial-with-examples/). Basically, you tell R to apply a function (like the one we are defining) to a vector (like the list of webpages). It works like this:
+
+`sapply(vector,function,potential-arguments)`
+
+Here, the potential arguments would be other variables you have outsourced in your function.
+
+Then, run the entire thing and hopefully enjoy the list of quotes for all tags...
 
 ```{r function,exercise=TRUE, exercise.lines=10}
-
+urls<-page %>% html_nodes(".tags .tag") %>% html_attr("href")
+urls<-paste0("http://quotes.toscrape.com",urls)
 
 
 
 ```
 
 ```{r function-solution}
+urls<-page %>% html_nodes(".tags .tag") %>% html_attr("href")
+urls<-paste0("http://quotes.toscrape.com",urls)
 scrape_page<-function(pageurl,node){
   page<-read_html(pageurl)
   selected_nodes<-html_nodes(page,node)
   pagetext<-html_text(selected_nodes)
 }
+sapply(urls,scrape_page,".text")
 ```
 
+If you had a peak at the solution, you will see that I put the CSS selector as a variable - that is because CSS Selectors will vary between pages while the function of scraping the text out of a page will remain the same for many uses. So this way, you already have a function written-up when you plan your actual scraping project...
 
+## Wrap-up
 
-The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at R.
+Fantastic, you're done with this lesson!
+
+The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at scraping in R.
 
