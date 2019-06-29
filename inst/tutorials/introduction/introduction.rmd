@@ -144,14 +144,8 @@ question("Try finding the CSS Selektor for all tags associated with each quote. 
 
 ### Applying CSS Selectors
 
-Now, we try to use these CSS Selectors with the `html_nodes()` command. Use the CSS selector for the quotes to select only the quotes from the parsed HTML (remember - the object was called page) and assign them to a new object `selected_nodes`. Then, inspect the results by calling the object!
+Now, we try to use these CSS Selectors with the `html_nodes()` command. Since each exercise chunk is independent, there will be a bit of copy-pasting involved: Parse the page, use the CSS selector to select only the quotes from the parsed HTML and assign them to a new object `selected_nodes`. Then, inspect the results by calling the object!
 
-**From here on, the parsed page is stored in the object page, so you can skip these steps.**
-
-
-```{r page-setup}
-page<-read_html(quotepage)
-```
 
 
 ```{r nodes, exercise=TRUE,exercise.setup="page-setup"}
@@ -159,6 +153,7 @@ page<-read_html(quotepage)
 ```
 
 ```{r nodes-solution,exercise.setup='page-setup'}
+page<-read_html("http://quotes.toscrape.com/")
 selected_nodes<-html_nodes(page,".text")
 selected_nodes
 ```
@@ -171,6 +166,7 @@ This already looks more structured - but we should get rid of the HTML commands.
 ```
 
 ```{r textnodes-solution,exercise.setup='page-setup'}
+page<-read_html("http://quotes.toscrape.com/")
 selected_nodes<-html_nodes(page,".text")
 selected_nodes %>% html_text()
 ```
