@@ -185,6 +185,7 @@ To continue, you can run the following lessons from your R console:
 
 
 For the text analysis session, you can run the following three lessons so far:
+
 - applying dictionaries `run_tutorial("dictionary",package="learn2scrape")`
 - creating our own dictionary for classification `run_tutorial("dictionary_classification",package="learn2scrape")`
 - machine learning classifiers
