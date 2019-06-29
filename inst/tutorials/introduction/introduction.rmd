@@ -181,11 +181,13 @@ selected_nodes %>% html_text()
 
 To continue, you can run the following lessons from your R console:
 
-<!--- Scraping Tables: run_tutorial("Tables",package="learn2scrape")-->
+
 <!--- Scraping files: run_tutorial("Files",package="learn2scrape")-->
 <!-- - Learning CSS Selectors: run_tutorial("CSS",package="learn2scrape")-->
 - Scraping multiple pages: 
     - `run_tutorial("scraping_pages",package="learn2scrape")`
+- Scraping Tables: 
+    - `run_tutorial("Tables",package="learn2scrape")`
 - EPSA conference scraping project: 
     - `run_tutorial("scraping_epsa",package="learn2scrape")`
 
