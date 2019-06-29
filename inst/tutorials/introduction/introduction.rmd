@@ -180,12 +180,16 @@ To continue, you can run the following lessons from your R console:
 <!--- Scraping Tables: run_tutorial("Tables",package="learn2scrape")-->
 <!--- Scraping files: run_tutorial("Files",package="learn2scrape")-->
 <!-- - Learning CSS Selectors: run_tutorial("CSS",package="learn2scrape")-->
-- Scraping multiple pages: `run_tutorial("scraping_pages",package="learn2scrape")`
-- EPSA conference scraping project: `run_tutorial("scraping_epsa",package="learn2scrape")`
+- Scraping multiple pages: 
+    - `run_tutorial("scraping_pages",package="learn2scrape")`
+- EPSA conference scraping project: 
+    - `run_tutorial("scraping_epsa",package="learn2scrape")`
 
 
 For the text analysis session, you can run the following three lessons so far:
 
-- applying dictionaries `run_tutorial("dictionary",package="learn2scrape")`
-- creating our own dictionary for classification `run_tutorial("dictionary_classification",package="learn2scrape")`
+- applying dictionaries 
+    - `run_tutorial("dictionary",package="learn2scrape")`
+- creating our own dictionary for classification 
+    - `run_tutorial("dictionary_classification",package="learn2scrape")`
 - machine learning classifiers
