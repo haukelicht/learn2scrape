@@ -39,7 +39,7 @@ To extract links, we need another command. Remember we said hyperlinks are an *a
 
 `html_attr(parsed_page,"href")`
 
-However, this will only work on individual HTML tags, so we will use `html_nodes()` again. Please try on the [quotes2scrape webpage](http://quotes.toscrape.com/). 
+However, this will only work on individual HTML tags, so we will use `html_nodes()` again. Please try on the [quotes2scrape webpage](http://quotes.toscrape.com/){target="_blank"}. 
 
 - first, you can extract potential links from all tags by using the universal selector (`html_nodes("*)`)
 - second, look up the selector of the tags again and extract the links to all tabs

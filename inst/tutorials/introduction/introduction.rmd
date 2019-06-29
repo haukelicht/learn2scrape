@@ -28,13 +28,13 @@ You will see explanations but there are also some parts where you'll be asked to
 - Be cautious about the *Start over*-button: Clicking on it will delete the code you wrote
 - unlike in a normal markdown document, all chunks are independent. That means: If you create something in one chunk, it won't be available in the other chunks
 
-If you prefer using [swirl](https://swirlstats.com/), this first lesson is also available as a swirl-course. As things get more complex later on, I'll ask you to switch to the browser-version!
+<!--If you prefer using [swirl](https://swirlstats.com/){target="_blank"}, this first lesson is also available as a swirl-course. As things get more complex later on, I'll ask you to switch to the browser-version! -->
 
 ## Basics of webscraping
 
 **Web scraping** is the process of extracting data from webpages. Normally, we do that intuitively - we scan a webpages with our eyes and read only those parts that are important to us. This is more complicated when we want R to read pages for us - R does not know what is important. So we have to tell R exactly where to look!
 
-But don't worry, we will go step by step. Let's start with something simple. Imagine, we want to scrape this simple webpage full of quotes. Its address is [http://quotes.toscrape.com/](http://quotes.toscrape.com/) Just have a look at the webpage.
+But don't worry, we will go step by step. Let's start with something simple. Imagine, we want to scrape this simple webpage full of quotes. Its address is [http://quotes.toscrape.com/](http://quotes.toscrape.com/){target="_blank"} Just have a look at the webpage.
 
 **First**, we need to load the package we'll use for most of our scraping. It is called *rvest*. Please load it with the `library()` command.
 
@@ -70,7 +70,7 @@ url<-"http://quotes.toscrape.com/"
 read_html(url)
 ```
 
-The output does not look like you expected? You would be surprised to see that the [original webpage](http://quotes.toscrape.com/) looks quite similar. Have a look at the webpage source code. Depending on your browser, you can probably select 'view source' after a right mouse click. If you have trouble, [google has an up-to-date explanation](https://www.google.com/search?hl=&site=&q=how+to+view+webpage+source+code+in+browser). 
+The output does not look like you expected? You would be surprised to see that the [original webpage](http://quotes.toscrape.com/){target="_blank"} looks quite similar. Have a look at the webpage source code. Depending on your browser, you can probably select 'view source' after a right mouse click. If you have trouble, [google has an up-to-date explanation](https://www.google.com/search?hl=&site=&q=how+to+view+webpage+source+code+in+browser){target="_blank"}. 
 
 
 ## Extracting elements
@@ -107,11 +107,11 @@ library(rvest)
 ?html_nodes
 ```
 
-So, we need xpath or CSS selectors! If you have not used HTML before, this might sound complicated. It helps to get a bit into the structure of HTML. [Click on this link to read an introduction to HTML](https://www.w3schools.com/html/default.asp)
+So, we need xpath or CSS selectors! If you have not used HTML before, this might sound complicated. It helps to get a bit into the structure of HTML. [Click on this link to read an introduction to HTML](https://www.w3schools.com/html/default.asp){target="_blank"}.
 
 ### SelectorGadget
 
-While understanding HTML helps, we often do not need to engage with the code because there are lots of tools to help us. For example, SelectorGadget is a JavaScript bookmarklet that allows you to interactively figure out what css selector you need to extract parts of the page. If you have not heard of selectorgadget, check its [webpage](https://selectorgadget.com/) - there is even a video:
+While understanding HTML helps, we often do not need to engage with the code because there are lots of tools to help us. For example, SelectorGadget is a JavaScript bookmarklet that allows you to interactively figure out what css selector you need to extract parts of the page. If you have not heard of selectorgadget, check its [webpage](https://selectorgadget.com/){target="_blank"} - there is even a video:
 
 ![](https://vimeo.com/52055686)
 

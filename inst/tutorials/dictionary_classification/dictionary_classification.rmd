@@ -46,9 +46,9 @@ Remember we used the different sections of EPSA in the previous exercises? Imagi
 Before you start defining your own dictionary, we have to return to the question of stemming.
 Generally, I would recommend to skip stemming when using a dictionary: Since stemming cuts off the endings of words, we may include words we are not interested in or miss words that we actually wanted to include.
 
-Instead, you can use [**wildcards**](https://en.wikipedia.org/wiki/Glob_(programming)) to include words with different stems. Wildcards work like jokers: `*` replaces either no, a single or multiple characters. `?` replaces exactly one character. You can use them at any place within a word.
+Instead, you can use [**wildcards**](https://en.wikipedia.org/wiki/Glob_(programming)){target="_blank"} to include words with different stems. Wildcards work like jokers: `*` replaces either no, a single or multiple characters. `?` replaces exactly one character. You can use them at any place within a word.
 
-Of course, you can also use [regular expressions]() if you already know them, however, there is no need to learn them just for our dictionary.
+Of course, you can also use [regular expressions](https://stringr.tidyverse.org/articles/regular-expressions.html){target="_blank"} if you already know them, however, there is no need to learn them just for our dictionary.
 
 Below, you can practice different versions of wildcards. Feel free to pick a different example and try out more variants.
 
@@ -77,7 +77,7 @@ Now that we have understood how dictionaries work, we can start defining our own
 - **PA**: Public Policy and Public Administration (Eoin O’Malley, DCU)
 - **PT**: Political Theory (Peter Stone, TCD)
 - **PC**: Political Communication and Media (Rebekah Tromble, Leiden)
-- (a single roundtbale submission that we have excluded - you will see the difference of a single abstract to what we scraped)
+- (a single roundtable submission that we have excluded - you will see the difference of a single abstract compared to what we scraped)
 
 Try to come up with a dictionary of words that could describe the content of each section. Check the documentation of the `dictionary()` function for more information on the syntax or click on 'hint' to see a skeleton of the syntax that you can fill in. If you click on solution, you will see a simple variant of a dictionary.
 

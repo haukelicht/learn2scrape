@@ -46,7 +46,7 @@ You can try all three steps below. Just some notes of caution: `corpus` has grea
 
 While the main purpose of `tokens()` is to split the text into individual words, it already allows you to do a lot of pre-processing. I recommend to specify remove_hyphens=T, remove_symbol=T and remove_punct=T to remove these things and split hyphenated words. After all, political scientists love using complex words in their abstracts.
 
-The `dfm()` function automates a lot of pre-processing and I would recommend to check the documentation to see the default settings. For example, it automatically sets all words to lowercase. With `dfm_remove()` we can remove features we are not interested in, e.g. so-called [stopwords]() that occur frequently but are not meaningful (e.g. 'is'). Usually, we would also stem words at this point with `dfm_wordstem()` - this is not so crucial and sometimes counter-productive for dictionaries (but more on that below).
+The `dfm()` function automates a lot of pre-processing and I would recommend to check the documentation to see the default settings. For example, it automatically sets all words to lowercase. With `dfm_remove()` we can remove features we are not interested in, e.g. so-called [stopwords](https://en.wikipedia.org/wiki/Stop_words){target="_blank"} that occur frequently but are not meaningful (e.g. 'is' or 'that'). Usually, we would also stem words at this point with `dfm_wordstem()` - this is not so crucial and sometimes counter-productive for dictionaries (but more on that below).
 
 ```{r corpus, exercise=TRUE,exercise.setup='packset'}
 
@@ -146,7 +146,7 @@ dfm(text) %>% dfm_lookup(eu_dict)
 tokens(text) %>% tokens_lookup(eu_dict) %>% dfm()
 ```
 
-### Apply different levels
+### Apply different levels of a dictionary
 
 Dictionaries with a hierarchical structure can be evaluated at different levels. The newsmap dictionary has such a hierarchical structure: It contains countries, nested in regions which are then nested in continents. That means, you can apply only a part of the dictionary by specifying `levels` inside the `dfm_lookup()` command. Try it out below by specifying levels (1, 2 or 3) and look at the output of `textstat_frequency()`!
 
@@ -166,7 +166,7 @@ textstat_frequency(country_dfm)
 ```
 
 
-### Evaluation by subgroups
+### Applying a dictionary to groups
 
 Remember all the information we originally had in the data frame? The quanteda objects keep this information as so-called *document variable* with each document, though it is hidden. You can access it for any corpus, tokens or dfm object with the `docvars()` command. You can also use it to group the output of the `textstat_frequency()` function. For example, we have information on the section of each paper. This was a bit messy in the dataset we scraped but I stored a cleaned version in the variable `section`. 
 

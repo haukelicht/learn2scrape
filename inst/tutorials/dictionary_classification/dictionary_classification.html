@@ -48,7 +48,7 @@ if (window.hljs) {
 
 <div id="section-welcome" class="section level2">
 <h2>Welcome</h2>
-<p><em>Last revised: 2019-06-28</em></p>
+<p><em>Last revised: 2019-06-29</em></p>
 <p>We proceed to create our own dictionary in order to use it for classification.</p>
 </div>
 <div id="section-how-to-create-a-dictionary" class="section level2">
@@ -58,8 +58,8 @@ if (window.hljs) {
 <div id="section-to-stem-or-not-to-stem" class="section level3">
 <h3>To stem or not to stem?</h3>
 <p>Before you start defining your own dictionary, we have to return to the question of stemming. Generally, I would recommend to skip stemming when using a dictionary: Since stemming cuts off the endings of words, we may include words we are not interested in or miss words that we actually wanted to include.</p>
-<p>Instead, you can use <a href="https://en.wikipedia.org/wiki/Glob_(programming)"><strong>wildcards</strong></a> to include words with different stems. Wildcards work like jokers: <code>*</code> replaces either no, a single or multiple characters. <code>?</code> replaces exactly one character. You can use them at any place within a word.</p>
-<p>Of course, you can also use <a href="">regular expressions</a> if you already know them, however, there is no need to learn them just for our dictionary.</p>
+<p>Instead, you can use <a href="https://en.wikipedia.org/wiki/Glob_(programming)" target="_blank"><strong>wildcards</strong></a> to include words with different stems. Wildcards work like jokers: <code>*</code> replaces either no, a single or multiple characters. <code>?</code> replaces exactly one character. You can use them at any place within a word.</p>
+<p>Of course, you can also use <a href="" target="_blank">regular expressions</a> if you already know them, however, there is no need to learn them just for our dictionary.</p>
 <p>Below, you can practice different versions of wildcards. Feel free to pick a different example and try out more variants.</p>
 <div class="tutorial-exercise" data-label="wildcards" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>text&lt;-&quot;There is a woodshed made from wood in the woods &quot;
@@ -88,7 +88,7 @@ tokens_lookup(test_tokens,dictionary(list(wood=&quot;wood*&quot;)))</code></pre>
 <li><strong>PA</strong>: Public Policy and Public Administration (Eoin O’Malley, DCU)</li>
 <li><strong>PT</strong>: Political Theory (Peter Stone, TCD)</li>
 <li><strong>PC</strong>: Political Communication and Media (Rebekah Tromble, Leiden)</li>
-<li>(a single roundtbale submission that we have excluded - you will see the difference of a single abstract to what we scraped)</li>
+<li>(a single roundtable submission that we have excluded - you will see the difference of a single abstract compared to what we scraped)</li>
 </ul>
 <p>Try to come up with a dictionary of words that could describe the content of each section. Check the documentation of the <code>dictionary()</code> function for more information on the syntax or click on ‘hint’ to see a skeleton of the syntax that you can fill in. If you click on solution, you will see a simple variant of a dictionary.</p>
 <div class="tutorial-exercise" data-label="newdict" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="15">

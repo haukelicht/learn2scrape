@@ -48,7 +48,7 @@ if (window.hljs) {
 
 <div id="section-welcome" class="section level2">
 <h2>Welcome</h2>
-<p><em>Last revised: 2019-06-28</em></p>
+<p><em>Last revised: 2019-06-29</em></p>
 <p>This is the tutorial for dictionary analysis. We will proceed step-by-step and also go through some of the most important steps in pre-processing data.</p>
 <p>For our analysis, we first need to load some packages: <strong>quanteda</strong> (for text analysis), <strong>dplyr</strong> (for data manipulation) and <strong>ggplot2</strong> (for visualizing our results). I have already pre-loaded the data frame we will use. It is called <strong>epsa_paper</strong>.</p>
 <div class="tutorial-exercise" data-label="libraries" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
@@ -147,8 +147,8 @@ dfm(text) %&gt;% dfm_lookup(eu_dict)
 tokens(text) %&gt;% tokens_lookup(eu_dict) %&gt;% dfm()</code></pre>
 </div>
 </div>
-<div id="section-apply-different-levels" class="section level3">
-<h3>Apply different levels</h3>
+<div id="section-apply-different-levels-of-a-dictionary" class="section level3">
+<h3>Apply different levels of a dictionary</h3>
 <p>Dictionaries with a hierarchical structure can be evaluated at different levels. The newsmap dictionary has such a hierarchical structure: It contains countries, nested in regions which are then nested in continents. That means, you can apply only a part of the dictionary by specifying <code>levels</code> inside the <code>dfm_lookup()</code> command. Try it out below by specifying levels (1, 2 or 3) and look at the output of <code>textstat_frequency()</code>!</p>
 <div class="tutorial-exercise" data-label="applylevels" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.setup":"applysetup","exercise.checker":"NULL"}</script>
@@ -161,8 +161,8 @@ country_dfm &lt;- dfm_lookup(epsa_dfm, newsmap_dict, levels = 3)
 textstat_frequency(country_dfm)</code></pre>
 </div>
 </div>
-<div id="section-evaluation-by-subgroups" class="section level3">
-<h3>Evaluation by subgroups</h3>
+<div id="section-applying-a-dictionary-to-groups" class="section level3">
+<h3>Applying a dictionary to groups</h3>
 <p>Remember all the information we originally had in the data frame? The quanteda objects keep this information as so-called <em>document variable</em> with each document, though it is hidden. You can access it for any corpus, tokens or dfm object with the <code>docvars()</code> command. You can also use it to group the output of the <code>textstat_frequency()</code> function. For example, we have information on the section of each paper. This was a bit messy in the dataset we scraped but I stored a cleaned version in the variable <code>section</code>.</p>
 <p>Let’s apply this: You can see the original sections below. I would recommend you only apply the highest level of the dictionary (levels=1) to keep the output manageable. Then, tell <code>textstat_frequency</code> to sort the output by specifying the <code>section</code> variable as a group.</p>
 <div class="tutorial-exercise" data-label="groupapply" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
