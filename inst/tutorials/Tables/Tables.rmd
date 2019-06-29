@@ -13,6 +13,8 @@ library(rvest)
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
+### Introduction
+
 Compared to text, tables are a lot more satisfying to scrape: Using `html_table()` we can just extract all tables contained in the page and then select those that are relevant for us. Or, we can again use html_nodes to select specific tables. For this lesson, I have loaded the packages `rvest`, `magrittr` and `dplyr`.
 
 ### Scraping all tables
