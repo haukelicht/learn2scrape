@@ -71,22 +71,68 @@ paste("a","b")
 paste0("a","b")
 ```
 
-Now, completing the paths of the URLs we scraped should not be a problem for you. Copy-paste the code you used to extract the links of the tags, assign it to a new object and copy-paste the base url (http://quotes.toscrape.com/) in front of it.
+Now, completing the paths of the URLs we scraped should not be a problem for you. Copy-paste the code you used to extract the links of the tags, assign it to an object called `url` and copy-paste the base url (http://quotes.toscrape.com/) in front of it.
 
 **Watch out for the slashes between the base url and the address of your page - having none or too many is a typical problem!**
 
-```{r paste, exercise=T}
+```{r paste, exercise=TRUE}
 
 
 ```
 
 ```{r paste-solution}
 urls<-page %>% html_nodes(".tags .tag") %>% html_attr("href")
-paste0("http://quotes.toscrape.com",urls)
+urls<-paste0("http://quotes.toscrape.com",urls)
 ```
 
 
 
 ## Automating the following of links
 
+As I mentioned, in the end, webscraping is a function of programming. So once we collected the links we are interested in and learned the basic commands of rvest, there are multiple ways to proceed:
+
+- You can write a function 
+- You can write a `for()`-loop that loops over the vector of links (using the fucntion or just code)
+- You can `apply()` a function to the vector - this is probably the fastest variant but a bit difficult to get used to
+
+First, try to rewrite the code we have used to scrape into a function called `scrape_page()`.
+I recommend to first write down a skeleton of code that you would use to first extract the links to the quote pages, parse the first of the quote pages (`urls[1]`), extract the nodes of the quotes on this page and then extract the text of these nodes. This is also a good exercise to see to which extent you remember what we have learned so far:
+
+```{r tagpages,exercise=TRUE}
+
+
+
+
+
+```
+
+```{r tagpages-solution}
+urls<-page %>% html_nodes(".tags .tag") %>% html_attr("href")
+urls<-paste0("http://quotes.toscrape.com",urls)
+page<-read_html(urls[1])
+selected_nodes<-html_nodes(page,".text")
+pagetext<-html_text(selected_nodes)
+```
+
+Now, try to re-write the scraping of the pages into a function. Think about which parts you want to put into the function and which parts you should leave outside. Also, think about what elements you should give as arguments to the function.
+Then, try to apply the function to the pages we downloaded.
+
+```{r function,exercise=TRUE, exercise.lines=10}
+
+
+
+
+```
+
+```{r function-solution}
+scrape_page<-function(pageurl,node){
+  page<-read_html(pageurl)
+  selected_nodes<-html_nodes(page,node)
+  pagetext<-html_text(selected_nodes)
+}
+```
+
+
+
+The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at R.
 

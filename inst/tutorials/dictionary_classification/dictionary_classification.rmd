@@ -1,0 +1,220 @@
+---
+pagetitle: "Using a dictionary for classification"
+output: 
+  learnr::tutorial:
+    progressive: false
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE,message=F,warning=F)
+library(quanteda)
+library(dplyr)
+library(ggplot2)
+library(learn2scrape)
+library(caret)
+
+data(epsa_paper)
+epsa_paper<-subset(epsa_paper,section!="PS")
+epsa_corpus<-corpus(epsa_paper,text_field = "abstracts")
+epsa_tokens<-tokens(epsa_corpus,remove_hyphens=T,remove_symbol=T)
+epsa_dfm<-dfm(epsa_tokens) %>% dfm_remove(c(stopwords("en"),"-"))
+```
+
+
+
+
+
+## Welcome
+
+*Last revised: `r Sys.Date()`*
+
+We proceed to create our own dictionary in order to use it for classification.
+
+
+## How to create a dictionary
+
+To create our own dictionary, we need to come up with a list of words that represent the concepts we want to measure. 
+You could define a dictionary for anything - qualitative vs. quantitative research, regions, time periods, writing styles...
+
+However, it is difficult to check the quality of our dictionary if we do not know where abstracts really belong. So instead, I suggest we use something we already know about the abstracts: 
+Remember we used the different sections of EPSA in the previous exercises? Imagine having to sort all 800 abstracts into different sections! How great would it be to have a dictionary that tells you in which section an abstract belongs...
+
+### To stem or not to stem?
+
+Before you start defining your own dictionary, we have to return to the question of stemming.
+Generally, I would recommend to skip stemming when using a dictionary: Since stemming cuts off the endings of words, we may include words we are not interested in or miss words that we actually wanted to include.
+
+Instead, you can use [**wildcards**](https://en.wikipedia.org/wiki/Glob_(programming)) to include words with different stems. Wildcards work like jokers: `*` replaces either no, a single or multiple characters. `?` replaces exactly one character. You can use them at any place within a word.
+
+Of course, you can also use [regular expressions]() if you already know them, however, there is no need to learn them just for our dictionary.
+
+Below, you can practice different versions of wildcards. Feel free to pick a different example and try out more variants.
+
+```{r wildcards,exercise=TRUE}
+text<-"There is a woodshed made from wood in the woods "
+test_tokens<-tokens(text)
+tokens_lookup(test_tokens,dictionary(list(wood="wood")))
+tokens_lookup(test_tokens,dictionary(list(wood="wood?")))
+tokens_lookup(test_tokens,dictionary(list(wood="wood*")))
+```
+
+## Creating your own dictionary
+
+### Defining a dictionary
+
+Now that we have understood how dictionaries work, we can start defining our own. This is a list of the sections at this year's EPSA
+
+- **EL**: Elections, Public Opinion, and Voting Behaviour (John Garry, QUB)
+- **CP**: Comparative Politics (Ken Benoit, LSE)
+- **LE**: Legislative Studies and Party Politics (Gail McElroy, TCD)
+- **PE**: Political Economy (Tim Hicks, UCL)
+- **EU**: EU Politics (Gail McElroy, TCD)
+- **CF**: International and Domestic Conflict (Thomas Chadefaux, TCD)
+- **IR**: International Relations (Jonathan Kuyper, QUB)
+- **ME**: Political Methodology (Laron Williams, U. Missouri)
+- **PA**: Public Policy and Public Administration (Eoin O’Malley, DCU)
+- **PT**: Political Theory (Peter Stone, TCD)
+- **PC**: Political Communication and Media (Rebekah Tromble, Leiden)
+- (a single roundtbale submission that we have excluded - you will see the difference of a single abstract to what we scraped)
+
+Try to come up with a dictionary of words that could describe the content of each section. Check the documentation of the `dictionary()` function for more information on the syntax or click on 'hint' to see a skeleton of the syntax that you can fill in. If you click on solution, you will see a simple variant of a dictionary.
+
+```{r newdict,exercise=TRUE,exercise.lines=15}
+?dictionary
+
+
+```
+
+```{r newdict-hint}
+section_dictionary <- dictionary(list(
+    EL=c(""),
+    CP=c(""),
+    LE=c(""),
+    PE=c(""),
+    EU=c(""),
+    CF=c(""),
+    IR=c(""),
+    ME=c(""),
+    PA=c(""),
+    PT=c(""),
+    PC=c("")))
+```
+
+```{r newdict-solution}
+section_dictionary <- dictionary(list(
+    EL=c("election*","opinion","vot*"),
+    CP=c("comparative"),
+    LE=c("parliament*","party*","parties*"),
+    PE=c("econom*"),
+    EU=c("EU","Europ*"),
+    CF=c("conflict*"),
+    IR=c("international*"),
+    ME=c("method*"),
+    PA=c("policy*"),
+    PT=c("theor*"),
+    PC=c("communication","media")))
+```
+
+To apply the dictionary, use the `tokens_lookup()` function (if you have used multi-word expressions - otherwise you can also go for `dfm_lookup`). Convert the result to a dfm and inspect it using `head()`.
+
+Copy the dictionary you created above.
+
+```{r apply2,exercise=TRUE,exercise.lines=15}
+
+
+
+```
+
+```{r apply2-solution,eval=F}
+section_dictionary <- dictionary(list(
+    EL=c("election*","opinion","vot*"),
+    CP=c("comparative"),
+    LE=c("parliament*","party*","parties*"),
+    PE=c("econom*"),
+    EU=c("EU","Europ*"),
+    CF=c("conflict*"),
+    IR=c("international*"),
+    ME=c("method*"),
+    PA=c("policy*"),
+    PT=c("theor*"),
+    PC=c("communication","media")))
+sections<-tokens_lookup(epsa_tokens,section_dictionary) %>% dfm()
+head(sections)
+```
+
+We move on to using the dictionary for classification - so keep it in your clipboard!
+
+## Using a dictionary for classification
+
+We can use our dictionary to classify the sections. To make it easier to handle the results, we convert it to a dataframe using the `convert()` command. Additionally, we need to attach the document variables (which include the correct classification) to the data frame. Since the order has not changed, you can just use `bind_cols()` after converting the dfm to a data frame.
+
+Next, we need to come up with a decision-making rule how to translate our dictionary hits into categories. While machine learning algorithms would come up with more elaborate rules, we use a very simple rule: We ascribe the abstract to the dictionary category that produces most hits in the text. This is a bit tricky and there are multiple ways to do this - feel free to take a look at the solution if you cannot figure out how to do this.
+
+
+
+```{r classify,exercise=TRUE,exercise.lines=15}
+
+```
+
+```{r classify-solution,eval=F}
+section_dictionary <- dictionary(list(
+    EL=c("election*","opinion","vot*"),
+    CP=c("comparative"),
+    LE=c("parliament*","party*","parties*"),
+    PE=c("econom*"),
+    EU=c("EU","Europ*"),
+    CF=c("conflict*"),
+    IR=c("international*"),
+    ME=c("method*"),
+    PA=c("policy*"),
+    PT=c("theor*"),
+    PC=c("communication","media")))
+sections<-tokens_lookup(epsa_tokens,section_dictionary) %>% dfm()
+section_classification<-convert(sections,"data.frame")
+section_classification$predicted_section<-colnames(section_classification[,2:12])[max.col(section_classification[,2:12])]
+```
+
+
+Like other classification algorithms, we have to evaluate our dictionary against the gold standard (or is it a gold standard?) of the EPSA section distribution.
+
+To make our life easier, we use the `confusionMatrix()` function from the caret package. This way, we just have to do three steps:
+
+- convert the true and the predicted section into a factor - that is the input that `confusionMatrix()` takes
+    - you should also convert the predicted section into upper case
+- apply the `confusionMatrix()` function from the `caret()` package
+- interpret the results - we'll go through that in a second after you give the first two steps a try:
+
+```{r evaluation,exercise=TRUE,exercise.lines=15}
+
+```
+
+
+
+```{r evaluation-solution}
+section_dictionary <- dictionary(list(
+    EL=c("election*","opinion","vot*"),
+    CP=c("comparative"),
+    LE=c("parliament*","party*","parties*"),
+    PE=c("econom*"),
+    EU=c("EU","Europ*"),
+    CF=c("conflict*"),
+    IR=c("international*"),
+    ME=c("method*"),
+    PA=c("policy*"),
+    PT=c("theor*"),
+    PC=c("communication","media")))
+sections<-tokens_lookup(epsa_tokens,section_dictionary) %>% dfm()
+section_classification<-convert(sections,"data.frame")
+section_classification$predicted_section<-colnames(section_classification[,2:12])[max.col(section_classification[,2:12])]
+section_classification$predicted_section<-as.factor(toupper(section_classification$predicted_section))
+section_classification$section<-as.factor(section_classification$section)
+confusionMatrix(data=section_classification$predicted_section,reference=section_classification$section)
+```
+
+First, have a look at the overall statistics. The most important statistic is **accuracy**. If you were as uncreative as me, your result will not be that great (e.g. somewhere between 30-40% accuracy). You also get a Confidence Interval - this is more important when you sample than in our case where we evaluate against the whole universe of cases. Even if your result is not that great, you are probably better than the **No-information Rate** which would be the result of random guessing.
+
+If you want to go into details, you can check the statistics by class. **Sensitivity** shows how good your dictionary is at detecting positive instances of this section. In contrast, **Specificity** measures whether you have false positives, that is, results that you assign to the category while they really belong somewhere else. For each category, you also receive a 'Balanced Accuracy' which combines Sensitivity and Specificity.
+
+These statistics by class are particularly useful when you want to find out where your classifier is still performing is performing best.

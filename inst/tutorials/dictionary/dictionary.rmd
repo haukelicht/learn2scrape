@@ -26,7 +26,7 @@ This is the tutorial for dictionary analysis. We will proceed step-by-step and a
 
 For our analysis, we first need to load some packages: **quanteda** (for text analysis), **dplyr** (for data manipulation) and **ggplot2** (for visualizing our results). I have already pre-loaded the data frame we will use. It is called **epsa_paper**.
 
-```{r libraries,exercise=T}
+```{r libraries,exercise=TRUE}
 library(quanteda)
 library(dplyr)
 library(ggplot2)
@@ -48,7 +48,7 @@ While the main purpose of `tokens()` is to split the text into individual words,
 
 The `dfm()` function automates a lot of pre-processing and I would recommend to check the documentation to see the default settings. For example, it automatically sets all words to lowercase. With `dfm_remove()` we can remove features we are not interested in, e.g. so-called [stopwords]() that occur frequently but are not meaningful (e.g. 'is'). Usually, we would also stem words at this point with `dfm_wordstem()` - this is not so crucial and sometimes counter-productive for dictionaries (but more on that below).
 
-```{r corpus, exercise=T,exercise.setup='packset'}
+```{r corpus, exercise=TRUE,exercise.setup='packset'}
 
 
 ```
@@ -67,11 +67,6 @@ epsa_dfm<-dfm(epsa_tokens)  %>% dfm_remove(stopwords("en"))
 #epsa_dfm <- epsa_dfm %>% dfm_wordstem(language="en")
 ```
 
-<div id="corpus-hint">`epsa_corpus<-corpus(epsa_paper,text_field = "abstracts")`<br>
-`epsa_tokens<-tokens(epsa_corpus,remove_hyphens=T,remove_symbol=T,remove_punct=T)`<br>
-`epsa_dfm<-dfm(epsa_tokens)  %>% dfm_remove(stopwords("en"))`<br>
-`#normally: #epsa_dfm <- epsa_dfm %>% dfm_wordstem(language="en")`
-</div>
 
 
 ## Loading an existing dictionary
@@ -86,7 +81,7 @@ epsa_dfm<-dfm(epsa_tokens) %>% dfm_remove(c(stopwords("en"),"-"))
 Dictionaries come in different forms. For pre-defined dictionaries, YAML is one of of the most frequent formats. For our example, we will use the [newsmap dictionary](). Normally, you would just load it by giving the path to the file. Since this is a bit more complicated when you load the file from a package, I have already written a line that finds the correct path for you.
  First, try to load the dictionary using the `dictionary()` function. Check the documentation to see the syntax or ask for a hint.
 
-```{r loaddict, exercise=T,exercise.setup='dictset',exercise.lines=3}
+```{r loaddict, exercise=TRUE,exercise.setup='dictset',exercise.lines=3}
 path<-system.file("extdata", "newsmap.yml", package = "learn2scrape")
 
 ```
@@ -107,7 +102,7 @@ newsmap_dict <- dictionary(file = path,
                            format = "YAML")
 ```
 
-```{r printdict,exercise=T}
+```{r printdict,exercise=TRUE}
 print(newsmap_dict)
 ```
 
@@ -126,7 +121,7 @@ newsmap_dict <- dictionary(file = path,
 
 To apply the dictionary, we can use `tokens_lookup()` or `dfm_lookup()` on the dfm or corpus object. You can try it out below. Note that I have put a `head()` around the tokens variant, otherwise you will see the tokens of all 800 abstracts in our dataset. If you want to get a general overview of the results, you can also use the `textstat_frequency()`command to get a count frequency of all the features:
 
-```{r simpleapply,exercise=T,exercise.setup="applysetup"}
+```{r simpleapply,exercise=TRUE,exercise.setup="applysetup"}
 dfm_lookup(epsa_dfm,newsmap_dict)
 tokens_lookup(epsa_tokens,newsmap_dict) %>% head()
 ```
@@ -137,7 +132,7 @@ tokens_lookup(epsa_tokens,newsmap_dict) %>% head()
 Remember that we talked about the difference between corpus, tokens and dfms? This is important for applying dictionaries. 
 Given words loose their order in dfms, multi-word dictionaries have to be applied to tokens, not dfms. You can then convert the tokens object into a dfm in the next step. Try it out below! (That is: create a dfm from the text and apply the dictionary, create tokens from the text and apply the dictionary)
 
-```{r objectapply,exercise=T}
+```{r objectapply,exercise=TRUE}
 text<-"Switzerland is not in the European Union"
 eu_dict<-dictionary(list(EU="European Union"))
 
@@ -155,7 +150,7 @@ tokens(text) %>% tokens_lookup(eu_dict) %>% dfm()
 
 Dictionaries with a hierarchical structure can be evaluated at different levels. The newsmap dictionary has such a hierarchical structure: It contains countries, nested in regions which are then nested in continents. That means, you can apply only a part of the dictionary by specifying `levels` inside the `dfm_lookup()` command. Try it out below by specifying levels (1, 2 or 3) and look at the output of `textstat_frequency()`!
 
-```{r applylevels, exercise=T,exercise.setup='applysetup'}
+```{r applylevels, exercise=TRUE,exercise.setup='applysetup'}
 
 
 
@@ -177,7 +172,7 @@ Remember all the information we originally had in the data frame? The quanteda o
 
 Let's apply this: You can see the original sections below. I would recommend you only apply the highest level of the dictionary (levels=1) to keep the output manageable. Then, tell `textstat_frequency` to sort the output by specifying the `section` variable as a group.
 
-```{r groupapply, exercise=T,exercise.setup='applysetup'}
+```{r groupapply, exercise=TRUE,exercise.setup='applysetup'}
 
 
 ```

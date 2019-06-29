@@ -13,7 +13,7 @@
 <meta name="progressive" content="false" />
 <meta name="allow-skip" content="false" />
 
-<title>Scraping multiple pages</title>
+<title>Using a dictionary for classification</title>
 
 
 <!-- highlightjs -->
@@ -46,93 +46,181 @@ if (window.hljs) {
 
 <div class="topics">
 
-<div id="section-introduction" class="section level2">
-<h2>Introduction</h2>
+<div id="section-welcome" class="section level2">
+<h2>Welcome</h2>
 <p><em>Last revised: 2019-06-28</em></p>
-<p>So, you have learned how to use some of the basic functions of the <code>rvest</code> package: <code>read_html()</code>, <code>html_nodes()</code> and <code>html_text()</code>. If we really want to scrape a lot of pages, we need another step: We have to learn to follow links without actually opening the browser and clicking.</p>
-<p>In this part of the tutorial, you will learn two things:</p>
+<p>We proceed to create our own dictionary in order to use it for classification.</p>
+</div>
+<div id="section-how-to-create-a-dictionary" class="section level2">
+<h2>How to create a dictionary</h2>
+<p>To create our own dictionary, we need to come up with a list of words that represent the concepts we want to measure. You could define a dictionary for anything - qualitative vs. quantitative research, regions, time periods, writing styles…</p>
+<p>However, it is difficult to check the quality of our dictionary if we do not know where abstracts really belong. So instead, I suggest we use something we already know about the abstracts: Remember we used the different sections of EPSA in the previous exercises? Imagine having to sort all 800 abstracts into different sections! How great would it be to have a dictionary that tells you in which section an abstract belongs…</p>
+<div id="section-to-stem-or-not-to-stem" class="section level3">
+<h3>To stem or not to stem?</h3>
+<p>Before you start defining your own dictionary, we have to return to the question of stemming. Generally, I would recommend to skip stemming when using a dictionary: Since stemming cuts off the endings of words, we may include words we are not interested in or miss words that we actually wanted to include.</p>
+<p>Instead, you can use <a href="https://en.wikipedia.org/wiki/Glob_(programming)"><strong>wildcards</strong></a> to include words with different stems. Wildcards work like jokers: <code>*</code> replaces either no, a single or multiple characters. <code>?</code> replaces exactly one character. You can use them at any place within a word.</p>
+<p>Of course, you can also use <a href="">regular expressions</a> if you already know them, however, there is no need to learn them just for our dictionary.</p>
+<p>Below, you can practice different versions of wildcards. Feel free to pick a different example and try out more variants.</p>
+<div class="tutorial-exercise" data-label="wildcards" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>text&lt;-&quot;There is a woodshed made from wood in the woods &quot;
+test_tokens&lt;-tokens(text)
+tokens_lookup(test_tokens,dictionary(list(wood=&quot;wood&quot;)))
+tokens_lookup(test_tokens,dictionary(list(wood=&quot;wood?&quot;)))
+tokens_lookup(test_tokens,dictionary(list(wood=&quot;wood*&quot;)))</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+</div>
+</div>
+<div id="section-creating-your-own-dictionary" class="section level2">
+<h2>Creating your own dictionary</h2>
+<div id="section-defining-a-dictionary" class="section level3">
+<h3>Defining a dictionary</h3>
+<p>Now that we have understood how dictionaries work, we can start defining our own. This is a list of the sections at this year’s EPSA</p>
 <ul>
-<li>to extract links from webpages</li>
-<li>some methods to automate following these links.</li>
+<li><strong>EL</strong>: Elections, Public Opinion, and Voting Behaviour (John Garry, QUB)</li>
+<li><strong>CP</strong>: Comparative Politics (Ken Benoit, LSE)</li>
+<li><strong>LE</strong>: Legislative Studies and Party Politics (Gail McElroy, TCD)</li>
+<li><strong>PE</strong>: Political Economy (Tim Hicks, UCL)</li>
+<li><strong>EU</strong>: EU Politics (Gail McElroy, TCD)</li>
+<li><strong>CF</strong>: International and Domestic Conflict (Thomas Chadefaux, TCD)</li>
+<li><strong>IR</strong>: International Relations (Jonathan Kuyper, QUB)</li>
+<li><strong>ME</strong>: Political Methodology (Laron Williams, U. Missouri)</li>
+<li><strong>PA</strong>: Public Policy and Public Administration (Eoin O’Malley, DCU)</li>
+<li><strong>PT</strong>: Political Theory (Peter Stone, TCD)</li>
+<li><strong>PC</strong>: Political Communication and Media (Rebekah Tromble, Leiden)</li>
+<li>(a single roundtbale submission that we have excluded - you will see the difference of a single abstract to what we scraped)</li>
 </ul>
-<p>You will see that in the end, webscraping is a function of programming in R. The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data.</p>
+<p>Try to come up with a dictionary of words that could describe the content of each section. Check the documentation of the <code>dictionary()</code> function for more information on the syntax or click on ‘hint’ to see a skeleton of the syntax that you can fill in. If you click on solution, you will see a simple variant of a dictionary.</p>
+<div class="tutorial-exercise" data-label="newdict" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="15">
+<pre class="text"><code>?dictionary</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
-<div id="section-extracting-links-from-webpages" class="section level2">
-<h2>Extracting links from webpages</h2>
-<p>To extract links, we need another command. Remember we said hyperlinks are an <em>attribute</em> of the text? Because of that, the <code>rvest</code> command is called <code>html_attr()</code>. We can use it to extract different attributes, so you will have to tell rvest that what we are interested in is a link. Remember what links looked like?</p>
-<p><code>&lt;a href=&gt;&lt;/a&gt;</code></p>
-<p><em>href</em> stands for hyperreference and signifies the webpage the link leads to. You can specify <code>name="href"</code> inside the <code>html_attr()</code> command to extract the link. For example:</p>
-<p><code>html_attr(parsed_page,"href")</code></p>
-<p>However, this will only work on individual HTML tags, so we will use <code>html_nodes()</code> again. Please try on the <a href="http://quotes.toscrape.com/">quotes2scrape webpage</a>.</p>
+<div class="tutorial-exercise-support" data-label="newdict-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>section_dictionary &lt;- dictionary(list(
+    EL=c(&quot;&quot;),
+    CP=c(&quot;&quot;),
+    LE=c(&quot;&quot;),
+    PE=c(&quot;&quot;),
+    EU=c(&quot;&quot;),
+    CF=c(&quot;&quot;),
+    IR=c(&quot;&quot;),
+    ME=c(&quot;&quot;),
+    PA=c(&quot;&quot;),
+    PT=c(&quot;&quot;),
+    PC=c(&quot;&quot;)))</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="newdict-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>section_dictionary &lt;- dictionary(list(
+    EL=c(&quot;election*&quot;,&quot;opinion&quot;,&quot;vot*&quot;),
+    CP=c(&quot;comparative&quot;),
+    LE=c(&quot;parliament*&quot;,&quot;party*&quot;,&quot;parties*&quot;),
+    PE=c(&quot;econom*&quot;),
+    EU=c(&quot;EU&quot;,&quot;Europ*&quot;),
+    CF=c(&quot;conflict*&quot;),
+    IR=c(&quot;international*&quot;),
+    ME=c(&quot;method*&quot;),
+    PA=c(&quot;policy*&quot;),
+    PT=c(&quot;theor*&quot;),
+    PC=c(&quot;communication&quot;,&quot;media&quot;)))</code></pre>
+</div>
+<p>To apply the dictionary, use the <code>tokens_lookup()</code> function (if you have used multi-word expressions - otherwise you can also go for <code>dfm_lookup</code>). Convert the result to a dfm and inspect it using <code>head()</code>.</p>
+<p>Copy the dictionary you created above.</p>
+<div class="tutorial-exercise" data-label="apply2" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="15">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="apply2-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>section_dictionary &lt;- dictionary(list(
+    EL=c(&quot;election*&quot;,&quot;opinion&quot;,&quot;vot*&quot;),
+    CP=c(&quot;comparative&quot;),
+    LE=c(&quot;parliament*&quot;,&quot;party*&quot;,&quot;parties*&quot;),
+    PE=c(&quot;econom*&quot;),
+    EU=c(&quot;EU&quot;,&quot;Europ*&quot;),
+    CF=c(&quot;conflict*&quot;),
+    IR=c(&quot;international*&quot;),
+    ME=c(&quot;method*&quot;),
+    PA=c(&quot;policy*&quot;),
+    PT=c(&quot;theor*&quot;),
+    PC=c(&quot;communication&quot;,&quot;media&quot;)))
+sections&lt;-tokens_lookup(epsa_tokens,section_dictionary) %&gt;% dfm()
+head(sections)</code></pre>
+</div>
+<p>We move on to using the dictionary for classification - so keep it in your clipboard!</p>
+</div>
+</div>
+<div id="section-using-a-dictionary-for-classification" class="section level2">
+<h2>Using a dictionary for classification</h2>
+<p>We can use our dictionary to classify the sections. To make it easier to handle the results, we convert it to a dataframe using the <code>convert()</code> command. Additionally, we need to attach the document variables (which include the correct classification) to the data frame. Since the order has not changed, you can just use <code>bind_cols()</code> after converting the dfm to a data frame.</p>
+<p>Next, we need to come up with a decision-making rule how to translate our dictionary hits into categories. While machine learning algorithms would come up with more elaborate rules, we use a very simple rule: We ascribe the abstract to the dictionary category that produces most hits in the text. This is a bit tricky and there are multiple ways to do this - feel free to take a look at the solution if you cannot figure out how to do this.</p>
+<div class="tutorial-exercise" data-label="classify" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="15">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="classify-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>section_dictionary &lt;- dictionary(list(
+    EL=c(&quot;election*&quot;,&quot;opinion&quot;,&quot;vot*&quot;),
+    CP=c(&quot;comparative&quot;),
+    LE=c(&quot;parliament*&quot;,&quot;party*&quot;,&quot;parties*&quot;),
+    PE=c(&quot;econom*&quot;),
+    EU=c(&quot;EU&quot;,&quot;Europ*&quot;),
+    CF=c(&quot;conflict*&quot;),
+    IR=c(&quot;international*&quot;),
+    ME=c(&quot;method*&quot;),
+    PA=c(&quot;policy*&quot;),
+    PT=c(&quot;theor*&quot;),
+    PC=c(&quot;communication&quot;,&quot;media&quot;)))
+sections&lt;-tokens_lookup(epsa_tokens,section_dictionary) %&gt;% dfm()
+section_classification&lt;-convert(sections,&quot;data.frame&quot;)
+section_classification$predicted_section&lt;-colnames(section_classification[,2:12])[max.col(section_classification[,2:12])]</code></pre>
+</div>
+<p>Like other classification algorithms, we have to evaluate our dictionary against the gold standard (or is it a gold standard?) of the EPSA section distribution.</p>
+<p>To make our life easier, we use the <code>confusionMatrix()</code> function from the caret package. This way, we just have to do three steps:</p>
 <ul>
-<li>first, you can extract potential links from all tags by using the universal selector (<code>html_nodes("*)</code>)</li>
-<li>second, look up the selector of the tags again and extract the links to all tabs</li>
-</ul>
-<p>The parsed page is stored in an object called <code>page</code>.</p>
-<div class="tutorial-exercise" data-label="links" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
-</div>
-<div class="tutorial-exercise-support" data-label="links-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code># all pages
-page %&gt;% html_nodes(&quot;*&quot;) %&gt;% html_attr(&quot;href&quot;)
-# tags
-page %&gt;% html_nodes(&quot;.tags .tag&quot;) %&gt;% html_attr(&quot;href&quot;)</code></pre>
-</div>
-<p>Do you notice something about the links? They are missing a part. That is because they are relative links within the directory structure of the webpage. To ‘repair’ them, we need to add the <strong>base url</strong> of the webpage.</p>
-<p>This is sometimes just the url of the webpage we originally scraped from, sometimes (if we already started from a page other than the starting page) we need to cut the path to the base url. For this, we can use the function <code>paste()</code> that pastes together two character vectors. I recommend using <code>paste0()</code> which pastes the vectors together without inserting a white space between the vectors. If you have never used paste, try it out</p>
-<div class="tutorial-exercise" data-label="pastetest" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>paste(&quot;a&quot;,&quot;b&quot;)
-paste0(&quot;a&quot;,&quot;b&quot;)</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
-</div>
-<p>Now, completing the paths of the URLs we scraped should not be a problem for you. Copy-paste the code you used to extract the links of the tags, assign it to an object called <code>url</code> and copy-paste the base url (<a href="http://quotes.toscrape.com/" class="uri">http://quotes.toscrape.com/</a>) in front of it.</p>
-<p><strong>Watch out for the slashes between the base url and the address of your page - having none or too many is a typical problem!</strong></p>
-<div class="tutorial-exercise" data-label="paste" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
-</div>
-<div class="tutorial-exercise-support" data-label="paste-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>urls&lt;-page %&gt;% html_nodes(&quot;.tags .tag&quot;) %&gt;% html_attr(&quot;href&quot;)
-urls&lt;-paste0(&quot;http://quotes.toscrape.com&quot;,urls)</code></pre>
-</div>
-</div>
-<div id="section-automating-the-following-of-links" class="section level2">
-<h2>Automating the following of links</h2>
-<p>As I mentioned, in the end, webscraping is a function of programming. So once we collected the links we are interested in and learned the basic commands of rvest, there are multiple ways to proceed:</p>
+<li>convert the true and the predicted section into a factor - that is the input that <code>confusionMatrix()</code> takes
 <ul>
-<li>You can write a function</li>
-<li>You can write a <code>for()</code>-loop that loops over the vector of links (using the fucntion or just code)</li>
-<li>You can <code>apply()</code> a function to the vector - this is probably the fastest variant but a bit difficult to get used to</li>
+<li>you should also convert the predicted section into upper case</li>
+</ul></li>
+<li>apply the <code>confusionMatrix()</code> function from the <code>caret()</code> package</li>
+<li>interpret the results - we’ll go through that in a second after you give the first two steps a try:</li>
 </ul>
-<p>First, try to rewrite the code we have used to scrape into a function called <code>scrape_page()</code>. I recommend to first write down a skeleton of code that you would use to first extract the links to the quote pages, parse the first of the quote pages (<code>urls[1]</code>), extract the nodes of the quotes on this page and then extract the text of these nodes. This is also a good exercise to see to which extent you remember what we have learned so far:</p>
-<div class="tutorial-exercise" data-label="tagpages" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<div class="tutorial-exercise" data-label="evaluation" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="15">
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
-<div class="tutorial-exercise-support" data-label="tagpages-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>urls&lt;-page %&gt;% html_nodes(&quot;.tags .tag&quot;) %&gt;% html_attr(&quot;href&quot;)
-urls&lt;-paste0(&quot;http://quotes.toscrape.com&quot;,urls)
-page&lt;-read_html(urls[1])
-selected_nodes&lt;-html_nodes(page,&quot;.text&quot;)
-pagetext&lt;-html_text(selected_nodes)</code></pre>
+<div class="tutorial-exercise-support" data-label="evaluation-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>section_dictionary &lt;- dictionary(list(
+    EL=c(&quot;election*&quot;,&quot;opinion&quot;,&quot;vot*&quot;),
+    CP=c(&quot;comparative&quot;),
+    LE=c(&quot;parliament*&quot;,&quot;party*&quot;,&quot;parties*&quot;),
+    PE=c(&quot;econom*&quot;),
+    EU=c(&quot;EU&quot;,&quot;Europ*&quot;),
+    CF=c(&quot;conflict*&quot;),
+    IR=c(&quot;international*&quot;),
+    ME=c(&quot;method*&quot;),
+    PA=c(&quot;policy*&quot;),
+    PT=c(&quot;theor*&quot;),
+    PC=c(&quot;communication&quot;,&quot;media&quot;)))
+sections&lt;-tokens_lookup(epsa_tokens,section_dictionary) %&gt;% dfm()
+section_classification&lt;-convert(sections,&quot;data.frame&quot;)
+section_classification$predicted_section&lt;-colnames(section_classification[,2:12])[max.col(section_classification[,2:12])]
+section_classification$predicted_section&lt;-as.factor(toupper(section_classification$predicted_section))
+section_classification$section&lt;-as.factor(section_classification$section)
+confusionMatrix(data=section_classification$predicted_section,reference=section_classification$section)</code></pre>
 </div>
-<p>Now, try to re-write the scraping of the pages into a function. Think about which parts you want to put into the function and which parts you should leave outside. Also, think about what elements you should give as arguments to the function. Then, try to apply the function to the pages we downloaded.</p>
-<div class="tutorial-exercise" data-label="function" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="10">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
-</div>
-<div class="tutorial-exercise-support" data-label="function-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>scrape_page&lt;-function(pageurl,node){
-  page&lt;-read_html(pageurl)
-  selected_nodes&lt;-html_nodes(page,node)
-  pagetext&lt;-html_text(selected_nodes)
-}</code></pre>
-</div>
-<p>The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at R.</p>
-
+<p>First, have a look at the overall statistics. The most important statistic is <strong>accuracy</strong>. If you were as uncreative as me, your result will not be that great (e.g. somewhere between 30-40% accuracy). You also get a Confidence Interval - this is more important when you sample than in our case where we evaluate against the whole universe of cases. Even if your result is not that great, you are probably better than the <strong>No-information Rate</strong> which would be the result of random guessing.</p>
+<p>If you want to go into details, you can check the statistics by class. <strong>Sensitivity</strong> shows how good your dictionary is at detecting positive instances of this section. In contrast, <strong>Specificity</strong> measures whether you have false positives, that is, results that you assign to the category while they really belong somewhere else. For each category, you also receive a ‘Balanced Accuracy’ which combines Sensitivity and Specificity.</p>
+These statistics by class are particularly useful when you want to find out where your classifier is still performing is performing best. 
 <script type="application/shiny-prerendered" data-context="server-start">
 library(learnr)
+knitr::opts_chunk$set(echo = FALSE,message=F,warning=F)
+library(quanteda)
+library(dplyr)
+library(ggplot2)
 library(learn2scrape)
-library(rvest)
-knitr::opts_chunk$set(echo = FALSE)
-page<-system.file("extdata", "quotepage.html", package = "learn2scrape") %>% read_html()
+library(caret)
+
+data(epsa_paper)
+epsa_paper<-subset(epsa_paper,section!="PS")
+epsa_corpus<-corpus(epsa_paper,text_field = "abstracts")
+epsa_tokens<-tokens(epsa_corpus,remove_hyphens=T,remove_symbol=T)
+epsa_dfm<-dfm(epsa_tokens) %>% dfm_remove(c(stopwords("en"),"-"))
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
@@ -140,37 +228,37 @@ learnr:::register_http_handlers(session, metadata = NULL)
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
-`tutorial-exercise-links-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-links-code-editor`)), session)
-output$`tutorial-exercise-links-output` <- renderUI({
-  `tutorial-exercise-links-result`()
+`tutorial-exercise-wildcards-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-wildcards-code-editor`)), session)
+output$`tutorial-exercise-wildcards-output` <- renderUI({
+  `tutorial-exercise-wildcards-result`()
 })
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
-`tutorial-exercise-pastetest-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-pastetest-code-editor`)), session)
-output$`tutorial-exercise-pastetest-output` <- renderUI({
-  `tutorial-exercise-pastetest-result`()
+`tutorial-exercise-newdict-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-newdict-code-editor`)), session)
+output$`tutorial-exercise-newdict-output` <- renderUI({
+  `tutorial-exercise-newdict-result`()
 })
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
-`tutorial-exercise-paste-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-paste-code-editor`)), session)
-output$`tutorial-exercise-paste-output` <- renderUI({
-  `tutorial-exercise-paste-result`()
+`tutorial-exercise-apply2-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-apply2-code-editor`)), session)
+output$`tutorial-exercise-apply2-output` <- renderUI({
+  `tutorial-exercise-apply2-result`()
 })
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
-`tutorial-exercise-tagpages-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-tagpages-code-editor`)), session)
-output$`tutorial-exercise-tagpages-output` <- renderUI({
-  `tutorial-exercise-tagpages-result`()
+`tutorial-exercise-classify-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-classify-code-editor`)), session)
+output$`tutorial-exercise-classify-output` <- renderUI({
+  `tutorial-exercise-classify-result`()
 })
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
-`tutorial-exercise-function-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-function-code-editor`)), session)
-output$`tutorial-exercise-function-output` <- renderUI({
-  `tutorial-exercise-function-result`()
+`tutorial-exercise-evaluation-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-evaluation-code-editor`)), session)
+output$`tutorial-exercise-evaluation-output` <- renderUI({
+  `tutorial-exercise-evaluation-result`()
 })
 </script>
  <!--html_preserve-->
@@ -180,7 +268,7 @@ output$`tutorial-exercise-function-output` <- renderUI({
 <!--/html_preserve-->
 <!--html_preserve-->
 <script type="application/shiny-prerendered" data-context="execution_dependencies">
-{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38]}},"value":[{"type":"character","attributes":{},"value":["backports","base","compiler","datasets","digest","evaluate","graphics","grDevices","htmltools","htmlwidgets","httpuv","httr","jsonlite","knitr","later","learn2scrape","learnr","magrittr","markdown","methods","mime","promises","R6","Rcpp","rmarkdown","rprojroot","rvest","shiny","stats","stringi","stringr","tools","utils","withr","xfun","xml2","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.1.4","3.5.2","3.5.2","3.5.2","0.6.19","0.14","3.5.2","3.5.2","0.3.6","1.3","1.4.5.1","1.4.0","1.6","1.23","0.8.0","0.0.0.9000","0.9.2.9000","1.5","1.0","3.5.2","0.7","1.0.1","2.4.0","1.0.1","1.13","1.3-2","0.3.2","1.2.0","3.5.2","1.4.3","1.4.0","3.5.2","3.5.2","2.1.2","0.7","1.2.0","1.8-3","2.2.0"]}]}]}
+{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83]}},"value":[{"type":"character","attributes":{},"value":["assertthat","backports","base","caret","class","codetools","colorspace","compiler","crayon","data.table","datasets","digest","dplyr","evaluate","fastmatch","foreach","generics","ggplot2","glue","gower","graphics","grDevices","grid","gtable","htmltools","htmlwidgets","httpuv","ipred","iterators","jsonlite","knitr","later","lattice","lava","lazyeval","learn2scrape","learnr","lubridate","magrittr","markdown","MASS","Matrix","methods","mime","ModelMetrics","munsell","nlme","nnet","pillar","pkgconfig","plyr","prodlim","promises","purrr","quanteda","R6","Rcpp","RcppParallel","recipes","reshape2","rlang","rmarkdown","rpart","rprojroot","scales","shiny","spacyr","splines","stats","stats4","stopwords","stringi","stringr","survival","tibble","tidyselect","timeDate","tools","utils","withr","xfun","xtable","yaml"]},{"type":"character","attributes":{},"value":["0.2.1","1.1.4","3.5.2","6.0-81","7.3-14","0.2-15","1.4-1","3.5.2","1.3.4","1.12.2","3.5.2","0.6.19","0.8.0.1","0.14","1.1-0","1.4.4","0.0.2","3.2.0","1.3.1","0.1.2","3.5.2","3.5.2","3.5.2","0.3.0","0.3.6","1.3","1.4.5.1","0.9-8","1.0.10","1.6","1.23","0.8.0","0.20-38","1.6.4","0.2.2","0.0.0.9000","0.9.2.9000","1.7.4","1.5","1.0","7.3-51.1","1.2-15","3.5.2","0.7","1.2.2","0.5.0","3.1-137","7.3-12","1.4.1","2.0.2","1.8.4","2018.04.18","1.0.1","0.3.0","1.4.5","2.4.0","1.0.1","4.4.3","0.1.4","1.4.3","0.3.4","1.13","4.1-13","1.3-2","1.0.0","1.2.0","1.0","3.5.2","3.5.2","3.5.2","0.9.0","1.4.3","1.4.0","2.43-3","2.1.3","0.2.5","3043.102","3.5.2","3.5.2","2.1.2","0.7","1.8-3","2.2.0"]}]}]}
 </script>
 <!--/html_preserve-->
 </div>
@@ -194,7 +282,6 @@ output$`tutorial-exercise-function-output` <- renderUI({
 
 <!-- begin doc-metadata -->
 <div id="doc-metadata">
-<h2 class="title toc-ignore" style="display:none;">Scraping multiple pages</h2>
 </div>
 <!-- end doc-metadata -->
 

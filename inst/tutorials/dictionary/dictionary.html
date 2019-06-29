@@ -74,8 +74,17 @@ library(ggplot2)</code></pre>
 <div class="tutorial-exercise" data-label="corpus" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.setup":"packset","exercise.checker":"NULL"}</script>
 </div>
-<div id="section-corpus-hint">
-<p><code>epsa_corpus&lt;-corpus(epsa_paper,text_field = "abstracts")</code><br> <code>epsa_tokens&lt;-tokens(epsa_corpus,remove_hyphens=T,remove_symbol=T,remove_punct=T)</code><br> <code>epsa_dfm&lt;-dfm(epsa_tokens)  %&gt;% dfm_remove(stopwords("en"))</code><br> <code>#normally: #epsa_dfm &lt;- epsa_dfm %&gt;% dfm_wordstem(language="en")</code></p>
+<div class="tutorial-exercise-support" data-label="corpus-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>?corpus
+?tokens
+?dfm</code></pre>
+</div>
+<div class="tutorial-exercise-support" data-label="corpus-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>epsa_corpus&lt;-corpus(epsa_paper,text_field = &quot;abstracts&quot;)
+epsa_tokens&lt;-tokens(epsa_corpus,remove_hyphens=T,remove_symbol=T,remove_punct=T)
+epsa_dfm&lt;-dfm(epsa_tokens)  %&gt;% dfm_remove(stopwords(&quot;en&quot;))
+#normally
+#epsa_dfm &lt;- epsa_dfm %&gt;% dfm_wordstem(language=&quot;en&quot;)</code></pre>
 </div>
 </div>
 </div>
@@ -91,7 +100,17 @@ epsa_dfm&lt;-dfm(epsa_tokens) %&gt;% dfm_remove(c(stopwords(&quot;en&quot;),&quo
 <pre class="text"><code>path&lt;-system.file(&quot;extdata&quot;, &quot;newsmap.yml&quot;, package = &quot;learn2scrape&quot;)</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.setup":"dictset","exercise.checker":"NULL"}</script>
 </div>
+<div class="tutorial-exercise-support" data-label="loaddict-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>path&lt;-system.file(&quot;extdata&quot;, &quot;newsmap.yml&quot;, package = &quot;learn2scrape&quot;)
+newsmap_dict &lt;- dictionary(file = path,
+                           format = &quot;YAML&quot;)</code></pre>
+</div>
 <p>To view the dictionary, you can use the <code>print()</code> command</p>
+<div class="tutorial-exercise-support" data-label="printdict-setup" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>path&lt;-system.file(&quot;extdata&quot;, &quot;newsmap.yml&quot;, package = &quot;learn2scrape&quot;)
+newsmap_dict &lt;- dictionary(file = path,
+                           format = &quot;YAML&quot;)</code></pre>
+</div>
 <div class="tutorial-exercise" data-label="printdict" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>print(newsmap_dict)</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
@@ -121,12 +140,25 @@ tokens_lookup(epsa_tokens,newsmap_dict) %&gt;% head()</code></pre>
 eu_dict&lt;-dictionary(list(EU=&quot;European Union&quot;))</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
+<div class="tutorial-exercise-support" data-label="objectapply-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>text&lt;-&quot;Switzerland is not in the European Union&quot;
+eu_dict&lt;-dictionary(list(EU=&quot;European Union&quot;))
+dfm(text) %&gt;% dfm_lookup(eu_dict)
+tokens(text) %&gt;% tokens_lookup(eu_dict) %&gt;% dfm()</code></pre>
+</div>
 </div>
 <div id="section-apply-different-levels" class="section level3">
 <h3>Apply different levels</h3>
 <p>Dictionaries with a hierarchical structure can be evaluated at different levels. The newsmap dictionary has such a hierarchical structure: It contains countries, nested in regions which are then nested in continents. That means, you can apply only a part of the dictionary by specifying <code>levels</code> inside the <code>dfm_lookup()</code> command. Try it out below by specifying levels (1, 2 or 3) and look at the output of <code>textstat_frequency()</code>!</p>
 <div class="tutorial-exercise" data-label="applylevels" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.setup":"applysetup","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="applylevels-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code># apply one level of the dictionary (continent)
+region_dfm &lt;- dfm_lookup(epsa_dfm, newsmap_dict, levels = 1)
+textstat_frequency(region_dfm)
+country_dfm &lt;- dfm_lookup(epsa_dfm, newsmap_dict, levels = 3)
+textstat_frequency(country_dfm)</code></pre>
 </div>
 </div>
 <div id="section-evaluation-by-subgroups" class="section level3">
@@ -135,6 +167,10 @@ eu_dict&lt;-dictionary(list(EU=&quot;European Union&quot;))</code></pre>
 <p>Let’s apply this: You can see the original sections below. I would recommend you only apply the highest level of the dictionary (levels=1) to keep the output manageable. Then, tell <code>textstat_frequency</code> to sort the output by specifying the <code>section</code> variable as a group.</p>
 <div class="tutorial-exercise" data-label="groupapply" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.setup":"applysetup","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="groupapply-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>dfm_lookup(epsa_dfm, newsmap_dict, levels = 1) %&gt;%
+  textstat_frequency(groups=&quot;section&quot;)</code></pre>
 </div>
 <!--Bonus: If you want to visualize this, you can use `dfm_weight()` to calculate proportions by group.-->
 Of course, there is a lot more to learn about dictionaries - for example, you can combine them with <a href="">weighting</a> and receive quantities like the relative frequency of your dictionary entries or dichotomize the results into match / no match. This all depends on your research question, so please explore and feel free to ask. We now proceed to creating our own dictionary in order to practice classifying texts. 
