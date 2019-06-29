@@ -192,7 +192,7 @@ epsa_df_long<- epsa_paper %>% select(titles,author1:author6,time) %>% gather("nu
 epsa_authorwise<-epsa_df_long %>% left_join(participants)
 ```
 
-## Looping through the abstracts
+## Gathering the abstracts
 
 Getting the abstracts is a bit more complicated. Since they are not on the page we scraped, we will have to collect and follow the links to the details of each paper.
 
@@ -252,32 +252,49 @@ table, th, td {
 </tr>
 </table>
 
+<br>
+
+So, if we use `a[href^=value]` as a CSS Selector, we only receive links that start with a certain value. Now, try to collect just the links we need.
 
 
-So, if we use `[href^=value]`, we only receive links that start with a certain value.
-
-
-```{r abstracts,exercise=TRUE}
+```{r abstractlinks,exercise=TRUE}
 
 ```
 
 
-```{r abstracts-solution}
-paper_links<-page %>% html_nodes("a[href^='/stages']") %>% html_attr("href")
-get_text<-function(url,node="div.card__subtitle+ div"){
+```{r abstractlinks-solution}
+paper_links<-titlepage %>% html_nodes("a[href^='/stages']") %>% html_attr("href")
+```
+
+## Looping through the abstracts
+
+Now, it is time to scrape the abstracts. For that, we need to visit a lot of pages and I recommend you find a way to automate this. You may want to check the lesson on scraping multiple pages if you are unfamiliar with apply commands:
+
+`run_tutorial("scraping_pages",package="learn2scrape")`
+
+Here, we just need to adapt the function we wrote then. If you skipped the tutorial but feel equipped to proceed right away, just try to think about how to write a function that scrapes text and apply it to the URLs we collected.
+
+*Two tips: Don't forget to add the base url, given all URLs are relative. Also, you might want to try your function on a single URL before you scrape the whole thing (which takes a few minutes)!*
+
+```{r scrapeabstracts,exercise=TRUE}
+paper_links<-titlepage %>% html_nodes("a[href^='/stages']") %>% html_attr("href")
+```
+
+```{r scrapeabstracts-solution}
+paper_links<-titlepage %>% html_nodes("a[href^='/stages']") %>% html_attr("href")
+paper_links<-paste0("https://app.oxfordabstracts.com",paper_links)
+get_abstracts<-function(url,node=".card__sub-section div p"){
   html<-read_html(url)
   html_nodes(html,node) %>% html_text()
 }
-
+abstracts<-sapply(paper_links, get_abstracts)
 ```
 
 
-
-Now, it is time to scrape the abstracts.
 
 
 ## Wrap-up
 
-Congratulations! You have scraped the abstracts of this year's EPSA conference. I hope you enjoyed it - we will work with them tomorrow during the text analysis class.
+Congratulations! You have scraped the details and abstracts of this year's EPSA conference. I hope you enjoyed it - we will work with them tomorrow during the text analysis class.
 
 As mentioned before, [let me know](mailto:gessler@ipz.uzh.ch) via e-mail or in person if you have any suggestions how to make this tutorial more useful.

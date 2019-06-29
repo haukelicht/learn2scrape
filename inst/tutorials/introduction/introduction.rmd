@@ -24,9 +24,10 @@ You will see explanations but there are also some parts where you'll be asked to
 
 - this is an interactive tutorial
 - If you don't know the answer, you can click on the *Hint*-button (where available) or the *Solution* button to see the solution.
-- You can test your code by clicking on *Run Code*
+- You can test your code by clicking on *Run Code*. Since there is no environment, you can also add the names of objects to inspect them or use `ls()` to see what is in your environment when you execute the chunk
 - Be cautious about the *Start over*-button: Clicking on it will delete the code you wrote
 - unlike in a normal markdown document, all chunks are independent. That means: If you create something in one chunk, it won't be available in the other chunks
+    - that means, you will sometimes have to copy-paste code from previous exercises but I have tried to make things as easy as possible
 
 <!--If you prefer using [swirl](https://swirlstats.com/){target="_blank"}, this first lesson is also available as a swirl-course. As things get more complex later on, I'll ask you to switch to the browser-version! -->
 
@@ -72,16 +73,14 @@ read_html(url)
 
 The output does not look like you expected? You would be surprised to see that the [original webpage](http://quotes.toscrape.com/){target="_blank"} looks quite similar. Have a look at the webpage source code. Depending on your browser, you can probably select 'view source' after a right mouse click. If you have trouble, [google has an up-to-date explanation](https://www.google.com/search?hl=&site=&q=how+to+view+webpage+source+code+in+browser){target="_blank"}. 
 
+Just if you were wondering, of course, we could have also skipped creating a variable with the URL. and could have instead directly applied the `read_html()` function  to the URL http://quotes.toscrape.com/ .
 
 ## Extracting elements
 
-### Extracting Text
 
-Just if you were wondering, of course, we could have also skipped creating a variable with the URL. Try to apply the read_html() function directly to the URL http://quotes.toscrape.com/ and save the result to an object called `page`.
+The function `read_html()` parses the html code, similar to what our browser does. Still, it gives us the entire document including the HTML commands. Since we do not want the formatting of the webpage, we can use the function html_text() to extract the Webpage text.
 
-The function read_html parses the html code, similar to what our browser does. Still, it gives us the entire document including the HTML commands. You can use the function html_text() to extract the Webpage text. 
-
-Remember, we just assigned the parsed HTML page to the object page? Try applying html_text() to the object page.
+Try it out: assign the parsed page to an object called page and apply `html_text()` to it.
 
 
 
@@ -109,7 +108,11 @@ library(rvest)
 
 So, we need xpath or CSS selectors! If you have not used HTML before, this might sound complicated. It helps to get a bit into the structure of HTML. [Click on this link to read an introduction to HTML](https://www.w3schools.com/html/default.asp){target="_blank"}.
 
-### SelectorGadget
+Basically, HTML Tags form the structure of a page and CSS selectors are a type of *grammar* or *pattern-description* that helps us select specific parts of the page structure. I am working on a tutorial specific to CSS selectors (that you will be able to access by running `run_tutorial("CSS",package="learn2scrape")` in the future), but for now, we will just use a tool that helps us determine the correct selectors. In fact, most people use these tools for scraping and only learn the basics of CSS selectors.
+
+Just for reference: For a list of CSS Selectors, check out [this collection](https://www.w3schools.com/cssref/css_selectors.asp){target="_blank"}. If you want to practice CSS Selectors in a fun way, I recommend playing with the [CSS Diner](https://flukeout.github.io/){target="_blank"} where you can learn about different selector structures.
+
+## Extracting elements with SelectorGadget
 
 While understanding HTML helps, we often do not need to engage with the code because there are lots of tools to help us. For example, SelectorGadget is a JavaScript bookmarklet that allows you to interactively figure out what css selector you need to extract parts of the page. If you have not heard of selectorgadget, check its [webpage](https://selectorgadget.com/){target="_blank"} - there is even a video:
 

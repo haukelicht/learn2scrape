@@ -121,7 +121,7 @@ The easiest way to do this is to use `sapply()`, which is a simplified and user-
 
 `sapply(vector,function,potential-arguments)`
 
-Here, the potential arguments would be other variables you have outsourced in your function.
+In our case, the vector would be the list of URLs, the function your scraping function and the potential arguments are other variables you might have outsourced from your function.
 
 Then, run the entire thing and hopefully enjoy the list of quotes for all tags...
 
@@ -133,7 +133,7 @@ urls<-paste0("http://quotes.toscrape.com",urls)
 
 ```
 
-```{r function-solution}
+```{r function-solution,eval=F}
 urls<-page %>% html_nodes(".tags .tag") %>% html_attr("href")
 urls<-paste0("http://quotes.toscrape.com",urls)
 scrape_page<-function(pageurl,node){
@@ -151,4 +151,8 @@ If you had a peak at the solution, you will see that I put the CSS selector as a
 Fantastic, you're done with this lesson!
 
 The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at scraping in R.
+
+If you are done with this lesson, you may want to give the EPSA Scraping project a go:
+
+`run_tutorial("scraping_epsa",package="learn2scrape")`
 

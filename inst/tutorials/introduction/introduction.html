@@ -54,9 +54,12 @@ if (window.hljs) {
 <ul>
 <li>this is an interactive tutorial</li>
 <li>If you don’t know the answer, you can click on the <em>Hint</em>-button (where available) or the <em>Solution</em> button to see the solution.</li>
-<li>You can test your code by clicking on <em>Run Code</em></li>
+<li>You can test your code by clicking on <em>Run Code</em>. Since there is no environment, you can also add the names of objects to inspect them or use <code>ls()</code> to see what is in your environment when you execute the chunk</li>
 <li>Be cautious about the <em>Start over</em>-button: Clicking on it will delete the code you wrote</li>
-<li>unlike in a normal markdown document, all chunks are independent. That means: If you create something in one chunk, it won’t be available in the other chunks</li>
+<li>unlike in a normal markdown document, all chunks are independent. That means: If you create something in one chunk, it won’t be available in the other chunks
+<ul>
+<li>that means, you will sometimes have to copy-paste code from previous exercises but I have tried to make things as easy as possible</li>
+</ul></li>
 </ul>
 <!--If you prefer using [swirl](https://swirlstats.com/){target="_blank"}, this first lesson is also available as a swirl-course. As things get more complex later on, I'll ask you to switch to the browser-version! -->
 </div>
@@ -93,15 +96,13 @@ url&lt;-&quot;http://quotes.toscrape.com/&quot;
 read_html(url)</code></pre>
 </div>
 <p>The output does not look like you expected? You would be surprised to see that the <a href="http://quotes.toscrape.com/" target="_blank">original webpage</a> looks quite similar. Have a look at the webpage source code. Depending on your browser, you can probably select ‘view source’ after a right mouse click. If you have trouble, <a href="https://www.google.com/search?hl=&amp;site=&amp;q=how+to+view+webpage+source+code+in+browser" target="_blank">google has an up-to-date explanation</a>.</p>
+<p>Just if you were wondering, of course, we could have also skipped creating a variable with the URL. and could have instead directly applied the <code>read_html()</code> function to the URL <a href="http://quotes.toscrape.com/" class="uri">http://quotes.toscrape.com/</a> .</p>
 </div>
 </div>
 <div id="section-extracting-elements" class="section level2">
 <h2>Extracting elements</h2>
-<div id="section-extracting-text" class="section level3">
-<h3>Extracting Text</h3>
-<p>Just if you were wondering, of course, we could have also skipped creating a variable with the URL. Try to apply the read_html() function directly to the URL <a href="http://quotes.toscrape.com/" class="uri">http://quotes.toscrape.com/</a> and save the result to an object called <code>page</code>.</p>
-<p>The function read_html parses the html code, similar to what our browser does. Still, it gives us the entire document including the HTML commands. You can use the function html_text() to extract the Webpage text.</p>
-<p>Remember, we just assigned the parsed HTML page to the object page? Try applying html_text() to the object page.</p>
+<p>The function <code>read_html()</code> parses the html code, similar to what our browser does. Still, it gives us the entire document including the HTML commands. Since we do not want the formatting of the webpage, we can use the function html_text() to extract the Webpage text.</p>
+<p>Try it out: assign the parsed page to an object called page and apply <code>html_text()</code> to it.</p>
 <div class="tutorial-exercise" data-label="text" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="2">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
@@ -110,7 +111,6 @@ read_html(url)</code></pre>
 html_text(page)</code></pre>
 </div>
 <p>Did you find the quotes from before? Admittedly, this still looks very messy. Maybe you are thinking: If only, there would be a way to tell R to just get the text of the quotes!</p>
-</div>
 <div id="section-css-selectors" class="section level3">
 <h3>CSS Selectors</h3>
 <p>Luckily there is! The html_nodes() command allows us to select specific ‘nodes’, that is, elements of the HTML Code. Please have a look at the documentation of the html_nodes() command.</p>
@@ -120,9 +120,12 @@ html_text(page)</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
 <p>So, we need xpath or CSS selectors! If you have not used HTML before, this might sound complicated. It helps to get a bit into the structure of HTML. <a href="https://www.w3schools.com/html/default.asp" target="_blank">Click on this link to read an introduction to HTML</a>.</p>
+<p>Basically, HTML Tags form the structure of a page and CSS selectors are a type of <em>grammar</em> or <em>pattern-description</em> that helps us select specific parts of the page structure. I am working on a tutorial specific to CSS selectors (that you will be able to access by running <code>run_tutorial("CSS",package="learn2scrape")</code> in the future), but for now, we will just use a tool that helps us determine the correct selectors. In fact, most people use these tools for scraping and only learn the basics of CSS selectors.</p>
+<p>Just for reference: For a list of CSS Selectors, check out <a href="https://www.w3schools.com/cssref/css_selectors.asp">this collection</a>. If you want to practice CSS Selectors in a fun way, I recommend playing with the <a href="https://flukeout.github.io/" target="_blank">CSS Diner</a> where you can learn about different selector structures.</p>
 </div>
-<div id="section-selectorgadget" class="section level3">
-<h3>SelectorGadget</h3>
+</div>
+<div id="section-extracting-elements-with-selectorgadget" class="section level2">
+<h2>Extracting elements with SelectorGadget</h2>
 <p>While understanding HTML helps, we often do not need to engage with the code because there are lots of tools to help us. For example, SelectorGadget is a JavaScript bookmarklet that allows you to interactively figure out what css selector you need to extract parts of the page. If you have not heard of selectorgadget, check its <a href="https://selectorgadget.com/" target="_blank">webpage</a> - there is even a video:</p>
 <p><img src="https://vimeo.com/52055686" /></p>
 <p>We will try to use SelectorGadget now. <a href="https://chrome.google.com/webstore/detail/selectorgadget/mhjhnkcfbdhnjickkkdbjoemdmbfginb">If you have Chrome, you can just install SelectorGadget in your browser</a>. If you have a different browser, drag this link into your <a href="javascript:(function()%7Bvar%20s=document.createElement(&#39;div&#39;);s.innerHTML=&#39;Loading...&#39;;s.style.color=&#39;black&#39;;s.style.padding=&#39;20px&#39;;s.style.position=&#39;fixed&#39;;s.style.zIndex=&#39;9999&#39;;s.style.fontSize=&#39;3.0em&#39;;s.style.border=&#39;2px%20solid%20black&#39;;s.style.right=&#39;40px&#39;;s.style.top=&#39;40px&#39;;s.setAttribute(&#39;class&#39;,&#39;selector_gadget_loading&#39;);s.style.background=&#39;white&#39;;document.body.appendChild(s);s=document.createElement(&#39;script&#39;);s.setAttribute(&#39;type&#39;,&#39;text/javascript&#39;);s.setAttribute(&#39;src&#39;,&#39;https://dv0akt2986vzh.cloudfront.net/unstable/lib/selectorgadget.js&#39;);document.body.appendChild(s);%7D)();">bookmark bar and click on it when needed</a>. Now, use it to select all quotes on the quotes webpage we have used.</p>
@@ -138,31 +141,30 @@ html_text(page)</code></pre>
 <tr>
 <td>
 
-<div id="htmlwidget-e4160b310a5fc7d0a0c4" style="width:100%;height:auto;", class = "quiz html-widget">
+<div id="htmlwidget-dbf1fb983426a4798e11" style="width:100%;height:auto;", class = "quiz html-widget">
 <div class="panel panel-default">
 <div class="panel-body quizArea">
 </div>
 </div>
 </div>
 
-<script type="application/json" data-for="htmlwidget-e4160b310a5fc7d0a0c4">{"x":{"question":"Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?","answers":[{"option":".quote","correct":false,"message":"Almost but we did not want to include the author and tags!"},{"option":".tags .tag","correct":false,"message":null},{"option":".text","correct":true,"message":null},{"option":"h2","correct":false,"message":null}],"label":"selector-practice-1","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?","a":[{"option":".quote","correct":false,"message":"Almost but we did not want to include the author and tags!"},{"option":".tags .tag","correct":false,"message":null},{"option":".text","correct":true,"message":null},{"option":"h2","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-dbf1fb983426a4798e11">{"x":{"question":"Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?","answers":[{"option":".quote","correct":false,"message":"Almost but we did not want to include the author and tags!"},{"option":".tags .tag","correct":false,"message":null},{"option":".text","correct":true,"message":null},{"option":"h2","correct":false,"message":null}],"label":"selector-practice-1","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?","a":[{"option":".quote","correct":false,"message":"Almost but we did not want to include the author and tags!"},{"option":".tags .tag","correct":false,"message":null},{"option":".text","correct":true,"message":null},{"option":"h2","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
 </td>
 </tr>
 <tr>
 <td>
 
-<div id="htmlwidget-2e8b1238b35f0f2c54fa" style="width:100%;height:auto;", class = "quiz html-widget">
+<div id="htmlwidget-8ebc52b0da880ae90127" style="width:100%;height:auto;", class = "quiz html-widget">
 <div class="panel panel-default">
 <div class="panel-body quizArea">
 </div>
 </div>
 </div>
 
-<script type="application/json" data-for="htmlwidget-2e8b1238b35f0f2c54fa">{"x":{"question":"Try finding the CSS Selektor for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?","answers":[{"option":".quote","correct":false,"message":null},{"option":".tags .tag","correct":true,"message":null},{"option":".text","correct":false,"message":null},{"option":"h2","correct":false,"message":null}],"label":"selector-practice-2","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Try finding the CSS Selektor for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?","a":[{"option":".quote","correct":false,"message":null},{"option":".tags .tag","correct":true,"message":null},{"option":".text","correct":false,"message":null},{"option":"h2","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-8ebc52b0da880ae90127">{"x":{"question":"Try finding the CSS Selektor for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?","answers":[{"option":".quote","correct":false,"message":null},{"option":".tags .tag","correct":true,"message":null},{"option":".text","correct":false,"message":null},{"option":"h2","correct":false,"message":null}],"label":"selector-practice-2","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Try finding the CSS Selektor for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?","a":[{"option":".quote","correct":false,"message":null},{"option":".tags .tag","correct":true,"message":null},{"option":".text","correct":false,"message":null},{"option":"h2","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
 </td>
 </tr>
 </table>
-</div>
 </div>
 <div id="section-applying-css-selectors" class="section level3">
 <h3>Applying CSS Selectors</h3>
