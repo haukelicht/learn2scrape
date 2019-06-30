@@ -20,25 +20,25 @@ institutions<-html_nodes(authorpage, ".card__copy--authors-wrap div") %>% html_t
 participants<-data.frame(authors,institutions,stringsAsFactors = F) %>% filter(duplicated(authors)==F)
 rm(institutions,authors)
 
-page<-read_html("https://app.oxfordabstracts.com/events/772/programme-builder/view/sort/title?view=published")
-
 title_select<-".card__subtitle--program-abstract-title p"
 time_select<-".card__datum--programme-time"
 author_select<-".card__copy--authors-wrap"
 institution_select<-".card__copy--affiliations"
 
-titles<-page %>% html_nodes(title_select) %>% html_text(trim=T) 
-authors<-page %>% html_nodes(author_select) %>% html_text(trim=T)
-time<-page %>% html_nodes(time_select) %>% html_text(trim=T) 
-institutions<-page %>% html_nodes(institution_select) %>% html_text(trim=T)
+titles<-titlepage %>% html_nodes(title_select) %>% html_text(trim=T) 
+authors<-titlepage %>% html_nodes(author_select) %>% html_text(trim=T)
+time<-titlepage %>% html_nodes(time_select) %>% html_text(trim=T) 
+institutions<-titlepage %>% html_nodes(institution_select) %>% html_text(trim=T)
 epsa_paper<-data.frame(titles, authors, time, institutions,stringsAsFactors = F)
 ```
 
 ## Introduction
 
-This is an exercise for scraping the program of the [2019 EPSA Conference](https://www.epsanet.org/conference-2019/){target="_blank"}. The exercise format assumes you already have some experience with HTML - so just try your best and ask for hints or refer back to the other exercises if things do not work out.
+*Last revised: `r Sys.Date()`*
 
-For this session, I have pre-loaded the `rvest`, `tidyr` and `dplyr` packages, so remember to load them if you try to do this in your own R session. Due to the structure of the course, you unfortunately have to repeat steps like parsing the page multiple times.
+This is an exercise for scraping the program of the [2019 EPSA Conference](https://www.epsanet.org/conference-2019/){target="_blank"}. The exercise format assumes you already have some experience with HTML - so ask your colleagues, click on hints, skip sections or refer back to the other exercises if things do not work out.
+
+For this session, I have pre-loaded the `rvest`, `tidyr` and `dplyr` packages, so remember to load them if you try to do this in your own R session. Again, due to the structure of the course, you unfortunately have to repeat steps like parsing the page multiple times.
 
 ## Scraping the conference program
 
@@ -52,7 +52,7 @@ Proceeding as before, define the [starting url](https://app.oxfordabstracts.com/
 
 ```{r generate-urls-solution}
 url<-"https://app.oxfordabstracts.com/events/772/programme-builder/view/sort/title?view=published"
-page<-read_html(pageurl)
+page<-read_html(url)
 ```
 
 ### Extracting information
@@ -66,7 +66,7 @@ There is a number of things we might be interested in:
 - abstracts
 - potentially, other thinks like time slots...
 
-Try to find CSS selectors for the bold items! We'll worry about the abstracts a bit later.
+Try to find CSS selectors for the bold items! We will worry about the abstracts a bit later.
 
 ```{r selector-practice, echo=FALSE}
 quiz(caption= "Quiz about selectors",
@@ -104,9 +104,9 @@ question("What is the CSS selector for the authors' institution?",
 
 Now, parse the page again and extract the information (titles, location and time, authors and affiliations) from the parsed HTML page. Combine them into a new dataframe called `epsa_paper` using the `data.frame()` command. You can then inspect the data frame we downloaded.
 
-*Tip: You can include trim=T inside html_text() to clean the results. Also, I recommend defining the CSS Selectors in a variable, rather than including it directly in* `html_nodes()`. *That way, you can re-use your code more easily.*
+*Tip: You can include trim=T inside html_text() to remove line breaks and white spaces at the margins of the results. Also, I recommend defining the CSS selectors in a variable, rather than including it directly in* `html_nodes()`. *That way, you can re-use your code more easily.*
 
-If you are not online and cannot scrape the page, use the object `titlepage` as parsed html page (that is, as result of `read_html()`).
+If you are not online and cannot scrape the page, the package includes a static version of the page. You can use the object `titlepage` as parsed html page (that is, as result of `read_html()`).
 
 ```{r extraction,exercise=TRUE,exercise.lines=15}
 
@@ -137,9 +137,9 @@ epsa_paper
 
 If you had a look at the author and institution information in the last section, it is not very intuitive. Instead of being listed by author, each author has a footnote with their institution - this is difficult when we need to disentangle papers where multiple authors come from the same institution.
 
-While we could match this in R, we will make our lives a bit easier and practice scraping a bit more: We go to the [author page](https://app.oxfordabstracts.com/events/772/programme-builder/view/sort/author?view=published){target="_blank"} and scrape the names and institutions of everyone who attended EPSA. If you are not online and cannot scrape the page, use the object `authorpage` as parsed html page (that is, as result of `read_html()`). Then, combine them into a data frame.
+While we could match this in R, we will make our lives a bit easier and practice scraping a bit more: We go to the [author page](https://app.oxfordabstracts.com/events/772/programme-builder/view/sort/author?view=published){target="_blank"} and scrape the names and institutions of everyone who attended EPSA.  Then, combine them into a data frame. If you are not online and cannot scrape the page, use the object `authorpage` as parsed html page (that is, as result of `read_html()`).
 
-*On an additional note: Some of our colleagues are registered with several accounts. If you want to make sure you do not create duplicates, just filter by applying the* `duplicated()` *command to the authors.*
+*On an additional note: Some of our colleagues are registered with several accounts. If you want to make sure you do not create duplicates, just filter using the* `filter()` *command on authors that are duplicated (see the function* `duplicated()`*).*
 
 ```{r authors, exercise=TRUE,exercise.lines=5}
 
@@ -157,9 +157,9 @@ participants<-data.frame(authors,institutions,stringsAsFactors = F) %>% filter(d
 
 So, how do we match the two? This is more a data management than a scraping question, so there are of course multiple ways. It is also a bit part of the grunt-work so feel free to move on to the next section instead. In fact, if you do not have much experience using `tidy` or `dplyr`, I recommend to skip this section because I won't be able to go into all of the details and this is really specific to the EPSA case.
 
-If you do want to do the matching, I recommend using `separate()` from the tidyr package: it separates a single character vector into multiple columns of a data frame, based on a [regular expression](https://stringr.tidyverse.org/articles/regular-expressions.html){target="_blank"}. This way, we separate the author column into individual authors. Note that you have to provide a list of column names - I decided to just go for authors and numbers and just tried out until I saw that six would be enough... 
+If you do want to do the matching, I recommend using `separate()` from the tidyr package: it separates a single character vector into multiple columns of a data frame, based on a [regular expression](https://stringr.tidyverse.org/articles/regular-expressions.html){target="_blank"}. This way, we separate the author column into individual authors. Note that you have to provide a list of column names - I decided to just go for authors and numbers and just tried out until I saw that six would be enough... If you have a better approach to doing this - let me know!
 
-If you want, you can try to find a fitting regular expression here. I have pre-filled everything except the regular expression that you need to add as `sep`:
+If you want, you can try to find a fitting regular expression here. I have pre-filled everything except the regular expression that you need to add as `sep` parameter:
 
 ```{r regex,exercise=TRUE}
 separate(epsa_paper,col=authors,into=c("author1","author2","author3","author4","author5","author6"),sep="")
@@ -175,7 +175,7 @@ The next step is to reshape the data frame into a long format using `gather()`: 
 I have pre-loaded a data frame with the participants and their institutions (called `participants` with the variables `authors` and `institutions`) into your environment.
 
 ```{r merging, exercise=TRUE,exercise.lines=10}
-epsa_paper<-epsa_paper %>% mutate(author_raw=authors) %>% 
+epsa_paper<-epsa_paper %>% 
 separate(col="authors",into=c("author1","author2","author3","author4","author5","author6"),
   sep="\\s*\n+\\s*\n*\\s*") 
 epsa_df_long<- epsa_paper %>% select(titles,author1:author6,time) %>% gather("number","authors",-c(titles,time)) %>%
@@ -196,9 +196,13 @@ epsa_authorwise<-epsa_df_long %>% left_join(participants)
 
 Getting the abstracts is a bit more complicated. Since they are not on the page we scraped, we will have to collect and follow the links to the details of each paper.
 
-Unfortunately, SelectorGadget seems to do a bad job here - try it yourself 
+Unfortunately, SelectorGadget seems to do a bad job with collecting the links - if you want, try out its output here:
 
-Let us start by just extracting all links contained on the page - for that, just run the first line which selects all elements with an a-tag, that is, all links.
+```{r selectorfail,exercise=TRUE}
+
+```
+
+So we try to manually determine a selector instead. Let us start by just extracting all links contained on the page - for that, just run the first line which selects all elements with an a-tag, that is, all links.
 
 ```{r alllinks,exercise=TRUE}
 titlepage %>% html_nodes("a") %>% html_attr("href") 
@@ -209,7 +213,7 @@ Seems like there are some false matches. We have two options how to exclude them
 a) we sort them afterwards by only keeping links that confirm to a certain pattern
 b) we sort them beforehand by modifying our CSS selector to only include certain patterns
 
-Here, we go for the second option. First, try out which of the links are correct?
+Since this is a webscraping course, we go for the second option. First, try out which of the links are correct?
 
 ```{r complicatedpractice, echo=FALSE}
 quiz(question("Which links lead to the pages with the paper abstracts?",
@@ -220,7 +224,7 @@ quiz(question("Which links lead to the pages with the paper abstracts?",
 ))
 ```
 
-Great, so we know what to do. Luckily, we can use [more specific selectors](https://www.w3.org/TR/selectors-3/#attribute-substrings) to select exactly those nodes we want. There are basically three important such specific selectors: 
+Now that we know the regularity, we can use [more specific selectors](https://www.w3.org/TR/selectors-3/#attribute-substrings) to select exactly those nodes we want. Let me introduce three important specific selectors: 
 
 <style>
 table, th, td {
@@ -238,17 +242,17 @@ table, th, td {
 <tr>
 <td>&lsqb;attribute*=value&rsqb;</td>
 <td>Matches elements with an attribute that contains a given value</td>
-<td>a&lsqb;href*="pressrelease"&rsqb;</td>
+<td>a&lsqb;href*="press"&rsqb;<br> 'press' somewhere in link</td>
 </tr>
 <tr>
 <td>&lsqb;attribute^="value"&rsqb;</td>
 <td>Matches elements with an attribute that starts with a given value</td>
-<td>a&lsqb;href*="/press/"&rsqb;</td>
+<td>a&lsqb;href^="/press/"&rsqb;<br>link starts with 'press'</td>
 </tr>
 <tr>
 <td>&lsqb;attribute&dollar;="value"&rsqb;</td>
 <td>Matches elements with an attribute that ends with a given value</td>
-<td>&lsqb;href$=".pdf"&rsqb;</td>
+<td>&lsqb;href$=".pdf"&rsqb;<br>filetype is pdf</td>
 </tr>
 </table>
 
@@ -272,11 +276,11 @@ Now, it is time to scrape the abstracts. For that, we need to visit a lot of pag
 
 `run_tutorial("scraping_pages",package="learn2scrape")`
 
-Here, we just need to adapt the function we wrote then. If you skipped the tutorial but feel equipped to proceed right away, just try to think about how to write a function that scrapes text and apply it to the URLs we collected.
+Here, we just need to adapt the function we wrote then. If you skipped the tutorial but want to proceed right away, you can try to write a function that scrapes text and apply it to the URLs we collected.
 
 *Two tips: Don't forget to add the base url, given all URLs are relative. Also, you might want to try your function on a single URL before you scrape the whole thing (which takes a few minutes)!*
 
-```{r scrapeabstracts,exercise=TRUE}
+```{r scrapeabstracts,exercise=TRUE,exercise.timelimit=500}
 paper_links<-titlepage %>% html_nodes("a[href^='/stages']") %>% html_attr("href")
 ```
 

@@ -4,6 +4,18 @@
 #' @format A data frame with columns:
 #' \describe{
 #'  \item{title}{paper title}
+#'  \item{author1}{first author}
+#'  \item{author2}{second author}
+#'  \item{author3}{third author}
+#'  \item{author4}{fourth author}
+#'  \item{author5}{fifth author}
+#'  \item{author6}{sixth author}
+#'  \item{institution1}{first author}
+#'  \item{institution2}{second institution}
+#'  \item{institution3}{third institution}
+#'  \item{institution4}{fourth institution}
+#'  \item{institution5}{fifth institution}
+#'  \item{institution6}{sixth institution}
 #'  \item{section}{EPSA section}
 #'  \item{abstracts}{Paper abstract}
 #'  \item{panel}{Panel location}
@@ -15,33 +27,3 @@
 #' }
 "epsa_paper"
 
-
-#' Page with titles
-#'
-#' @source EPSA Paper titles. Scraped from EPSA conference program.
-#' @format A list format webpage with paper titles
-#' @examples
-#' \dontrun{
-#'  titlepage
-#' }
-"titlepage"
-
-#' Page with authors
-#'
-#' @source EPSA Paper authors. Scraped from EPSA conference program.
-#' @format A list format webpage with author names
-#' @examples
-#' \dontrun{
-#'  authorpage
-#' }
-"authorpage"
-
-#' Page with quotes
-#'
-#' @source Quotes to scrape webpage
-#' @format A list format webpage with quotes
-#' @examples
-#' \dontrun{
-#'  quotepage
-#' }
-"quotepage"

@@ -1,5 +1,6 @@
 ---
 pagetitle: "Creating a dictionary for classification"
+author: "Theresa Gessler"
 output: 
   learnr::tutorial:
     progressive: false

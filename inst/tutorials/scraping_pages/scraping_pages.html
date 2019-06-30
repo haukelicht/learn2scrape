@@ -48,27 +48,27 @@ if (window.hljs) {
 
 <div id="section-introduction" class="section level2">
 <h2>Introduction</h2>
-<p><em>Last revised: 2019-06-29</em></p>
-<p>So, you have learned how to use some of the basic functions of the <code>rvest</code> package: <code>read_html()</code>, <code>html_nodes()</code> and <code>html_text()</code>. If we really want to scrape a lot of pages, we need another step: We have to learn to follow links without actually opening the browser and clicking.</p>
+<p><em>Last revised: 2019-07-01</em></p>
+<p>So, you have learned how to use some of the basic functions of the <code>rvest</code> package: <code>read_html()</code>, <code>html_nodes()</code> and <code>html_text()</code>. But most of the time, we are not just interested in a single page but multiple pages from the same domain, e.g. all newspaper reports by a specific newspaper or all speeches by a politician. So we need another step: We have to learn to follow links without actually opening the browser and clicking on the link and copying the new path.</p>
 <p>In this part of the tutorial, you will learn two things:</p>
 <ul>
 <li>to extract links from webpages</li>
-<li>some methods to automate following these links.</li>
+<li>ways to automate following these links.</li>
 </ul>
 <p>You will see that in the end, webscraping is a function of programming in R. The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data.</p>
 </div>
 <div id="section-extracting-links-from-webpages" class="section level2">
 <h2>Extracting links from webpages</h2>
-<p>To extract links, we need another command. Remember we said hyperlinks are an <em>attribute</em> of the text? Because of that, the <code>rvest</code> command is called <code>html_attr()</code>. We can use it to extract different attributes, so you will have to tell rvest that what we are interested in is a link. Remember what links looked like?</p>
-<p><code>&lt;a href=&gt;&lt;/a&gt;</code></p>
+<p>To extract links, we need another command. Remember we said hyperlinks are an <em>attribute</em> of the text? Because of that, the <code>rvest</code> command to get these links is called <code>html_attr()</code>. We can use it to extract different types of attributes, so you will have to tell rvest the attribute that we are interested in is a link. Remember what links looked like?</p>
+<p><code>This is text &lt;a href="http://quotes.toscrape.com/"&gt;with a link&lt;/a&gt;.</code></p>
 <p><em>href</em> stands for hyperreference and signifies the webpage the link leads to. You can specify <code>name="href"</code> inside the <code>html_attr()</code> command to extract the link. For example:</p>
 <p><code>html_attr(parsed_page,"href")</code></p>
-<p>However, this will only work on individual HTML tags, so we will use <code>html_nodes()</code> again. Please try on the <a href="http://quotes.toscrape.com/" target="_blank">quotes2scrape webpage</a>.</p>
+<p>However, this will only work on individual HTML tags not on entire pages (since the link is an attribute of the tag), so we will use <code>html_nodes()</code> again. Please try two things on the <a href="http://quotes.toscrape.com/" target="_blank">quotes2scrape webpage</a>:</p>
 <ul>
-<li>first, you can extract potential links from all tags by using the universal selector (<code>html_nodes("*)</code>)</li>
-<li>second, look up the selector of the tags again and extract the links to all tabs</li>
+<li>first, you can extract potential links from all tags by using the universal selector (<code>html_nodes("*"")</code>)</li>
+<li>second, look up the selector of the tags again and extract the links to all tags</li>
 </ul>
-<p>The parsed page is stored in an object called <code>page</code>.</p>
+<p>The parsed page is stored in an object called <code>page</code> so you do not need to download it again.</p>
 <div class="tutorial-exercise" data-label="links" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
@@ -78,15 +78,15 @@ page %&gt;% html_nodes(&quot;*&quot;) %&gt;% html_attr(&quot;href&quot;)
 # tags
 page %&gt;% html_nodes(&quot;.tags .tag&quot;) %&gt;% html_attr(&quot;href&quot;)</code></pre>
 </div>
-<p>Do you notice something about the links? They are missing a part. That is because they are relative links within the directory structure of the webpage. To ‘repair’ them, we need to add the <strong>base url</strong> of the webpage.</p>
-<p>This is sometimes just the url of the webpage we originally scraped from, sometimes (if we already started from a page other than the starting page) we need to cut the path to the base url. For this, we can use the function <code>paste()</code> that pastes together two character vectors. I recommend using <code>paste0()</code> which pastes the vectors together without inserting a white space between the vectors. If you have never used paste, try it out</p>
+<p>Do you notice something about the links? They are missing a part. That is because they are relative links within the directory structure of the webpage. To ‘repair’ them, we need to add the <strong>base url</strong> of the webpage. This is typically just the url of the webpage we originally scraped from.</p>
+<p>For adding the base url, we can use the function <code>paste()</code> that pastes together two character vectors. I recommend using <code>paste0()</code> which pastes the vectors together without inserting separators like white space between the vectors. If you have never used paste, try it out:</p>
 <div class="tutorial-exercise" data-label="pastetest" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>paste(&quot;a&quot;,&quot;b&quot;)
 paste0(&quot;a&quot;,&quot;b&quot;)</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
-<p>Now, completing the paths of the URLs we scraped should not be a problem for you. Copy-paste the code you used to extract the links of the tags, assign it to an object called <code>url</code> and copy-paste the base url (<a href="http://quotes.toscrape.com/" class="uri">http://quotes.toscrape.com/</a>) in front of it.</p>
-<p><strong>Watch out for the slashes between the base url and the address of your page - having none or too many is a typical problem!</strong></p>
+<p>Now, completing the paths of the URLs we scraped should not be a problem for you. Re-use the code you used to extract the links of the tags, assign it to an object called <code>url</code> and add the base url (<a href="http://quotes.toscrape.com/" class="uri">http://quotes.toscrape.com/</a>) in front of it.</p>
+<p><em>Watch out for the slashes between the base url and the address of your page - having none or too many slashes is a typical problem!</em></p>
 <div class="tutorial-exercise" data-label="paste" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
@@ -99,11 +99,12 @@ urls&lt;-paste0(&quot;http://quotes.toscrape.com&quot;,urls)</code></pre>
 <h2>Automating the following of links</h2>
 <p>As I mentioned, in the end, webscraping is a function of programming. So once we collected the links we are interested in and learned the basic commands of rvest, there are multiple ways to proceed:</p>
 <ul>
-<li>You can write a function</li>
-<li>You can write a <code>for()</code>-loop that loops over the vector of links (using the fucntion or just code)</li>
-<li>You can <code>apply()</code> a function to the vector - this is probably the fastest variant but a bit difficult to get used to</li>
+<li>You can write a function that scrapes the content of all the links</li>
+<li>You can write a <code>for()</code>-loop that loops over the vector of links (using the function you wrote or just hard-code inside the loop)</li>
+<li>You can <code>apply()</code> a function to the vector - this is the fastest variant but takes some getting used to</li>
 </ul>
-<p>First, try to rewrite the code we have used to scrape into a function called <code>scrape_page()</code>. I recommend to first write down a skeleton of code that you would use to first extract the links to the quote pages, parse the first of the quote pages (<code>urls[1]</code>), extract the nodes of the quotes on this page and then extract the text of these nodes. This is also a good exercise to see to which extent you remember what we have learned so far:</p>
+<p>We will apply a function to the vector of URLs. For this purpose, first, try to rewrite the code we have used to scrape into a function called <code>scrape_page()</code>.</p>
+<p>I recommend to first write down a skeleton of code that you would use to first extract the links to the quote pages, parse the first of the quote pages (<code>urls[1]</code>), extract the nodes of the quotes on this page and then extract the text of these nodes. This is also a good exercise to see to which extent you remember what we have learned so far. You can then think about re-writing the code in the next step.</p>
 <div class="tutorial-exercise" data-label="tagpages" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
@@ -114,10 +115,10 @@ page&lt;-read_html(urls[1])
 selected_nodes&lt;-html_nodes(page,&quot;.text&quot;)
 pagetext&lt;-html_text(selected_nodes)</code></pre>
 </div>
-<p>Now, try to re-write the scraping of the pages into a function called <code>scrape_page</code>. Think about which parts you want to put into the function and which parts you should leave outside. Also, think about what elements you should give as arguments to the function. Then, try to apply the function to the pages we downloaded. To save you the way back to the last section, I already pasted some code that gets us the list of urls.</p>
-<p>The easiest way to do this is to use <code>sapply()</code>, which is a simplified and user-friendly version of the <a href="https://www.r-bloggers.com/the-r-apply-function-a-tutorial-with-examples/">apply-function</a>. Basically, you tell R to apply a function (like the one we are defining) to a vector (like the list of webpages). It works like this:</p>
+<p>Now, try to re-write the scraping of the pages into a function called <code>scrape_page</code>. You have to make two decisions: which parts you want to put into the function or do beforehand and what elements you give as arguments to the function or you hard-code into it. Both really depends on your preferences and if you will re-use the function. To save you the way back to the last section, I already pasted some code that gets us the list of urls with which you can work.</p>
+<p>After writing the function, try to apply it to the pagelinks we collected. The easiest way to do this is to use <code>sapply()</code>, which is a simplified and user-friendly version of the <a href="https://www.r-bloggers.com/the-r-apply-function-a-tutorial-with-examples/">apply-function</a>. Basically, you tell R to apply a function (like the one we are defining) to a vector (like the list of webpages). It works like this:</p>
 <p><code>sapply(vector,function,potential-arguments)</code></p>
-<p>Here, the potential arguments would be other variables you have outsourced in your function.</p>
+<p>In our case, the vector is the list of URLs, the function is your scraping function and the potential arguments are other variables you have set as parameters for your function.</p>
 <p>Then, run the entire thing and hopefully enjoy the list of quotes for all tags…</p>
 <div class="tutorial-exercise" data-label="function" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="10">
 <pre class="text"><code>urls&lt;-page %&gt;% html_nodes(&quot;.tags .tag&quot;) %&gt;% html_attr(&quot;href&quot;)
@@ -134,15 +135,17 @@ scrape_page&lt;-function(pageurl,node){
 }
 sapply(urls,scrape_page,&quot;.text&quot;)</code></pre>
 </div>
-<p>If you had a peak at the solution, you will see that I put the CSS selector as a variable - that is because CSS Selectors will vary between pages while the function of scraping the text out of a page will remain the same for many uses. So this way, you already have a function written-up when you plan your actual scraping project…</p>
+<p>If you had a peak at the solution, you will see that I put the CSS selector as a variable - that is because CSS Selectors will vary between pages while the function of scraping the text of a page will remain the same for many uses. So this way, you already have a function written-up when you plan your actual scraping project…</p>
 </div>
 <div id="section-wrap-up" class="section level2">
 <h2>Wrap-up</h2>
 <p>Fantastic, you’re done with this lesson!</p>
 <p>The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at scraping in R.</p>
 <p>If you are done with this lesson, you may want to give the EPSA Scraping project a go:</p>
-<p><code>run_tutorial("scraping_epsa",package="learn2scrape")</code></p>
-
+<p><code>learnr::run_tutorial("scraping_epsa",package="learn2scrape")</code></p>
+<p>Or, try the other intermediate tutorials:</p>
+<p><code>learnr::run_tutorial("tables",package="learn2scrape")</code></p>
+<code>learnr::run_tutorial("files",package="learn2scrape")</code> 
 <script type="application/shiny-prerendered" data-context="server-start">
 library(learnr)
 library(learn2scrape)

@@ -48,56 +48,44 @@ if (window.hljs) {
 
 <div id="section-welcome" class="section level2">
 <h2>Welcome</h2>
-<p><em>Last revised: 2019-06-29</em></p>
-<p>Welcome to webscraping with learn2scrape! This is a first attempt at making this class more interactive and fun - if you have any feedback, <a href="mailto:gessler@ipz.uzh.ch">let me know</a>!</p>
-<p>You will see explanations but there are also some parts where you’ll be asked to write code. Some notes about the format:</p>
+<p><em>Last revised: 2019-06-30</em></p>
+<p>Welcome to webscraping with learn2scrape! This is a first attempt at making this class more interactive and fun - if you have any feedback, let me know in the next days <a href="mailto:gessler@ipz.uzh.ch">or after the course via e-mail</a>! Also, if you are interested in scraping, feel free to <a href="https://github.com/theresagessler/learn2scrape">watch the repository on Github</a> to get updates on new elements.</p>
+<p>The tutorial has explanations but there are many interactive parts where you will be asked to write code. Some notes about the format:</p>
 <ul>
-<li>this is an interactive tutorial</li>
-<li>If you don’t know the answer, you can click on the <em>Hint</em>-button (where available) or the <em>Solution</em> button to see the solution.</li>
-<li>You can test your code by clicking on <em>Run Code</em>. Since there is no environment, you can also add the names of objects to inspect them or use <code>ls()</code> to see what is in your environment when you execute the chunk</li>
-<li>Be cautious about the <em>Start over</em>-button: Clicking on it will delete the code you wrote</li>
-<li>unlike in a normal markdown document, all chunks are independent. That means: If you create something in one chunk, it won’t be available in the other chunks
+<li>If you don’t know the answer, you can click on <em>Hint</em> (where available) or the <em>Solution</em> Button to see the solution
 <ul>
-<li>that means, you will sometimes have to copy-paste code from previous exercises but I have tried to make things as easy as possible</li>
+<li>or ask me or your neighbours for help, asking makes everything better!</li>
 </ul></li>
+<li>You can test your code by clicking on <em>Run Code</em></li>
+<li>Since there is no environment like in RStudio, you have to call the objects to inspect their content or use <code>ls()</code> to see what is in your environment when you execute the chunk</li>
+<li>Be cautious about the <em>Start over</em> Button: Clicking on it will erase the code you wrote</li>
 </ul>
+<p>Unlike in a normal markdown document, all chunks are independent. That means: If you create something in one chunk, it won’t be available in the other chunks. Therefore, you will sometimes have to repeat code from previous exercises but I have tried to keep this to a minimum. Either use it as an opportunity to repeat or copy-paste - learnr saves your answers.</p>
+<p><em>Also, some of the exercises will use <a href="https://magrittr.tidyverse.org/">piping</a> since it just makes scraping so much easier - if you are not familiar with this or any other element of the code, just let me know.</em></p>
 <!--If you prefer using [swirl](https://swirlstats.com/){target="_blank"}, this first lesson is also available as a swirl-course. As things get more complex later on, I'll ask you to switch to the browser-version! -->
 </div>
 <div id="section-basics-of-webscraping" class="section level2">
 <h2>Basics of webscraping</h2>
-<p><strong>Web scraping</strong> is the process of extracting data from webpages. Normally, we do that intuitively - we scan a webpages with our eyes and read only those parts that are important to us. This is more complicated when we want R to read pages for us - R does not know what is important. So we have to tell R exactly where to look!</p>
-<p>But don’t worry, we will go step by step. Let’s start with something simple. Imagine, we want to scrape this simple webpage full of quotes. Its address is <a href="http://quotes.toscrape.com/" target="_blank">http://quotes.toscrape.com/</a> Just have a look at the webpage.</p>
-<p><strong>First</strong>, we need to load the package we’ll use for most of our scraping. It is called <em>rvest</em>. Please load it with the <code>library()</code> command.</p>
-<p><strong>Next</strong>, to read the page into R, we need to tell R its address - please create a character vector named <code>url</code> that contains the URL <a href="http://quotes.toscrape.com/" class="uri">http://quotes.toscrape.com/</a> . You can see if it worked by calling the object <code>url</code>.</p>
-<div class="tutorial-exercise" data-label="package" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="3">
+<p>We start with something very simple: reading web data into R. Imagine, we want to scrape a simple webpage full of quotes. Its address is <a href="http://quotes.toscrape.com/" target="_blank">http://quotes.toscrape.com/</a>. Just have a look at the webpage.</p>
+<ul>
+<li><strong>First</strong>, we need to load the package we’ll use for most of our scraping. It is called <em>rvest</em>. Please load it with the <code>library()</code> command.</li>
+<li><strong>Next</strong>, to read the page into R, we need to tell R its address - please create a character vector named <code>url</code> that contains the URL <a href="http://quotes.toscrape.com/" class="uri">http://quotes.toscrape.com/</a>
+<ul>
+<li>You can see if it worked by calling the object <code>url</code>.</li>
+</ul></li>
+<li>read in (sometimes called: parse) the webpage. To tell R to read the webpage, we can use the function <code>read_html()</code>. Use this on the url object we just created!</li>
+</ul>
+<div class="tutorial-exercise" data-label="read" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="3">
 <pre class="text"><code>&quot;http://quotes.toscrape.com/&quot;</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
-</div>
-<div class="tutorial-exercise-support" data-label="package-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>library(rvest)
-url&lt;-&quot;http://quotes.toscrape.com/&quot;</code></pre>
-</div>
-<div id="section-parsing" class="section level3">
-<h3>Parsing</h3>
-<p>Now, we start by reading (sometimes called parsing) the webpage. To tell R to read the webpage, we can use the function <code>read_html()</code>. Apply the function to the url object we just created!</p>
-<div class="tutorial-exercise" data-label="read" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="3">
-<pre class="text"><code>library(rvest)
-url&lt;-&quot;http://quotes.toscrape.com/&quot;</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
-</div>
-<div class="tutorial-exercise-support" data-label="read-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>library(rvest)
-url&lt;-&quot;http://quotes.toscrape.com/&quot;
-read_html(url)</code></pre>
 </div>
 <div class="tutorial-exercise-support" data-label="read-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>library(rvest)
 url&lt;-&quot;http://quotes.toscrape.com/&quot;
 read_html(url)</code></pre>
 </div>
-<p>The output does not look like you expected? You would be surprised to see that the <a href="http://quotes.toscrape.com/" target="_blank">original webpage</a> looks quite similar. Have a look at the webpage source code. Depending on your browser, you can probably select ‘view source’ after a right mouse click. If you have trouble, <a href="https://www.google.com/search?hl=&amp;site=&amp;q=how+to+view+webpage+source+code+in+browser" target="_blank">google has an up-to-date explanation</a>.</p>
-<p>Just if you were wondering, of course, we could have also skipped creating a variable with the URL. and could have instead directly applied the <code>read_html()</code> function to the URL <a href="http://quotes.toscrape.com/" class="uri">http://quotes.toscrape.com/</a> .</p>
-</div>
+<p>The output does not look like you expected? Actually, the <a href="http://quotes.toscrape.com/" target="_blank">original webpage</a> looks quite similar. Have a look at the webpage source code. Depending on your browser, you can probably select ‘view source’ after a right mouse click. If you have trouble, <a href="https://www.google.com/search?hl=&amp;site=&amp;q=how+to+view+webpage+source+code+in+browser" target="_blank">google has an up-to-date explanation</a>.</p>
+<p><em>Just if you were wondering, of course, we could have also skipped creating a variable with the URL. and could have instead directly applied the <code>read_html()</code> function to the URL <a href="http://quotes.toscrape.com/" class="uri">http://quotes.toscrape.com/</a>.</em></p>
 </div>
 <div id="section-extracting-elements" class="section level2">
 <h2>Extracting elements</h2>
@@ -110,18 +98,29 @@ read_html(url)</code></pre>
 <pre class="text"><code>page&lt;-read_html(&quot;http://quotes.toscrape.com/&quot;)
 html_text(page)</code></pre>
 </div>
-<p>Did you find the quotes from before? Admittedly, this still looks very messy. Maybe you are thinking: If only, there would be a way to tell R to just get the text of the quotes!</p>
+<p>Did you find the quotes from before? Admittedly, this still looks very messy. Maybe you are thinking: If only, there would be a way to tell R to just get the text of the quotes! Luckily there is.</p>
 <div id="section-css-selectors" class="section level3">
 <h3>CSS Selectors</h3>
-<p>Luckily there is! The html_nodes() command allows us to select specific ‘nodes’, that is, elements of the HTML Code. Please have a look at the documentation of the html_nodes() command.</p>
+<p>The html_nodes() command allows us to select specific ‘nodes’, that is, elements of the HTML Code. Please have a look at the documentation of the html_nodes() command.</p>
 <div class="tutorial-exercise" data-label="documentation" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>library(rvest)
 ?html_nodes</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
-<p>So, we need xpath or CSS selectors! If you have not used HTML before, this might sound complicated. It helps to get a bit into the structure of HTML. <a href="https://www.w3schools.com/html/default.asp" target="_blank">Click on this link to read an introduction to HTML</a>.</p>
-<p>Basically, HTML Tags form the structure of a page and CSS selectors are a type of <em>grammar</em> or <em>pattern-description</em> that helps us select specific parts of the page structure. I am working on a tutorial specific to CSS selectors (that you will be able to access by running <code>run_tutorial("CSS",package="learn2scrape")</code> in the future), but for now, we will just use a tool that helps us determine the correct selectors. In fact, most people use these tools for scraping and only learn the basics of CSS selectors.</p>
-<p>Just for reference: For a list of CSS Selectors, check out <a href="https://www.w3schools.com/cssref/css_selectors.asp">this collection</a>. If you want to practice CSS Selectors in a fun way, I recommend playing with the <a href="https://flukeout.github.io/" target="_blank">CSS Diner</a> where you can learn about different selector structures.</p>
+<p>So, we need xpath or CSS selectors. If you have not used HTML before, this might sound complicated. It helps to get a bit into the structure of HTML. <a href="https://www.w3schools.com/html/default.asp" target="_blank">Click on this link to read an introduction to HTML</a>.</p>
+<p>Basically, HTML Tags describe the formatting and structure of a webpage. CSS selectors are a type of <em>grammar</em> or <em>pattern-description</em> that helps us select specific parts of that structure. I am working on a tutorial specific to CSS selectors (that you will be able to access by running <code>run_tutorial("CSS",package="learn2scrape")</code> in the future - right now it is just a list), but for now, we will just use a tool that helps us determine the correct selectors. But that is not a problem: many people use these tools for scraping and only learn the basics of CSS selectors.</p>
+<p>For now, we will focus on two of the most important selectors: In principle, selectors work on tags - so if you write the name of a tag, the CSS selector will select all elements with that tag. <strong>Try it out with some of the HTML tags that we learned on the slides.</strong> Another useful selector is the star-symbol - it just selects <em>all</em> tags in the page (so it is a universal selector). As I said, we will focus more on gathering specific information but if you just want to parse large amounts of data, that can be very useful. <strong>Try the universal selector on our webpage.</strong></p>
+<div class="tutorial-exercise" data-label="selectors" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="5">
+<pre class="text"><code>page&lt;-read_html(&quot;http://quotes.toscrape.com/&quot;)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+</div>
+<div class="tutorial-exercise-support" data-label="selectors-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
+<pre class="text"><code>page&lt;-read_html(&quot;http://quotes.toscrape.com/&quot;)
+page %&gt;% html_nodes(&quot;a&quot;)
+page %&gt;% html_nodes(&quot;h1&quot;)
+page %&gt;% html_nodes(&quot;*&quot;)</code></pre>
+</div>
+<p>And for reference: For a list of CSS Selectors, check out <a href="https://www.w3schools.com/cssref/css_selectors.asp" target="_blank">this collection</a>. If you want to practice CSS Selectors in a fun way, I recommend playing with the <a href="https://flukeout.github.io/" target="_blank">CSS Diner</a> where you can learn about different selector structures.</p>
 </div>
 </div>
 <div id="section-extracting-elements-with-selectorgadget" class="section level2">
@@ -141,34 +140,34 @@ html_text(page)</code></pre>
 <tr>
 <td>
 
-<div id="htmlwidget-dbf1fb983426a4798e11" style="width:100%;height:auto;", class = "quiz html-widget">
+<div id="htmlwidget-74b666e5464cb8adf838" style="width:100%;height:auto;", class = "quiz html-widget">
 <div class="panel panel-default">
 <div class="panel-body quizArea">
 </div>
 </div>
 </div>
 
-<script type="application/json" data-for="htmlwidget-dbf1fb983426a4798e11">{"x":{"question":"Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?","answers":[{"option":".quote","correct":false,"message":"Almost but we did not want to include the author and tags!"},{"option":".tags .tag","correct":false,"message":null},{"option":".text","correct":true,"message":null},{"option":"h2","correct":false,"message":null}],"label":"selector-practice-1","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?","a":[{"option":".quote","correct":false,"message":"Almost but we did not want to include the author and tags!"},{"option":".tags .tag","correct":false,"message":null},{"option":".text","correct":true,"message":null},{"option":"h2","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-74b666e5464cb8adf838">{"x":{"question":"Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?","answers":[{"option":".quote","correct":false,"message":"Almost but we did not want to include the author and tags!"},{"option":".tags .tag","correct":false,"message":null},{"option":".text","correct":true,"message":null},{"option":"h2","correct":false,"message":null}],"label":"selector-practice-1","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Try finding the CSS selector for the text of the quote, without author and tags. What is the selector you receive?","a":[{"option":".quote","correct":false,"message":"Almost but we did not want to include the author and tags!"},{"option":".tags .tag","correct":false,"message":null},{"option":".text","correct":true,"message":null},{"option":"h2","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
 </td>
 </tr>
 <tr>
 <td>
 
-<div id="htmlwidget-8ebc52b0da880ae90127" style="width:100%;height:auto;", class = "quiz html-widget">
+<div id="htmlwidget-83cdc3cf91bf529b6366" style="width:100%;height:auto;", class = "quiz html-widget">
 <div class="panel panel-default">
 <div class="panel-body quizArea">
 </div>
 </div>
 </div>
 
-<script type="application/json" data-for="htmlwidget-8ebc52b0da880ae90127">{"x":{"question":"Try finding the CSS Selektor for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?","answers":[{"option":".quote","correct":false,"message":null},{"option":".tags .tag","correct":true,"message":null},{"option":".text","correct":false,"message":null},{"option":"h2","correct":false,"message":null}],"label":"selector-practice-2","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Try finding the CSS Selektor for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?","a":[{"option":".quote","correct":false,"message":null},{"option":".tags .tag","correct":true,"message":null},{"option":".text","correct":false,"message":null},{"option":"h2","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-83cdc3cf91bf529b6366">{"x":{"question":"Try finding the CSS selector for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?","answers":[{"option":".quote","correct":false,"message":null},{"option":".tags .tag","correct":true,"message":null},{"option":".text","correct":false,"message":null},{"option":"h2","correct":false,"message":null}],"label":"selector-practice-2","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Try finding the CSS selector for all tags associated with each quote. Deselect the Top Ten tags on the side. What is the selector you receive?","a":[{"option":".quote","correct":false,"message":null},{"option":".tags .tag","correct":true,"message":null},{"option":".text","correct":false,"message":null},{"option":"h2","correct":false,"message":null}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
 </td>
 </tr>
 </table>
 </div>
 <div id="section-applying-css-selectors" class="section level3">
 <h3>Applying CSS Selectors</h3>
-<p>Now, we try to use these CSS Selectors with the <code>html_nodes()</code> command. Since each exercise chunk is independent, there will be a bit of copy-pasting involved: Parse the page, use the CSS selector to select only the quotes from the parsed HTML and assign them to a new object <code>selected_nodes</code>. Then, inspect the results by calling the object!</p>
+<p>Now, we try to use these CSS Selectors with the <code>html_nodes()</code> command. Since each exercise chunk is independent, there will be a bit of repetition involved but it aids the memory: Parse the page, use the CSS selector to select only the quotes from the parsed HTML and assign them to a new object <code>selected_nodes</code>. Then, inspect the results by calling the object!</p>
 <div class="tutorial-exercise" data-label="nodes" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"page-setup","exercise.checker":"NULL"}</script>
 </div>
@@ -177,7 +176,7 @@ html_text(page)</code></pre>
 selected_nodes&lt;-html_nodes(page,&quot;.text&quot;)
 selected_nodes</code></pre>
 </div>
-<p>This already looks more structured - but we should get rid of the HTML commands. As a last step, try applying the <code>html_text()</code> command we used before to the nodes which we selected in the last step. This way, we get just the text from the nodes we selected. Please copy the code you used to extract the nodes and continue working on that!</p>
+<p>This already looks more structured - but we should get rid of the HTML tags. Try applying the <code>html_text()</code> command we used before to the nodes which we selected in the last step. This way, we get just the text from the nodes we selected. You can copy the code you used to extract the nodes and continue working on that!</p>
 <div class="tutorial-exercise" data-label="textnodes" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.setup":"page-setup","exercise.checker":"NULL"}</script>
 </div>
@@ -190,32 +189,29 @@ selected_nodes %&gt;% html_text()</code></pre>
 </div>
 <div id="section-wrap-up" class="section level2">
 <h2>Wrap-up</h2>
-<p><strong>Congratulations! If you completed this lesson, you scraped your first webpage!</strong></p>
-<p>To continue, you can run the following lessons from your R console:</p>
-<!--- Scraping Tables: run_tutorial("Tables",package="learn2scrape")-->
+<p><strong>Congratulations! If you completed this lesson, you scraped your first webpage! That was not so bad, was it?</strong></p>
+<p>To continue learning webscraping, you can run the following lessons from your R console:</p>
 <!--- Scraping files: run_tutorial("Files",package="learn2scrape")-->
 <!-- - Learning CSS Selectors: run_tutorial("CSS",package="learn2scrape")-->
 <ul>
-<li>Scraping multiple pages:
+<li>Scraping multiple pages (more of the essentials):
 <ul>
 <li><code>run_tutorial("scraping_pages",package="learn2scrape")</code></li>
 </ul></li>
-<li>EPSA conference scraping project:
+<li>Short section on scraping tables from webpages (do this if you think it would be useful for you):
+<ul>
+<li><code>run_tutorial("tables",package="learn2scrape")</code></li>
+</ul></li>
+<li>Short section on scraping files (do this if you think it would be useful for you):
+<ul>
+<li><code>run_tutorial("files",package="learn2scrape")</code></li>
+</ul></li>
+<li>EPSA conference scraping project (more advanced and complicated but we will use the data tomorrow):
 <ul>
 <li><code>run_tutorial("scraping_epsa",package="learn2scrape")</code></li>
 </ul></li>
 </ul>
-<p>For the text analysis session, you can run the following three lessons so far:</p>
-<ul>
-<li>applying dictionaries
-<ul>
-<li><code>run_tutorial("dictionary",package="learn2scrape")</code></li>
-</ul></li>
-<li>creating our own dictionary for classification
-<ul>
-<li><code>run_tutorial("dictionary_classification",package="learn2scrape")</code></li>
-</ul></li>
-<li>machine learning classifiers 
+
 <script type="application/shiny-prerendered" data-context="server-start">
 library(learnr)
 library(learn2scrape)
@@ -226,13 +222,6 @@ quotepage<-system.file("extdata", "quotepage.html", package = "learn2scrape")
  
 <script type="application/shiny-prerendered" data-context="server">
 learnr:::register_http_handlers(session, metadata = NULL)
-</script>
- 
-<script type="application/shiny-prerendered" data-context="server">
-`tutorial-exercise-package-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-package-code-editor`)), session)
-output$`tutorial-exercise-package-output` <- renderUI({
-  `tutorial-exercise-package-result`()
-})
 </script>
  
 <script type="application/shiny-prerendered" data-context="server">
@@ -253,6 +242,13 @@ output$`tutorial-exercise-text-output` <- renderUI({
 `tutorial-exercise-documentation-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-documentation-code-editor`)), session)
 output$`tutorial-exercise-documentation-output` <- renderUI({
   `tutorial-exercise-documentation-result`()
+})
+</script>
+ 
+<script type="application/shiny-prerendered" data-context="server">
+`tutorial-exercise-selectors-result` <- learnr:::setup_exercise_handler(reactive(req(input$`tutorial-exercise-selectors-code-editor`)), session)
+output$`tutorial-exercise-selectors-output` <- renderUI({
+  `tutorial-exercise-selectors-result`()
 })
 </script>
  
@@ -278,8 +274,7 @@ output$`tutorial-exercise-textnodes-output` <- renderUI({
 <script type="application/shiny-prerendered" data-context="execution_dependencies">
 {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["packages","version"]},"class":{"type":"character","attributes":{},"value":["data.frame"]},"row.names":{"type":"integer","attributes":{},"value":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38]}},"value":[{"type":"character","attributes":{},"value":["backports","base","compiler","datasets","digest","evaluate","graphics","grDevices","htmltools","htmlwidgets","httpuv","httr","jsonlite","knitr","later","learn2scrape","learnr","magrittr","markdown","methods","mime","promises","R6","Rcpp","rmarkdown","rprojroot","rvest","shiny","stats","stringi","stringr","tools","utils","withr","xfun","xml2","xtable","yaml"]},{"type":"character","attributes":{},"value":["1.1.4","3.5.2","3.5.2","3.5.2","0.6.19","0.14","3.5.2","3.5.2","0.3.6","1.3","1.4.5.1","1.4.0","1.6","1.23","0.8.0","0.0.0.9000","0.9.2.9000","1.5","1.0","3.5.2","0.7","1.0.1","2.4.0","1.0.1","1.13","1.3-2","0.3.2","1.2.0","3.5.2","1.4.3","1.4.0","3.5.2","3.5.2","2.1.2","0.7","1.2.0","1.8-3","2.2.0"]}]}]}
 </script>
-<!--/html_preserve--></li>
-</ul>
+<!--/html_preserve-->
 </div>
 
 </div> <!-- topics -->

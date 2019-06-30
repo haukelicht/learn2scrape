@@ -209,7 +209,7 @@ sections<-tokens_lookup(epsa_tokens,section_dictionary) %>% dfm()
 section_classification<-convert(sections,"data.frame")
 section_classification$predicted_section<-colnames(section_classification[,2:12])[max.col(section_classification[,2:12])]
 section_classification$predicted_section<-as.factor(toupper(section_classification$predicted_section))
-section_classification$section<-as.factor(section_classification$section)
+section_classification$section<-as.factor(docvars(sections, "section"))
 confusionMatrix(data=section_classification$predicted_section,reference=section_classification$section)
 ```
 

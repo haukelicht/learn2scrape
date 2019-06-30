@@ -20,31 +20,32 @@ page<-system.file("extdata", "quotepage.html", package = "learn2scrape") %>% rea
 
 *Last revised: `r Sys.Date()`*
 
-So, you have learned how to use some of the basic functions of the `rvest` package: `read_html()`, `html_nodes()` and `html_text()`. If we really want to scrape a lot of pages, we need another step: We have to learn to follow links without actually opening the browser and clicking.
+So, you have learned how to use some of the basic functions of the `rvest` package: `read_html()`, `html_nodes()` and `html_text()`.
+But most of the time, we are not just interested in a single page but multiple pages from the same domain, e.g. all newspaper reports by a specific newspaper or all speeches by a politician. So we need another step: We have to learn to follow links without actually opening the browser and clicking on the link and copying the new path.
 
 In this part of the tutorial, you will learn two things:
 
 - to extract links from webpages
-- some methods to automate following these links.
+- ways to automate following these links.
 
 You will see that in the end, webscraping is a function of programming in R. The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data.
 
 ## Extracting links from webpages
 
-To extract links, we need another command. Remember we said hyperlinks are an *attribute* of the text? Because of that, the `rvest` command is called `html_attr()`. We can use it to extract different attributes, so you will have to tell rvest that what we are interested in is a link. Remember what links looked like?
+To extract links, we need another command. Remember we said hyperlinks are an *attribute* of the text? Because of that, the `rvest` command to get these links is called `html_attr()`. We can use it to extract different types of attributes, so you will have to tell rvest the attribute that we are interested in is a link. Remember what links looked like?
 
-`<a href=></a>`
+`This is text <a href="http://quotes.toscrape.com/">with a link</a>.`
 
 *href* stands for hyperreference and signifies the webpage the link leads to. You can specify `name="href"` inside the `html_attr()` command to extract the link. For example:
 
 `html_attr(parsed_page,"href")`
 
-However, this will only work on individual HTML tags, so we will use `html_nodes()` again. Please try on the [quotes2scrape webpage](http://quotes.toscrape.com/){target="_blank"}. 
+However, this will only work on individual HTML tags not on entire pages (since the link is an attribute of the tag), so we will use `html_nodes()` again. Please try two things on the [quotes2scrape webpage](http://quotes.toscrape.com/){target="_blank"}:
 
-- first, you can extract potential links from all tags by using the universal selector (`html_nodes("*)`)
-- second, look up the selector of the tags again and extract the links to all tabs
+- first, you can extract potential links from all tags by using the universal selector (`html_nodes("*"")`)
+- second, look up the selector of the tags again and extract the links to all tags
 
-The parsed page is stored in an object called `page`.
+The parsed page is stored in an object called `page` so you do not need to download it again.
 
 ```{r links,exercise=TRUE}
 
@@ -61,19 +62,18 @@ page %>% html_nodes(".tags .tag") %>% html_attr("href")
 ```
 
 
+Do you notice something about the links? They are missing a part. That is because they are relative links within the directory structure of the webpage. To 'repair' them, we need to add the **base url** of the webpage. This is typically just the url of the webpage we originally scraped from.
 
-Do you notice something about the links? They are missing a part. That is because they are relative links within the directory structure of the webpage. To 'repair' them, we need to add the **base url** of the webpage. 
-
-This is sometimes just the url of the webpage we originally scraped from, sometimes (if we already started from a page other than the starting page) we need to cut the path to the base url. For this, we can use the function `paste()` that pastes together two character vectors. I recommend using `paste0()` which pastes the vectors together without inserting a white space between the vectors. If you have never used paste, try it out
+For adding the base url, we can use the function `paste()` that pastes together two character vectors. I recommend using `paste0()` which pastes the vectors together without inserting separators like white space between the vectors. If you have never used paste, try it out:
 
 ```{r pastetest,exercise=T}
 paste("a","b")
 paste0("a","b")
 ```
 
-Now, completing the paths of the URLs we scraped should not be a problem for you. Copy-paste the code you used to extract the links of the tags, assign it to an object called `url` and copy-paste the base url (http://quotes.toscrape.com/) in front of it.
+Now, completing the paths of the URLs we scraped should not be a problem for you. Re-use the code you used to extract the links of the tags, assign it to an object called `url` and add the base url (http://quotes.toscrape.com/) in front of it.
 
-**Watch out for the slashes between the base url and the address of your page - having none or too many is a typical problem!**
+*Watch out for the slashes between the base url and the address of your page - having none or too many slashes is a typical problem!*
 
 ```{r paste, exercise=TRUE}
 
@@ -91,12 +91,13 @@ urls<-paste0("http://quotes.toscrape.com",urls)
 
 As I mentioned, in the end, webscraping is a function of programming. So once we collected the links we are interested in and learned the basic commands of rvest, there are multiple ways to proceed:
 
-- You can write a function 
-- You can write a `for()`-loop that loops over the vector of links (using the fucntion or just code)
-- You can `apply()` a function to the vector - this is probably the fastest variant but a bit difficult to get used to
+- You can write a function that scrapes the content of all the links
+- You can write a `for()`-loop that loops over the vector of links (using the function you wrote or just hard-code inside the loop)
+- You can `apply()` a function to the vector - this is the fastest variant but takes some getting used to
 
-First, try to rewrite the code we have used to scrape into a function called `scrape_page()`.
-I recommend to first write down a skeleton of code that you would use to first extract the links to the quote pages, parse the first of the quote pages (`urls[1]`), extract the nodes of the quotes on this page and then extract the text of these nodes. This is also a good exercise to see to which extent you remember what we have learned so far:
+We will apply a function to the vector of URLs. For this purpose, first, try to rewrite the code we have used to scrape into a function called `scrape_page()`.
+
+I recommend to first write down a skeleton of code that you would use to first extract the links to the quote pages, parse the first of the quote pages (`urls[1]`), extract the nodes of the quotes on this page and then extract the text of these nodes. This is also a good exercise to see to which extent you remember what we have learned so far. You can then think about re-writing the code in the next step.
 
 ```{r tagpages,exercise=TRUE}
 
@@ -114,14 +115,14 @@ selected_nodes<-html_nodes(page,".text")
 pagetext<-html_text(selected_nodes)
 ```
 
-Now, try to re-write the scraping of the pages into a function called `scrape_page`. Think about which parts you want to put into the function and which parts you should leave outside. Also, think about what elements you should give as arguments to the function.
-Then, try to apply the function to the pages we downloaded. To save you the way back to the last section, I already pasted some code that gets us the list of urls.
+Now, try to re-write the scraping of the pages into a function called `scrape_page`.
+You have to make two decisions: which parts you want to put into the function or do beforehand and what elements you give as arguments to the function or you hard-code into it. Both really depends on your preferences and if you will re-use the function. To save you the way back to the last section, I already pasted some code that gets us the list of urls with which you can work.
 
-The easiest way to do this is to use `sapply()`, which is a simplified and user-friendly version of the [apply-function](https://www.r-bloggers.com/the-r-apply-function-a-tutorial-with-examples/). Basically, you tell R to apply a function (like the one we are defining) to a vector (like the list of webpages). It works like this:
+After writing the function, try to apply it to the pagelinks we collected. The easiest way to do this is to use `sapply()`, which is a simplified and user-friendly version of the [apply-function](https://www.r-bloggers.com/the-r-apply-function-a-tutorial-with-examples/). Basically, you tell R to apply a function (like the one we are defining) to a vector (like the list of webpages). It works like this:
 
 `sapply(vector,function,potential-arguments)`
 
-In our case, the vector would be the list of URLs, the function your scraping function and the potential arguments are other variables you might have outsourced from your function.
+In our case, the vector is the list of URLs, the function is your scraping function and the potential arguments are other variables you have set as parameters for your function.
 
 Then, run the entire thing and hopefully enjoy the list of quotes for all tags...
 
@@ -144,7 +145,7 @@ scrape_page<-function(pageurl,node){
 sapply(urls,scrape_page,".text")
 ```
 
-If you had a peak at the solution, you will see that I put the CSS selector as a variable - that is because CSS Selectors will vary between pages while the function of scraping the text out of a page will remain the same for many uses. So this way, you already have a function written-up when you plan your actual scraping project...
+If you had a peak at the solution, you will see that I put the CSS selector as a variable - that is because CSS Selectors will vary between pages while the function of scraping the text of a page will remain the same for many uses. So this way, you already have a function written-up when you plan your actual scraping project...
 
 ## Wrap-up
 
@@ -154,5 +155,10 @@ The more you learn to use loops, functions and apply commands, the easier the sc
 
 If you are done with this lesson, you may want to give the EPSA Scraping project a go:
 
-`run_tutorial("scraping_epsa",package="learn2scrape")`
+`learnr::run_tutorial("scraping_epsa",package="learn2scrape")`
 
+Or, try the other intermediate tutorials:
+
+`learnr::run_tutorial("tables",package="learn2scrape")`
+
+`learnr::run_tutorial("files",package="learn2scrape")`

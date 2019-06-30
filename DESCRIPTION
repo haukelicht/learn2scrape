@@ -12,12 +12,12 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
+    caret,
     dplyr,
     ggplot2,
-    tidyr,
+    learnr,
+    magrittr,
     rvest,
-    quanteda,
-    learnr
-Suggests:
-    caret
+    tidyr,
+    quanteda
 RoxygenNote: 6.1.1

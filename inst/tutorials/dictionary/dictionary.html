@@ -8,6 +8,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
+<meta name="author" content="Theresa Gessler" />
 
 
 <meta name="progressive" content="false" />
@@ -48,7 +49,7 @@ if (window.hljs) {
 
 <div id="section-welcome" class="section level2">
 <h2>Welcome</h2>
-<p><em>Last revised: 2019-06-29</em></p>
+<p><em>Last revised: 2019-06-30</em></p>
 <p>This is the tutorial for dictionary analysis. We will proceed step-by-step and also go through some of the most important steps in pre-processing data.</p>
 <p>For our analysis, we first need to load some packages: <strong>quanteda</strong> (for text analysis), <strong>dplyr</strong> (for data manipulation) and <strong>ggplot2</strong> (for visualizing our results). I have already pre-loaded the data frame we will use. It is called <strong>epsa_paper</strong>.</p>
 <div class="tutorial-exercise" data-label="libraries" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
@@ -70,7 +71,7 @@ library(ggplot2)</code></pre>
 </ul>
 <p>You can try all three steps below. Just some notes of caution: <code>corpus</code> has great defaults and you can often just apply it to your data frame; however, in our case you need to tell the function where to find the text by specifying the text_field option inside the command. If your data frame would have a variable called text, the <code>corpus()</code> function would take that.</p>
 <p>While the main purpose of <code>tokens()</code> is to split the text into individual words, it already allows you to do a lot of pre-processing. I recommend to specify remove_hyphens=T, remove_symbol=T and remove_punct=T to remove these things and split hyphenated words. After all, political scientists love using complex words in their abstracts.</p>
-<p>The <code>dfm()</code> function automates a lot of pre-processing and I would recommend to check the documentation to see the default settings. For example, it automatically sets all words to lowercase. With <code>dfm_remove()</code> we can remove features we are not interested in, e.g. so-called <a href="">stopwords</a> that occur frequently but are not meaningful (e.g. ‘is’). Usually, we would also stem words at this point with <code>dfm_wordstem()</code> - this is not so crucial and sometimes counter-productive for dictionaries (but more on that below).</p>
+<p>The <code>dfm()</code> function automates a lot of pre-processing and I would recommend to check the documentation to see the default settings. For example, it automatically sets all words to lowercase. With <code>dfm_remove()</code> we can remove features we are not interested in, e.g. so-called <a href="https://en.wikipedia.org/wiki/Stop_words" target="_blank">stopwords</a> that occur frequently but are not meaningful (e.g. ‘is’ or ‘that’). Usually, we would also stem words at this point with <code>dfm_wordstem()</code> - this is not so crucial and sometimes counter-productive for dictionaries (but more on that below).</p>
 <div class="tutorial-exercise" data-label="corpus" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":false,"error":false,"message":false,"exercise.df_print":"paged","exercise.setup":"packset","exercise.checker":"NULL"}</script>
 </div>
@@ -173,7 +174,7 @@ textstat_frequency(country_dfm)</code></pre>
   textstat_frequency(groups=&quot;section&quot;)</code></pre>
 </div>
 <!--Bonus: If you want to visualize this, you can use `dfm_weight()` to calculate proportions by group.-->
-Of course, there is a lot more to learn about dictionaries - for example, you can combine them with <a href="">weighting</a> and receive quantities like the relative frequency of your dictionary entries or dichotomize the results into match / no match. This all depends on your research question, so please explore and feel free to ask. We now proceed to creating our own dictionary in order to practice classifying texts. 
+Of course, there is a lot more to learn about dictionaries - for example, you can combine them with <a href="https://quanteda.io/reference/dfm_weight.html" target="_blank">weighting</a> and receive quantities like the relative frequency of your dictionary entries or dichotomize the results into match / no match. This all depends on your research question, so please explore and feel free to ask. We now proceed to creating our own dictionary in order to practice classifying texts. 
 <script type="application/shiny-prerendered" data-context="server-start">
 library(learnr)
 knitr::opts_chunk$set(echo = FALSE,message=F,warning=F)

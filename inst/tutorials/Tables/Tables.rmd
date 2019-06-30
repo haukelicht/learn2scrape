@@ -1,5 +1,6 @@
 ---
 title: "Scraping Tables"
+author: "Theresa Gessler"
 output: learnr::tutorial
 runtime: shiny_prerendered
 ---
@@ -15,31 +16,41 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ### Introduction
 
-Compared to text, tables are a lot more satisfying to scrape: Using `html_table()` we can just extract all tables contained in the page and then select those that are relevant for us. Or, we can again use html_nodes to select specific tables. For this lesson, I have loaded the packages `rvest`, `magrittr` and `dplyr`.
+*Last revised: `r Sys.Date()`*
+
+Compared to text, tables are a lot easier to scrape: 
+
+- Using `html_table()` we can just extract all tables contained in the page and manually select those that are relevant for us
+- alternatively, we can use html_nodes to select specific tables
+
+We will practice both. For this lesson, I have loaded the packages `rvest`, `magrittr` and `dplyr`.
 
 ### Scraping all tables
 
-The single most important specification is the `fill` parameter. If you specify fill as true inside the `html_table()` command, rvest will automatically fill rows with fewer than the maximum number of columns with NAs. This is useful because it allows you to scrape messy tables with inconsistent numbers of cells per row.
+As mentioned, we use a command called `html_table()`.
+The single most important specification for the commandis the `fill` parameter. If you specify fill as true inside the `html_table()` command, rvest will automatically fill rows with fewer than the maximum number of columns with NAs. This is useful because tables on the internet are often messy - they have inconsistent numbers of cells per row or the format is otherwise messed up. the fill specificaion allows you to deal with that by adding NA values.
 
-Try it out on [wikipedia's list of the tallest buildings](https://en.wikipedia.org/wiki/List_of_tallest_buildings){target="_blank"}.
+Try it out on [wikipedia's list of the tallest buildings](https://en.wikipedia.org/wiki/List_of_tallest_buildings){target="_blank"}. Read the page and then apply the `html_table()` command with and without the specification.
 
 ```{r fill, exercise=TRUE}
 "https://en.wikipedia.org/wiki/List_of_tallest_buildings"
 ```
 
-```{r fill-hint}
+```{r fill-solution}
 read_html("https://en.wikipedia.org/wiki/List_of_tallest_buildings") %>% html_table()
 read_html("https://en.wikipedia.org/wiki/List_of_tallest_buildings") %>% html_table(fill=T)
 ```
 
-If you assign the result to an object, the result will be a list.
-You can extract specific tables from this list by subsetting the list, putting the number of the table you want in two squared brackets. Or, if you want to proceed in a piping-chain, you can use the command `extract2()`, adding the number of the table in brackets (the command name is no typo - `extract` without the 2 works for vectors, `extract2()` works for lists). Try both variants for extracting the second table from the list of tallest buildings that we scraped.
+If you assign the result to an object, the object will be a list.
+You can extract specific tables from this list by subsetting the list (that is, putting the number of the table you want in two squared brackets). Or, if you want to proceed in a piping-chain, you can use the command `extract2()`, adding the number of the table in brackets (the command name is no typo - `extract` without the 2 works for vectors, `extract2()` works for lists).
+
+**Try both variants for extracting the second table from the list of tallest buildings that we scraped.**
 
 ```{r extract, exercise=TRUE}
 "https://en.wikipedia.org/wiki/List_of_tallest_buildings"
 ```
 
-```{r extract-hint}
+```{r extract-solution}
 tables<-read_html("https://en.wikipedia.org/wiki/List_of_tallest_buildings") %>% html_table(fill=T)
 tables[[2]]
 tables %>% extract2(2)
@@ -47,7 +58,7 @@ tables %>% extract2(2)
 
 ### Selecting specific tables
 
-Alternatively, you can select specific tables upfront. This is for example useful when you scrape different pages that all contain the relevant information but potentially in a different order - think articles about artists or writers that all contain a list of their work but may also contain other optional tables beforehand.
+Alternatively, you can select specific tables upfront. This is for example useful when you scrape different pages that all contain the relevant information in a table but the tables are in a different order - think articles about artists or writers that all contain a list of their work but may also contain other optional tables beforehand.
 
 In this case, you can just use `html_nodes()` to extract the relevant table if the tables share a common CSS selector. 
 
@@ -55,8 +66,8 @@ We practice this by downloading the basic information of [each member of the cas
 
 Try the following:
 
-- Use SelectorGadget to select all the links to the cast members
-- extract the links to their pages
+- Use SelectorGadget to select all the links to the cast members from the movie page
+    - extract the links to their pages
 - extract the tables from all pages
     - write a function that uses the CSS selector of their information box
     - scrape them all, for example by writing a function and applying it with `lapply()` on the list of links
@@ -85,4 +96,4 @@ scrape_tables<-function(urls,node=".infobox.vcard"){
 lapply(urls,scrape_tables)
 ```
 
-Unfortunately, you will see that all tables are quite heterogeneous - so this is not a general purpose solution. Still, when you are for example dealing with election results, scraping tables based on their nodes can be incredibly helpful!
+Unfortunately, you will see that all tables are quite heterogeneous - so this is not a general purpose solution. Still, when you are  dealing with election results or similar data, scraping tables based on their nodes can be incredibly helpful!
