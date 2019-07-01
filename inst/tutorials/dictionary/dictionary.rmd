@@ -12,7 +12,6 @@ library(learnr)
 knitr::opts_chunk$set(echo = FALSE,message=F,warning=F)
 library(quanteda)
 library(dplyr)
-library(ggplot2)
 library(learn2scrape)
 
 data(epsa_paper)
@@ -23,14 +22,13 @@ epsa_paper<-subset(epsa_paper,section!="PS")
 
 *Last revised: `r Sys.Date()`*
 
-This is the tutorial for dictionary analysis. We will proceed step-by-step and also go through some of the most important steps in pre-processing data.
+This is the first tutorial for dictionary analysis. We will proceed step-by-step and also go through some of the most important steps in pre-processing data. We still go through things quite quickly so do ask if you have questions
 
-For our analysis, we first need to load some packages: **quanteda** (for text analysis), **dplyr** (for data manipulation) and **ggplot2** (for visualizing our results). I have already pre-loaded the data frame we will use. It is called **epsa_paper**.
+For our analysis, we first need to load some packages: **quanteda** (for text analysis) and **dplyr** (for data manipulation). I have already pre-loaded the data frame we will use. It is called **epsa_paper** and is a slightly cleaned version of what we downloaded yesterday.
 
 ```{r libraries,exercise=TRUE}
 library(quanteda)
 library(dplyr)
-library(ggplot2)
 ```
 
 ## Pre-processing data
@@ -68,6 +66,7 @@ epsa_dfm<-dfm(epsa_tokens)  %>% dfm_remove(stopwords("en"))
 #epsa_dfm <- epsa_dfm %>% dfm_wordstem(language="en")
 ```
 
+To learn more about pre-processing in practice, I recommend [looking at quanteda tutorials](https://tutorials.quanteda.io/basic-operations/). To learn more about the why, I recommend [this article on why and how it matters](https://www.nyu.edu/projects/spirling/documents/preprocessing.pdf)
 
 
 ## Loading an existing dictionary
@@ -79,7 +78,7 @@ epsa_tokens<-tokens(epsa_corpus,remove_hyphens=T,remove_symbol=T)
 epsa_dfm<-dfm(epsa_tokens) %>% dfm_remove(c(stopwords("en"),"-"))
 ```
 
-Dictionaries come in different forms. For pre-defined dictionaries, YAML is one of of the most frequent formats. For our example, we will use the [newsmap dictionary](). Normally, you would just load it by giving the path to the file. Since this is a bit more complicated when you load the file from a package, I have already written a line that finds the correct path for you.
+Dictionaries come in different forms, depending on the software they were created with. You can check the documentation of the `dictionary()` command in quanteda to see which formats the package can import. For pre-defined dictionaries, YAML is one of of the most frequent formats. For our example, we will use the [newsmap dictionary](https://github.com/koheiw/newsmap). Normally, you would just load it by giving the path to the file. Since this is a bit more complicated when you load the file from a package, I have already written a line that finds the correct path for you.
  First, try to load the dictionary using the `dictionary()` function. Check the documentation to see the syntax or ask for a hint.
 
 ```{r loaddict, exercise=TRUE,exercise.setup='dictset',exercise.lines=3}
@@ -87,7 +86,7 @@ path<-system.file("extdata", "newsmap.yml", package = "learn2scrape")
 
 ```
 
-```{r loaddict-hint}
+```{r loaddict-sikztuib}
 path<-system.file("extdata", "newsmap.yml", package = "learn2scrape")
 newsmap_dict <- dictionary(file = path,
                            format = "YAML")
@@ -120,11 +119,14 @@ newsmap_dict <- dictionary(file = path,
 ```
 
 
-To apply the dictionary, we can use `tokens_lookup()` or `dfm_lookup()` on the dfm or corpus object. You can try it out below. Note that I have put a `head()` around the tokens variant, otherwise you will see the tokens of all 800 abstracts in our dataset. If you want to get a general overview of the results, you can also use the `textstat_frequency()`command to get a count frequency of all the features:
+To apply the dictionary, we can use `tokens_lookup()` or `dfm_lookup()` on the dfm or corpus object. The function 'looks up' entries in your dictionary within the corpus. You can try it out below. Note that I have put a `head()` around the tokens variant, otherwise you will see the tokens of all 800 abstracts in our dataset.
+
+If you want to get a summary of the results, you can use the `textstat_frequency()`command to get a count frequency of all the features in your text:
 
 ```{r simpleapply,exercise=TRUE,exercise.setup="applysetup"}
 dfm_lookup(epsa_dfm,newsmap_dict)
 tokens_lookup(epsa_tokens,newsmap_dict) %>% head()
+textstat_frequency(dfm_lookup(epsa_dfm,newsmap_dict))
 ```
 
 
@@ -149,7 +151,7 @@ tokens(text) %>% tokens_lookup(eu_dict) %>% dfm()
 
 ### Apply different levels of a dictionary
 
-Dictionaries with a hierarchical structure can be evaluated at different levels. The newsmap dictionary has such a hierarchical structure: It contains countries, nested in regions which are then nested in continents. That means, you can apply only a part of the dictionary by specifying `levels` inside the `dfm_lookup()` command. Try it out below by specifying levels (1, 2 or 3) and look at the output of `textstat_frequency()`!
+Dictionaries with a hierarchical structure can be evaluated at different levels. The newsmap dictionary has such a hierarchical structure: It contains countries, nested in regions which are then nested in continents. By default, all levels are applied at the same time. But you can also apply only a part of the dictionary by specifying `levels` inside the `dfm_lookup()` command. Try it out below by specifying levels (1, 2 or 3) and look at the output of `textstat_frequency()`!
 
 ```{r applylevels, exercise=TRUE,exercise.setup='applysetup'}
 
@@ -169,9 +171,16 @@ textstat_frequency(country_dfm)
 
 ### Applying a dictionary to groups
 
-Remember all the information we originally had in the data frame? The quanteda objects keep this information as so-called *document variable* with each document, though it is hidden. You can access it for any corpus, tokens or dfm object with the `docvars()` command. You can also use it to group the output of the `textstat_frequency()` function. For example, we have information on the section of each paper. This was a bit messy in the dataset we scraped but I stored a cleaned version in the variable `section`. 
+Remember that we originally scraped more information, like the times and locations of the panel? Since this information was in our original data frame, the quanteda objects keep this information as so-called [*document variables*](https://quanteda.io/reference/docvars.html) with each document. However, it is hidden from plain sight. You can access it for any corpus, tokens or dfm object with the `docvars()` command. 
 
-Let's apply this: You can see the original sections below. I would recommend you only apply the highest level of the dictionary (levels=1) to keep the output manageable. Then, tell `textstat_frequency` to sort the output by specifying the `section` variable as a group.
+You can also use it to group the output of the `textstat_frequency()` function. For example, we have information on the section of each paper based on the name of its panel. This was a bit messy in the dataset we scraped but I stored a cleaned version in the variable `section` - if you want, have a look at it before you proceed to the exercise below.
+
+ ```{r view-docvars, exercise=TRUE,exercise.setup='applysetup'}
+docvars(epsa_dfm, "section")
+
+```
+
+Let's apply this: Lookup the dictionary and group the results of `textstat_frequency()` by section. I would recommend you only apply the highest level of the dictionary (levels=1) to keep the output manageable. Then, tell `textstat_frequency` to sort the output by specifying the `section` variable as a group. *Caution: You always have to use quotation marks when you refer to the name of docvars.*
 
 ```{r groupapply, exercise=TRUE,exercise.setup='applysetup'}
 
@@ -191,4 +200,5 @@ dfm_lookup(epsa_dfm, newsmap_dict, levels = 1) %>% dfm_group("section") %>% dfm_
 ```
 
 
-Of course, there is a lot more to learn about dictionaries - for example, you can combine them with [weighting](https://quanteda.io/reference/dfm_weight.html){target="_blank"} and receive quantities like the relative frequency of your dictionary entries or dichotomize the results into match / no match. This all depends on your research question, so please explore and feel free to ask. We now proceed to creating our own dictionary in order to practice classifying texts.
+Of course, there is a lot more to learn about dictionaries - for example, you can combine them with [weighting](https://quanteda.io/reference/dfm_weight.html){target="_blank"}.
+You can then calculate quantities like the relative frequency of your dictionary entries or dichotomize the results into match / no match if you want to sort texts. This all depends on your research question, so please explore and feel free to ask. We now proceed to creating our own dictionary in order to practice classifying texts.

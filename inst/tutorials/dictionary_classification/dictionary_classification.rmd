@@ -30,16 +30,16 @@ epsa_dfm<-dfm(epsa_tokens) %>% dfm_remove(c(stopwords("en"),"-"))
 
 *Last revised: `r Sys.Date()`*
 
-We proceed to create our own dictionary in order to use it for classification.
+We proceed to create our own dictionary in order to use it for classification. What does that mean? In the last section, we took the abstracts (including their categorization into sections) as given and tried to describe them by looking at the frequency with which they use geographical words. So we tried to measure a continuous quantity about them. Now, we will try to sort the abstracts into discrete groups - this is basically a form of supervised learning, though with a lot of supervision.
 
 
 ## How to create a dictionary
 
 To create our own dictionary, we need to come up with a list of words that represent the concepts we want to measure. 
-You could define a dictionary for anything - qualitative vs. quantitative research, regions, time periods, writing styles...
+You could define a dictionary for anything - world regions (like with newsmaps), qualitative vs. quantitative research, time periods, writing styles...
 
 However, it is difficult to check the quality of our dictionary if we do not know where abstracts really belong. So instead, I suggest we use something we already know about the abstracts: 
-Remember we used the different sections of EPSA in the previous exercises? Imagine having to sort all 800 abstracts into different sections! How great would it be to have a dictionary that tells you in which section an abstract belongs...
+Remember we used the different sections of EPSA in the previous exercises? Imagine having to sort all 800 abstracts into different sections! How great would it be to have a dictionary that tells you in which section an abstract might fit...
 
 ### To stem or not to stem?
 
@@ -48,7 +48,7 @@ Generally, I would recommend to skip stemming when using a dictionary: Since ste
 
 Instead, you can use [**wildcards**](https://en.wikipedia.org/wiki/Glob_(programming)){target="_blank"} to include words with different stems. Wildcards work like jokers: `*` replaces either no, a single or multiple characters. `?` replaces exactly one character. You can use them at any place within a word.
 
-Of course, you can also use [regular expressions](https://stringr.tidyverse.org/articles/regular-expressions.html){target="_blank"} if you already know them, however, there is no need to learn them just for our dictionary.
+Of course, you can also use [**regular expressions**](https://stringr.tidyverse.org/articles/regular-expressions.html){target="_blank"}, which are much more powerful, if you already know them. However, there is no need to learn them just for our dictionary.
 
 Below, you can practice different versions of wildcards. Feel free to pick a different example and try out more variants.
 
@@ -148,7 +148,7 @@ We move on to using the dictionary for classification - so keep it in your clipb
 
 ## Using a dictionary for classification
 
-We can use our dictionary to classify the sections. To make it easier to handle the results, we convert it to a dataframe using the `convert()` command. Additionally, we need to attach the document variables (which include the correct classification) to the data frame. Since the order has not changed, you can just use `bind_cols()` after converting the dfm to a data frame.
+We can use our dictionary to classify the sections. To make it easier to handle the results, we convert it to a dataframe using the `convert()` command. Additionally, we need to attach the document variables (which include the correct 'classification') to the data frame. Since the order has not changed, you can just use `bind_cols()` to bind the column with the true sections after converting the dfm to a data frame. Otherwise, I would suggest to merge on the document names.
 
 Next, we need to come up with a decision-making rule how to translate our dictionary hits into categories. While machine learning algorithms would come up with more elaborate rules, we use a very simple rule: We ascribe the abstract to the dictionary category that produces most hits in the text. This is a bit tricky and there are multiple ways to do this - feel free to take a look at the solution if you cannot figure out how to do this.
 
@@ -177,12 +177,12 @@ section_classification$predicted_section<-colnames(section_classification[,2:12]
 ```
 
 
-Like other classification algorithms, we have to evaluate our dictionary against the gold standard (or is it a gold standard?) of the EPSA section distribution.
+Like other classification algorithms, we have to evaluate our dictionary against the gold standard (*or is it a gold standard?*) of the EPSA section distribution.
 
 To make our life easier, we use the `confusionMatrix()` function from the caret package. This way, we just have to do three steps:
 
 - convert the true and the predicted section into a factor - that is the input that `confusionMatrix()` takes
-    - you should also convert the predicted section into upper case
+    - you might need to convert the predicted section into upper case
 - apply the `confusionMatrix()` function from the `caret()` package
 - interpret the results - we'll go through that in a second after you give the first two steps a try:
 
@@ -217,4 +217,4 @@ First, have a look at the overall statistics. The most important statistic is **
 
 If you want to go into details, you can check the statistics by class. **Sensitivity** shows how good your dictionary is at detecting positive instances of this section. In contrast, **Specificity** measures whether you have false positives, that is, results that you assign to the category while they really belong somewhere else. For each category, you also receive a 'Balanced Accuracy' which combines Sensitivity and Specificity.
 
-These statistics by class are particularly useful when you want to find out where your classifier is still performing is performing best.
+These statistics by class are particularly useful when you want to find out where your classifier is performing best and where you might still need to improve it. Normally, you would do that on a training set.

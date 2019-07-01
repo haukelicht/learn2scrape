@@ -48,16 +48,17 @@ if (window.hljs) {
 
 <div id="section-introduction" class="section level2">
 <h2>Introduction</h2>
-<p>We have preloaded the <code>caret</code>, <code>dplyr</code> and <code>quanteda</code> packages. I have also pre-processed the EPSA data into a document-feature matrix called <code>epsa_dfm</code>. I used stemming and removed stopwords, hyphens and symbols.</p>
+<p><em>Last revised: 2019-07-01</em></p>
+<p>This tutorial introduces supervised text classification with machine learning. I have preloaded the <code>caret</code>, <code>dplyr</code> and <code>quanteda</code> packages. I have also pre-processed the EPSA data into a document-feature matrix called <code>epsa_dfm</code>. Just for your information: I used stemming and removed stopwords, hyphens and symbols.</p>
 </div>
 <div id="section-basics" class="section level2">
 <h2>Basics</h2>
-<p>We have discussed that we need to split the sample into a training and a test set. Here, we will just use <code>quanteda</code>’s in-built sampling function. However, we will discuss how to sample in other packages (and how to sample non-text data) at the end of this tutorial.</p>
+<p>We have discussed that we need to split the sample into a training and a test set. Here, we will just use sampling function built into <code>quanteda</code>. However, we will discuss how to sample in other packages (and how to sample non-text data) at the end of this tutorial.</p>
 <div id="section-sampling-in-quanteda" class="section level3">
 <h3>Sampling in quanteda</h3>
-<p>quanteda comes with a <code>dfm_sample()</code> function. With this, you can easily create a random training sample - you just need to decide on the size. In our case, I suggest to put most data into the training sample as we anyway do not have so much information to learn from.</p>
+<p>quanteda comes with a <code>dfm_sample()</code> function. With this, you can easily create a random training sample - you just need to decide on the size. In our case, I suggest to put most data into the training sample as we anyway do not have so much information to learn from. If you do not know the syntax, have a look at the documentation on <a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/match.html">value matching</a>.</p>
 <div class="tutorial-exercise" data-label="quanteda-split" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="quanteda-split-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>training_sample&lt;-dfm_sample(epsa_dfm,size=700)
@@ -67,9 +68,9 @@ test_sample&lt;-dfm_subset(epsa_dfm,!docnames(epsa_dfm) %in% docnames(training_s
 <div id="section-aligning-training-and-test-set" class="section level3">
 <h3>Aligning training and test set</h3>
 <p>Next, you should make sure that you only use features on which you actually have information - words that do not occur in your training set will not be useful for classifying. So you can use the <code>dfm_trim()</code> function to keep only words that occur in your sample - just specify 1 as the threshold.</p>
-<p>Then, you can also restrict the features of the test set to those features mentioned in the training set - otherwise, your classifier will not work. For this, you can use <code>dfm_keep()</code> (or <code>dfm_select()</code> with specifying that selection=“keep” - the first variant is just a short-hand). Basically you just need to remember the difference between <code>dfm_trim()</code> which cuts features based on their frequency and <code>dfm_keep</code> which changes features based on their presence in a character vector or another dfm.</p>
+<p>Then, you can also restrict the features of the test set to those features mentioned in the training set - otherwise, your classifier will not work. For this, you can use <code>dfm_keep()</code> (or <code>dfm_select()</code> with specifying that selection=“keep” - the first variant is just a short-hand).</p>
 <div class="tutorial-exercise" data-label="quanteda-features" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="4">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="quanteda-features-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>training_sample&lt;-dfm_sample(epsa_dfm,size=700)
@@ -77,13 +78,22 @@ test_sample&lt;-dfm_subset(epsa_dfm,!docnames(epsa_dfm) %in% docnames(training_s
 training_sample&lt;-dfm_trim(training_sample,1)
 test_sample&lt;-dfm_keep(test_sample,training_sample)</code></pre>
 </div>
+<p>Keep in mind the difference between <code>dfm_trim()</code> which cuts features based on their frequency and <code>dfm_keep</code> which changes features based on their presence in a character vector or another dfm.</p>
 </div>
 </div>
 <div id="section-training-a-classifier" class="section level2">
 <h2>Training a classifier</h2>
-<p>So far, <code>quanteda</code> is relatively basic regarding classifiers: The CRAN-version (which you have probably installed) only includes <code>textmodel_nb()</code>, a Naive Bayes classifier. However, naive bayes performs quite well for many tasks. Additionally, the quanteda implementation <a href="https://stackoverflow.com/questions/54427001/naive-bayes-in-quanteda-vs-caret-wildly-different-results">is optimized for text and uses a sparse matrix</a> which makes it much faster (and sometimes better performing) than caret’s Naives Bayes classifier.</p>
+<p>Now, we get to the interesting stuff. So far, <code>quanteda</code> is relatively basic regarding classifiers: The CRAN-version (which you have probably installed) only includes <code>textmodel_nb()</code>, a Naive Bayes classifier. However, naive bayes performs quite well for many tasks. Additionally, the quanteda implementation <a href="https://stackoverflow.com/questions/54427001/naive-bayes-in-quanteda-vs-caret-wildly-different-results">is optimized for text and uses a sparse matrix</a> which makes it much faster (and sometimes better performing) than Naives Bayes classifiers included in other packages when working with text.</p>
+<p>We try to do everything in one step, so take your time:</p>
+<ul>
+<li>recreate the training sample and the test set</li>
+<li>trim and align them</li>
+<li>train the classifier using <code>textmodel_nb()</code></li>
+<li>predict the sections of the abstracts using the <code>predict()</code> command</li>
+<li>create the <code>confusionMatrix</code> we introduced in the section on using dictionaries for classification</li>
+</ul>
 <div class="tutorial-exercise" data-label="quanteda-classify" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="10">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="quanteda-classify-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>training_sample&lt;-dfm_sample(epsa_dfm,size=700)
@@ -105,9 +115,9 @@ confusionMatrix(as.factor(docvars(test_sample,&quot;section&quot;)),predict)</co
 2+2
 end&lt;-Sys.time()
 end-start</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
-<p>We can also use this to evaluate how long a classifier takes. Try to check the time of the classifier we wrote in the previous section. You just need to add a few lines of code in the right places (of course, there are multiple places where you could want to measure the time - so it is not necessarily wrong if you add the timers at a different place than the solution):</p>
+<p>We can also use this to evaluate how long a classifier takes. Try to check the time of the classifier we wrote in the previous section. You just need to add a few lines of code in the right places. Of course, there are multiple places where you could want to measure the time - so it is not necessarily wrong if you add the timers at a different place than the solution*:</p>
 <div class="tutorial-exercise" data-label="timeone" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="15">
 <pre class="text"><code>training_sample&lt;-dfm_sample(epsa_dfm,size=700)
 test_sample&lt;-dfm_subset(epsa_dfm,!docnames(epsa_dfm) %in% docnames(training_sample))
@@ -115,7 +125,7 @@ training_sample&lt;-dfm_trim(training_sample,1)
 classifier&lt;-textmodel_nb(x=training_sample,y=docvars(training_sample,&quot;section&quot;))
 test_sample&lt;-dfm_keep(training_sample)
 predict&lt;-predict(classifier,newdata=test_sample)</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="timeone-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>training_sample&lt;-dfm_sample(epsa_dfm,size=700)
@@ -133,10 +143,9 @@ end-start</code></pre>
 <h2>Evaluating feature thresholds</h2>
 <p>We talked about the importance of removing features. This exercise is supposed to be a playground for you to evaluate how different thresholds affect the <em>speed</em>, <em>number of features</em> and <em>accuracy</em> of our classifier. To do this at scale, we should create a single test- and training set and then write a function that uses different thresholds for trimming and evaluates the respective classifiers. If you feel confident, try to write the function yourself. If you feel like you still need some help, copy the function from the first hint and just add a <code>sapply()</code>-command with different thresholds for <code>dfm_trim</code> to see how the classifier speed and accuracy develops.</p>
 <p>If you decide to write the function yourself, feel free to re-use the code from above. Just remember that you will need to trim the features of the test sample depending on the threshold you use for the training sample, so you might need to restructure things a bit.</p>
-<p>However, be a bit cautious with the interpretation of your results: ultimately, every run is a bit random and accuracy will vary depending on the sample - so look at the confidence interval. Also, this might be very different for other data sets and classifiers so take your time to practice with other data as well.</p>
-<p><em>If you run the classifiers a few times, you will see that the results vary a lot. This is because in the end, we have a quite small training and test set!</em></p>
+<p>However, be a bit cautious with the interpretation of your results: ultimately, every run is a bit random and accuracy will vary depending on the random sample - so look at the confidence intervals. <em>If you run the classifiers a few times, you will see that the results vary a lot. This is because in the end, we have a quite small training and test set!</em> Also, the results for spped might be very different for other data sets and classifiers so take your time to practice with other data as well if you have the opportunity.</p>
 <div class="tutorial-exercise" data-label="timetwo" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="20">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="timetwo-hint" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>epsa_dfm&lt;-dfm_wordstem(epsa_dfm) 
@@ -185,33 +194,37 @@ sapply(c(1,5,10,20,50,100),test_performance)</code></pre>
 </div>
 <div id="section-substantive-feature-evaluation" class="section level2">
 <h2>Substantive feature evaluation</h2>
-<p>While many machine learning algorithms are a black box, it is relatively easy to see which features are most important in the determination of each class. You can use <code>coef()</code> to see the coefficients of each feature.</p>
+<p>While many machine learning algorithms are a black box, with Naives Bayes, it is relatively easy to see which features are most important in the determination of each class. You can use <code>coef()</code> to see the coefficients of each feature.</p>
 <p>To see which features are most meaningful for different classes, convert the coefficient matrix into a data frame that you can sort by the feature frequency. The feature names will be stored as row names but you can convert them into a variable.</p>
-<p>Have a look at the 20 features which are most associated with the conflict section (CF)! <em>If you do not want to copy the model code again, I have pre-estimated a classifier called</em> <code>nb_model</code>. Are the features similar to what you thought of for the dictionary?</p>
+<p>Have a look at the 20 features which are most associated with the conflict section (CF)! <em>If you do not want to copy the model code again, I have pre-estimated a classifier called</em> <code>nb_model</code>.</p>
 <div class="tutorial-exercise" data-label="featureeval" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="featureeval-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>coef(nb_model)
 evaluation_df&lt;-coef(nb_model) %&gt;% data.frame() %&gt;% mutate(feature=rownames(.))
 evaluation_df %&gt;%  arrange(desc(CF)) %&gt;% select(feature, CF) %&gt;% head(20)</code></pre>
 </div>
+<p>Are the features similar to what you thought of for the dictionary?</p>
 </div>
-<div id="section-going-further-with-caret" class="section level2">
-<h2>Going further with caret</h2>
-<p>If you think you would like to try more classifiers, <code>caret</code> is your friend. Check the <a href="https://topepo.github.io/caret/train-models-by-tag.html">list of models by tag</a> to look through the models caret has implemented. Just be aware that many of them take quite long since they are not optimized for text classification. Also, some have specific restrictions (e.g. they can only distinguish between two classes).</p>
-<p>Some people use other packages like <code>RTextTools</code>, however, I do not recommend them since they are not maintained anymore and there is no support in case of problems. If you have previously used <code>tidytextt()</code>, I am also a fan of <a href="https://juliasilge.com/blog/tidy-text-classification/">this tutorial</a>.</p>
-<p>Below, we just discuss the most important differences if you want to try your luck with caret.</p>
+<div id="section-additional-models" class="section level2">
+<h2>Additional models</h2>
+<p>If you think you would like to try more classifiers, <code>caret</code> is your friend. Check the <a href="https://topepo.github.io/caret/train-models-by-tag.html">list of models by tag</a> to look through the models caret has implemented. Just be aware that many of them take quite long since they are not optimized for text classification. Also, some have specific restrictions (e.g. they can only distinguish between two classes). Below, we just discuss the most important differences if you want to try your luck with caret.</p>
+<p>There are other packages built for text classification like <code>RTextTools</code>, however, I do not recommend them since they are not maintained anymore and there is no support in case of problems. If you have previously used <code>tidytext()</code>, I am also a fan of <a href="https://juliasilge.com/blog/tidy-text-classification/">this tutorial</a>.</p>
 <div id="section-sampling-in-caret" class="section level3">
 <h3>Sampling in caret</h3>
-<p>Sampling in <code>caret</code> is a bit more tedious - we will not go through it in detail, there are just two details I would like to point out: First, you have to convert the dfm into a data frame to do that. You can do that using <code>convert(dfm-name,"data.frame")</code>, so that is easy enough. Second, <code>caret</code> has a lot more options for sampling. So if you want to stratify your sample by groups (e.g. to over-sample an under-represented class to make sure your classifier learns it), it is worth getting acquainted with the function a bit more. If you are interested, just check the documentation below. Otherwise, it can be simpler to still do the sampling in quanteda so you won’t have to deal with empty features later on.</p>
+<p>Sampling in <code>caret</code> is a bit more tedious - we will not go through it in detail, there are just two details I would like to point out:</p>
+<ol style="list-style-type: decimal">
+<li>With any other package but quanteda, we have to convert the dfm into a data frame to do that. You can do that using <code>convert(dfm-name,"data.frame")</code>, so that is easy enough.</li>
+<li><code>caret</code> has a lot more options for sampling. So if you want to stratify your sample by groups (e.g. to over-sample an under-represented class to make sure your classifier learns it), it is worth getting acquainted with the function a bit more. If you are interested, just check the documentation below. Otherwise, it can be simpler to still do the sampling in quanteda so you won’t have to deal with empty features later on.</li>
+</ol>
 <div class="tutorial-exercise" data-label="caret-docu" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>?createDataPartition</code></pre>
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
 <p>Empty features are less of a problem when you work with data other than text - typically, the variables from which our algorithm learns are already set. Then, separating the data is pretty straight-forward. Try it out on the <code>iris</code> dataset, a classic dataset used for machine learning:</p>
 <div class="tutorial-exercise" data-label="caret-sample" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="caret-sample-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>training_id &lt;- createDataPartition(iris$Species, p=0.80, list=FALSE)
@@ -221,11 +234,27 @@ training&lt;-iris[training_id,]</code></pre>
 </div>
 <div id="section-applying-a-classifier-in-caret" class="section level3">
 <h3>Applying a classifier in caret</h3>
-<p>The beauty of caret is that it unifies the syntax of lots of classification packages within R. The central function is <code>train()</code> and you can use it for different classifiers by just specifying a different method.</p>
+<p>The beauty of caret is that it unifies the syntax of lots of classification packages within R. The central function is <code>train()</code> and you can use it for different classifiers by just specifying a different method. We keep using the iris dataset so that our models actually compile</p>
+<p>I included code below that you can expand if you want</p>
+<ul>
+<li><code>trainControl()</code> is a function that splits the training sample into multiple parts for <a href="https://machinelearningmastery.com/k-fold-cross-validation/">cross-validation</a>
+<ul>
+<li>I just include it to show you the command if you have previously done machine learning with other packages but just ignore it if you are new to this</li>
+</ul></li>
+<li>we <code>train()</code> or <em>fit</em> different models to the data and calculate the accuracy based on re-sampling the training sample
+<ul>
+<li>this is a first measure of performance but it only tells us about performance on the data we used to train</li>
+</ul></li>
+<li>The three different models we calculate are:
+<ul>
+<li>lda</li>
+<li>k nearest neighbours</li>
+<li>a support vector machine</li>
+</ul></li>
+<li>we summarize the different models we ran, based on their within-sample performance on the training sample</li>
+<li>to actually evaluate our performnace, we look at the confusion matrix on the held-out test set</li>
+</ul>
 <div class="tutorial-exercise" data-label="caret-classify" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
-</div>
-<div class="tutorial-exercise-support" data-label="caret-classify-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
 <pre class="text"><code>control &lt;- trainControl(method=&quot;cv&quot;, number=10)
 metric &lt;- &quot;Accuracy&quot;
 fit.lda &lt;- train(Species~., data=training, method=&quot;lda&quot;, metric=metric, trControl=control)
@@ -235,8 +264,11 @@ fit.svm &lt;- train(Species~., data=training, method=&quot;svmRadial&quot;, metr
 # summarize accuracy of models
 results &lt;- resamples(list(lda=fit.lda, knn=fit.knn, svm=fit.svm))
 summary(results)
+
+# predict
 predictions &lt;- predict(fit.lda, validation)
 confusionMatrix(predictions, validation$Species)</code></pre>
+<script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.timelimit":500,"exercise.checker":"NULL"}</script>
 </div>
 </div>
 </div>
@@ -258,7 +290,8 @@ library(dplyr)
 library(learn2scrape)
 library(caret)
 library(quanteda)
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE,
+exercise.timelimit=500)
 
 data(epsa_paper)
 epsa_paper<-subset(epsa_paper,section!="PS")
