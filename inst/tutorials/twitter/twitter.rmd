@@ -1,0 +1,122 @@
+---
+title: "Scraping Twitter"
+author: "Theresa Gessler"
+date: "last updated: `r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+packages<-c("tidyverse","rvest","knitr","rtweet","quanteda","lubridate")
+lapply(packages,require,character.only=T)
+token <- create_token(
+  app = "theresa's api test",
+  consumer_key = "pCd7bnt4eM2D2ic1MgoNQ1xrM",
+  consumer_secret = "zIVAllEHKiV9Dz9YP4ezBpC7BeVSZpXOqib4bV4LU3anqjgV8J",
+  access_token = "731063401842135041-J7K1Bfr8OTzCddGHGkrDZRJIcugrnjR",
+  access_secret = "506giFhRQIJSa9nNhEZLF3GtkylSZkNkplu2i2gSgCtkO")
+```
+
+## Introduction
+
+
+
+## Authentification
+
+```{r,eval=F}
+## authenticate via access token
+token <- create_token(
+  app = "app_name",
+  consumer_key = "XYznzPFOF9FwWKN1Jp41",
+  consumer_secret = "CtkGEWmSevZqJuKl6HLqrD5ynPd9jG0SoHZbD",
+  access_token = "95514512-wK2EmA9LMZoQA4Xc2uyIiEwu2YXL",
+  access_secret = "9vpiS1fIPQtxc5d5nEN1f1m2xe5byw7")
+```
+
+
+```{r,echo=F,eval=T}
+
+```
+
+## Searching Tweets
+
+```{r}
+## search for 500 tweets on data journalism
+rt <- search_tweets("#rstats", n = 500, include_rts = FALSE)
+
+## plot time series
+ts_plot(rt)
+
+## inspect information
+
+colnames(rt)
+
+
+## search for 75,000 tweets including 'trump'
+trump <- search_tweets("trump", n = 75000, 
+                       retryonratelimit = TRUE)
+```
+
+## Searching for Users
+
+```{r}
+usrs <- search_users("data journalism", n = 500)
+save(usrs,file="data/06-usrs.RData")
+```
+
+```{r}
+obama <- get_timeline("BarackObama",n=3200)
+ts_plot(obama)
+tmls <- get_timelines(c("BarackObama","realDonaldTrump"),n=3200)
+
+```
+
+## Making connections
+
+```{r}
+liked <- get_favorites(c("BarackObama","realDonaldTrump"), 
+n = 3000)
+liked$text
+```
+
+```{r,eval=F}
+followers_kohler <- get_followers("koa_87")
+followers_skinner <- get_followers("BarJack")
+followers_kolly <- get_followers("mjKolly")
+```
+
+```{r}
+load("data/06-usrs.RData")
+data_sources<-get_friends(usrs$user_id,retryonratelimit = T)
+follow_count<-data_sources %>% group_by(user_id) %>% tally()
+
+top_sources<-follow_count %>% filter(n>100)
+top_sources_data<-lookup_users(top_sources$user_id)
+left_join(top_sources,top_sources_data) %>% 
+  dplyr::select(screen_name,n) %>% 
+  arrange(desc(n))
+```
+
+## Streaming Tweets
+
+```{r}
+## random sample for 30 seconds (default)
+rt <- stream_tweets(file_name="data/tweets.json")
+```
+
+```{r,eval=F}
+stream_tweets("trump",
+  timeout = 60 * 60 * 24 * 7,
+  file_name = "data/tweetsabouttrump.json",
+  parse = FALSE)
+tweetsabouttrump<-parse_stream("data/08-tweetsabouttrump.json")
+```
+
+
+## Summary
+
+- REST API
+    - searching for tweets: `search\_tweets()`
+    - users: `get\_timelines()`, `get\_followers()`, `get\_friends()`, `get\_favorites()` 
+- Streaming API
+    - `stream\_tweets()` (and filtering commands)
