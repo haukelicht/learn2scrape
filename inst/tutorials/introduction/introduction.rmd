@@ -94,10 +94,8 @@ Basically, HTML Tags describe the formatting and structure of a webpage. CSS sel
 
 For now, we will focus on two of the most important selectors: In principle, selectors work on tags - so if you write the name of a tag, the CSS selector will select all elements with that tag. **Try it out with some of the HTML tags that we learned on the slides.** Another useful selector is the star-symbol - it just selects *all* tags in the page (so it is a universal selector). As I said, we will focus more on gathering specific information but if you just want to parse large amounts of data, that can be very useful. **Try the universal selector on our webpage.**
 
-```{r selectors,exercise=TRUE, exercise.lines=5}
+```{r selectors,exercise=TRUE, exercise.lines=10}
 page<-read_html("http://quotes.toscrape.com/")
-
-
 ```
 
 ```{r selectors-solution}
@@ -107,7 +105,7 @@ page %>% html_nodes("h1")
 page %>% html_nodes("*")
 ```
 
-And for reference: For a list of CSS Selectors, check out [this collection](https://www.w3schools.com/cssref/css_selectors.asp){target="_blank"}. If you want to practice CSS Selectors in a fun way, I recommend playing with the [CSS Diner](https://flukeout.github.io/){target="_blank"} where you can learn about different selector structures.
+We will return to CSS Selectors later, but just for reference: For a list of CSS Selectors, check out [this collection](https://www.w3schools.com/cssref/css_selectors.asp){target="_blank"}. If you want to practice CSS Selectors in a fun way, I recommend playing with the [CSS Diner](https://flukeout.github.io/){target="_blank"} where you can learn about different selector structures.
 
 ## Extracting elements with SelectorGadget
 
@@ -149,7 +147,7 @@ Now, we try to use these CSS Selectors with the `html_nodes()` command. Since ea
 
 
 
-```{r nodes, exercise=TRUE,exercise.setup="page-setup"}
+```{r nodes, exercise=TRUE,exercise.setup="page-setup", exercise.lines=10}
 
 ```
 
@@ -161,7 +159,7 @@ selected_nodes
 
 This already looks more structured - but we should get rid of the HTML tags. Try applying the `html_text()` command we used before to the nodes which we selected in the last step. This way, we get just the text from the nodes we selected. You can copy the code you used to extract the nodes and continue working on that!
 
-```{r textnodes, exercise=TRUE, exercise.setup='page-setup'}
+```{r textnodes, exercise=TRUE, exercise.setup='page-setup', exercise.lines=10}
 
 
 ```
@@ -175,18 +173,3 @@ selected_nodes %>% html_text()
 ## Wrap-up
 
 **Congratulations! If you completed this lesson, you scraped your first webpage! That was not so bad, was it?**
-
-To continue learning webscraping, you can run the following lessons from your R console:
-
-
-<!--- Scraping files: run_tutorial("Files",package="learn2scrape")-->
-<!-- - Learning CSS Selectors: run_tutorial("CSS",package="learn2scrape")-->
-- Scraping multiple pages (more of the essentials): 
-    - `run_tutorial("scraping_pages",package="learn2scrape")`
-- Short section on scraping tables from webpages (do this if you think it would be useful for you): 
-    - `run_tutorial("tables",package="learn2scrape")`
-- Short section on scraping files (do this if you think it would be useful for you): 
-    - `run_tutorial("files",package="learn2scrape")`
-- EPSA conference scraping project (more advanced and complicated but we will use the data tomorrow): 
-    - `run_tutorial("scraping_epsa",package="learn2scrape")`
-
