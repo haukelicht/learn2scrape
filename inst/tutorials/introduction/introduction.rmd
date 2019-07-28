@@ -90,9 +90,16 @@ library(rvest)
 
 So, we need xpath or CSS selectors. If you have not used HTML before, this might sound complicated. It helps to get a bit into the structure of HTML. [Click on this link to read an introduction to HTML](https://www.w3schools.com/html/default.asp){target="_blank"}.
 
-Basically, HTML Tags describe the formatting and structure of a webpage. CSS selectors are a type of *grammar* or *pattern-description* that helps us select specific parts of that structure. I am working on a tutorial specific to CSS selectors (that you will be able to access by running `run_tutorial("CSS",package="learn2scrape")` in the future - right now it is just a list), but for now, we will just use a tool that helps us determine the correct selectors. But that is not a problem: many people use these tools for scraping and only learn the basics of CSS selectors.
+Basically, HTML Tags describe the formatting and structure of a webpage. CSS selectors are a type of *grammar* or *pattern-description* that helps us select specific parts of that structure. We will speak more about CSS selectors later in the course, for now, we will just use a tool that helps us determine the correct selectors. But that is not a problem: many people use these tools for scraping and only learn the basics of CSS selectors.
 
-For now, we will focus on two of the most important selectors: In principle, selectors work on tags - so if you write the name of a tag, the CSS selector will select all elements with that tag. **Try it out with some of the HTML tags that we learned on the slides.** Another useful selector is the star-symbol - it just selects *all* tags in the page (so it is a universal selector). As I said, we will focus more on gathering specific information but if you just want to parse large amounts of data, that can be very useful. **Try the universal selector on our webpage.**
+For this lesson, we will focus on two of the most important selectors:
+
+- in their most basic form, selectors work on HTML tags - so if you write the name of a tag (without the brackets), the CSS selector will select all elements with that tag
+    - **Try it out with some of the HTML tags that we learned on the slides.** 
+- a very useful selector is the star-symbol - it just selects *all* tags in the page (so it is a universal selector)
+    - **Try the universal selector on our webpage.**
+
+As I said, we will focus more on gathering specific information but if you just want to parse large amounts of data, the universal selector can be very useful. Now, let's practice!
 
 ```{r selectors,exercise=TRUE, exercise.lines=10}
 page<-read_html("http://quotes.toscrape.com/")
@@ -107,7 +114,7 @@ page %>% html_nodes("*")
 
 We will return to CSS Selectors later, but just for reference: For a list of CSS Selectors, check out [this collection](https://www.w3schools.com/cssref/css_selectors.asp){target="_blank"}. If you want to practice CSS Selectors in a fun way, I recommend playing with the [CSS Diner](https://flukeout.github.io/){target="_blank"} where you can learn about different selector structures.
 
-## Extracting elements with SelectorGadget
+## Using SelectorGadget
 
 While understanding HTML helps, we often do not need to engage with the code because there are lots of tools to help us. For example, SelectorGadget is a JavaScript bookmarklet that allows you to interactively figure out what css selector you need to extract parts of the page. If you have not heard of selectorgadget, check its [webpage](https://selectorgadget.com/){target="_blank"} - there is even a video:
 
