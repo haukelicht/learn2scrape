@@ -81,7 +81,7 @@ Now, completing the paths of the URLs we scraped should not be a problem for you
 ```
 
 ```{r paste-solution}
-urls<-page %>% html_nodes(".tags .tag") %>% html_attr("href")
+urls<-quotepage %>% html_nodes(".tags .tag") %>% html_attr("href")
 urls<-paste0("http://quotes.toscrape.com",urls)
 urls
 ```
