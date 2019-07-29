@@ -48,7 +48,7 @@ if (window.hljs) {
 
 <div id="section-introduction" class="section level2">
 <h2>Introduction</h2>
-<p><em>Last revised: 2019-07-27</em></p>
+<p><em>Last revised: 2019-07-29</em></p>
 <p>So, you have learned how to use some of the basic functions of the <code>rvest</code> package: <code>read_html()</code>, <code>html_nodes()</code> and <code>html_text()</code>. But most of the time, we are not just interested in a single page but multiple pages from the same domain, e.g. all newspaper reports by a specific newspaper or all speeches by a politician. So we need another step: We have to learn to follow links without actually opening the browser and clicking on the link and copying the new path.</p>
 <p>In this part of the tutorial, you will learn two things:</p>
 <ul>
@@ -91,7 +91,7 @@ paste0(&quot;a&quot;,&quot;b&quot;)</code></pre>
 <script type="application/json" data-opts-chunk="1">{"fig.width":6.5,"fig.height":4,"fig.retina":2,"fig.align":"default","fig.keep":"high","fig.show":"asis","out.width":624,"warning":true,"error":false,"message":true,"exercise.df_print":"paged","exercise.checker":"NULL"}</script>
 </div>
 <div class="tutorial-exercise-support" data-label="paste-solution" data-caption="Code" data-completion="1" data-diagnostics="1" data-startover="1" data-lines="0">
-<pre class="text"><code>urls&lt;-page %&gt;% html_nodes(&quot;.tags .tag&quot;) %&gt;% html_attr(&quot;href&quot;)
+<pre class="text"><code>urls&lt;-quotepage %&gt;% html_nodes(&quot;.tags .tag&quot;) %&gt;% html_attr(&quot;href&quot;)
 urls&lt;-paste0(&quot;http://quotes.toscrape.com&quot;,urls)
 urls</code></pre>
 </div>
@@ -133,14 +133,14 @@ pagetext&lt;-html_text(selected_nodes)</code></pre>
 <tr>
 <td>
 
-<div id="htmlwidget-99e3812a730c1b4bf04a" style="width:100%;height:auto;", class = "quiz html-widget">
+<div id="htmlwidget-32ccd7eca58db63df6ac" style="width:100%;height:auto;", class = "quiz html-widget">
 <div class="panel panel-default">
 <div class="panel-body quizArea">
 </div>
 </div>
 </div>
 
-<script type="application/json" data-for="htmlwidget-99e3812a730c1b4bf04a">{"x":{"question":"Which parts of the code change when we want to scrape several pages?","answers":[{"option":"the URL","correct":true,"message":null},{"option":"the selector","correct":false,"message":"Selectors sometimes change but not necessarily!"},{"option":"the URL and the selector","correct":false,"message":"Selectors sometimes change but not necessarily!"},{"option":"we need to repeat the code for each iteration","correct":false,"message":"don&#39;t be such a pessimist!"}],"label":"selector-practice-1","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Which parts of the code change when we want to scrape several pages?","a":[{"option":"the URL","correct":true,"message":null},{"option":"the selector","correct":false,"message":"Selectors sometimes change but not necessarily!"},{"option":"the URL and the selector","correct":false,"message":"Selectors sometimes change but not necessarily!"},{"option":"we need to repeat the code for each iteration","correct":false,"message":"don&#39;t be such a pessimist!"}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-32ccd7eca58db63df6ac">{"x":{"question":"Which parts of the code change when we want to scrape several pages?","answers":[{"option":"the URL","correct":true,"message":null},{"option":"the selector","correct":false,"message":"Selectors sometimes change but not necessarily!"},{"option":"the URL and the selector","correct":false,"message":"Selectors sometimes change but not necessarily!"},{"option":"we need to repeat the code for each iteration","correct":false,"message":"don&#39;t be such a pessimist!"}],"label":"selector-practice-1","skipStartButton":true,"perQuestionResponseAnswers":true,"perQuestionResponseMessaging":true,"preventUnanswered":true,"displayQuestionCount":false,"displayQuestionNumber":false,"disableRanking":true,"nextQuestionText":"","checkAnswerText":"Submit Answer","allowRetry":true,"randomSortAnswers":false,"json":{"info":{"name":"","main":""},"questions":[{"q":"Which parts of the code change when we want to scrape several pages?","a":[{"option":"the URL","correct":true,"message":null},{"option":"the selector","correct":false,"message":"Selectors sometimes change but not necessarily!"},{"option":"the URL and the selector","correct":false,"message":"Selectors sometimes change but not necessarily!"},{"option":"we need to repeat the code for each iteration","correct":false,"message":"don&#39;t be such a pessimist!"}],"correct":"Correct!","incorrect":"Incorrect."}]}},"evals":[],"jsHooks":[]}</script>
 </td>
 </tr>
 </table>
