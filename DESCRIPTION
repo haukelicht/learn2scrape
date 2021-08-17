@@ -1,9 +1,10 @@
 Package: learn2scrape
 Title: Learn To scrape web data in R
-Version: 0.0.9000
-Authors@R: person("Theresa", "Gessler", email = "gessler@ipz.uzh.ch",
-                  role = c("aut", "cre"))
-Maintainer: Theresa Gessler <gessler@ipz.uzh.ch>
+Version: 0.0.900
+Authors@R: c(
+    person("Theresa", "Gessler", email = "gessler@ipz.uzh.ch", role = c("aut", "cre")),
+    person("Hauke", "Licht", email = "hauke.licht@uzh.ch", role = c("aut"))
+    )
 Description: This package is there to create an interactive webscraping tutorial
     that can be run via learnr. Examples are drawn with a political science background
     in mind but tools are applicable more widely.
@@ -14,11 +15,10 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
-    caret,
-    dplyr,
-    ggplot2,
-    magrittr,
     rvest,
+    RSelenium,
+    dplyr,
     tidyr,
+    ggplot2,
     quanteda
 RoxygenNote: 7.1.1

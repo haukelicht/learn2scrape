@@ -1,0 +1,211 @@
+---
+title: "Scraping HTML tables"
+# author: "Theresa Gessler and Hauke Licht"
+# date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+description: >
+  Learn how to scrape data from HTML tables using the `rvest` package.
+# output: html_document
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r knitr, include=FALSE}
+knitr::opts_chunk$set(
+  # code chunk options
+  echo = TRUE
+  , eval = TRUE
+  , warning = FALSE
+  , message = FALSE
+  , cached = FALSE 
+  , exercise = TRUE
+)
+```
+
+
+```{r setup, include=FALSE}
+library(learnr)
+library(rvest)
+library(dplyr)
+```
+
+
+## Introduction
+
+*Last revised: `r format(Sys.Date(), '%e %B %Y')`*
+
+Compared to text, tables are a lot easier to scrape: 
+
+- Using `html_table()` we can just extract all tables contained in the page and manually select those that are relevant for us
+- alternatively, we can use `html_elements` and appropriate CSS selectors to select specific tables.
+
+We will practice both. 
+For this lesson, I have loaded the packages `rvest` and `dplyr`.
+
+## Scraping all tables
+
+As mentioned, we use a command called `html_table()` from the 'rvest' package.
+Next to the parsed page or HTML node(s) you want to read, the single most important parameter of the command is the `fill` parameter. 
+If you specify `fill = TRUE`, `html_table()` will automatically fill rows with fewer than the maximum number of columns with `NA`s. 
+This is useful because tables on the internet are often messy - they have inconsistent numbers of cells per row or the format is otherwise messed up. 
+The `fill` parameter allows you to deal with this by filling in `NA` values where necessary.
+
+Try it out on [wikipedia's list of the tallest buildings](https://en.wikipedia.org/wiki/List_of_tallest_buildings){target="_blank"}. Read the page and then apply the `html_table()` command with and without the specification.
+
+```{r fill}
+urls <- "https://en.wikipedia.org/wiki/List_of_tallest_buildings"
+page <- read_html(urls)
+wiki_tables <- html_table(page)
+```
+## Extracting specific tables
+
+Note that what type of data `html_table()` returns depends on what you input:
+
+- If you pass an 'table' `html_node` object (e.g., by extracting the first 'table' web element from a page), the result will be a *data frame*.
+- If instead you pass it a parsed HTML page or list of HTML nodes to extract all tables from the input, `html_table()` will return a *list of data frames*.
+
+**Try it out**: Use `str(..., 1)` to compare how `html_table()` behaves depending on the input type: 
+
+```{r one-vs-many-tables}
+urls <- "https://en.wikipedia.org/wiki/List_of_tallest_buildings"
+page <- read_html(urls)
+
+# ToDo: pass the object 'page' to html_table() and inspect the structure of the result
+class(page) # an 'xml_document'  object
+a <- ...
+# inspect: how is the return obejct structured?
+str(a, 1)
+
+# ToDo: extract all tables from `page` and inspect the structure of the result
+all_tables <- ...
+# check: what's the class of this object?
+class(all_tables) 
+b <- html_table(all_tables)
+# inspect and compare: how is the return obejct structured?
+str(b, 1) 
+
+# ToDo: extract the first table from `page` and inspect the structure of the result
+first_table <- ... # hint: there is a 'singular' equivalent to html_elements()
+# check: what's the class of this object?
+class(first_table) 
+# extract table(s)
+c <- html_table(first_table)
+# inspect and compare: how is the return obejct structured?
+str(c, 1) 
+
+```
+
+Of course, if you want to extract a specific table, you can always frist extract all tables and then extract the relevant element from the resulting using`[[`
+
+<!-- Alternatively, you want to proceed in a piping-chain, you can use the command `extract2()`, adding the number of the table in brackets (the command name is no typo - `extract` without the 2 works for vectors, `extract2()` works for lists). -->
+
+**Try it out:** extract the second table from the Wikipedia list of tallest buildings.**
+
+```{r extract-second-table}
+urls <- "https://en.wikipedia.org/wiki/List_of_tallest_buildings"
+page <- read_html(urls)
+tables <- html_table(page)
+# ToDo: extract the second table
+second_table <- ...
+```
+
+
+## Selecting specific tables
+
+Alternatively, you can select specific tables upfront. 
+This is for example useful when you scrape different pages that all contain the relevant information in a table but the corresponding tables are in different places on different pages.
+Say you are scraping Wikipedia articles about artists or writers, each article contains a list of their work, but each article may contain a variety of other tables.
+
+*If* the tables share a common CSS selector across pages, you can use `html_element()` to extract the relevant table from each page. 
+
+We practice this by downloading the basic information of [each member of the cast of the movie Wine Country](https://en.wikipedia.org/wiki/Wine_Country_(film)){target="_blank"} from Wikipedia.
+Note that basic information is contained in the grey box you usually see [on the right of a Wikipedia page](https://en.wikipedia.org/wiki/Amy_Poehler){target="_blank"}.
+
+Try the following with our Wikipedia example:
+
+1. Use *SelectorGadget* to select all the links to the cast members from the movie page (see https://en.wikipedia.org/wiki/Wine_Country_(film)#Cast)
+2. extract the links to their pages using *SelectorGadget*
+3. extract the tables from all pages
+4. use a `for`-loop or - if you already know how to - a function with `lapply`
+- put them into a list
+
+**Caution:** Be polite and don't forget to pause between iterations!
+
+<!-- *Unfortunately, the page changed since the creation of this tutorial. Please only scrape the first 10 URLs, otherwise you will run into an error!* -->
+
+```{r wine}
+cast_links <- ...
+
+# ToDo: create a list that collects all extracted tables
+... <- ...
+
+# ToDo: loop over elements in vector `cast_links` (see line 1)
+for (...) {
+  
+  #ToDo: read and HTML from page link 
+  ... 
+  #ToDo: extract all tables from 
+  ... 
+  
+  # pause between 2 and 3 seconds
+  Sys.sleep(runif(1, 2, 3))
+}
+```
+
+<details>
+<summary>**_Solutuion_**</summary>
+```{r wine-solution, exercise = FALSE, eval = FALSE}
+cast_links <- c(
+  "/wiki/Amy_Poehler",      "/wiki/Rachel_Dratch",    "/wiki/Ana_Gasteyer",     
+  "/wiki/Maya_Rudolph",     "/wiki/Paula_Pell",       "/wiki/Emily_Spivey",     
+  "/wiki/Tina_Fey",         "/wiki/Maya_Erskine",     "/wiki/Jason_Schwartzman",
+  "/wiki/Cherry_Jones",     "/wiki/Jay_Larson",       "/wiki/Liz_Cackowski",    
+  "/wiki/Sunita_Mani",      "/wiki/Greg_Poehler",     "/wiki/Bren%C3%A9_Brown"
+)
+cast_links <- paste0("https://en.wikipedia.org", cast_links)
+
+# create list for collecting extracted tables
+tables <- list()
+
+# loop over article URLs
+for (link in cast_links) {
+  message("iteration ", length(tables))
+  # read page and parse HTML
+  page <- read_html(link)
+  # extract tables from page
+  tables[[link]] <- html_table(page)
+  # pause
+  Sys.sleep(runif(1, 2, 3))
+}
+
+# how many tables extracted?
+as.data.frame(lengths(tables), nm = "n_tables")
+```
+</details>
+
+
+You will see that all tables are quite heterogeneous --- so this is not a general-purpose solution. 
+Still, when you are dealing with election results or similar data, scraping tables based on their nodes can be incredibly helpful!
+
+#### Step 2 in R 
+
+You'll have noticed that we have asked you to manually extract links to actors' Wikipedia pages in step 2 above.
+Could you think about a way to automate this.
+Try to put in words what you'd need to do to extract this information, say, from 100 pages of similarly structured articles about movies and their casts on Wikipedia.
+
+**Hint:** Solving this problem is challenging! 
+As shown below, you'll need to rely on Xpath and use nesting predicates and axes syntax (see https://devhints.io/xpath).
+We will pick up this challenge when speaking more about Xpath!
+
+<details>
+<summary>**_Solution_**</summary>
+```{r , exercise = FALSE, eval = FALSE}
+url <- "https://en.wikipedia.org/wiki/Wine_Country_(film)"
+page <- read_html(url)
+
+cast_list <- html_element(page, xpath = "//h2[./span[@id='Cast']]/following-sibling::ul")
+
+casts_rel_links <- cast_list %>% 
+  html_elements("a") %>% 
+  html_attr("href")
+```
+</details>

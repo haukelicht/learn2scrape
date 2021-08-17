@@ -1,0 +1,921 @@
+---
+title: "R basics: Data types and programming skills"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+description: >
+  Refresh your basic R programming skills.
+  This tutorial reviews
+  common R data types,
+  how to create, access and modify objects,
+  how to loop/iterate,
+  and 
+  how to write functions.
+# output: html_document
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+
+```{r knitr, include=FALSE}
+knitr::opts_chunk$set(
+  # code chunk options
+  echo = TRUE
+  , eval = TRUE
+  , warning = FALSE
+  , message = FALSE
+  , cached = FALSE 
+  , exercise = TRUE
+  , exercise.completion	= TRUE
+)
+```
+
+```{r setup-invisble, exercise = FALSE, include=FALSE}
+library(learnr)
+library(dplyr)
+# library(rvest)
+```
+
+## Introduction
+
+In this tutorial, we will refresh your basic R programming skills.
+It covers some of the essential programming concepts we will need to scrape and clean web data. 
+Specifically, we will review
+
+- common R data types,
+- how to create, access and modify objects,
+- how to loop/iterate, and 
+- how to write functions.
+
+If you're having trouble to understand the code in other tutorials, we recommend you go through this tutorial and make sure you understand each of the concepts introduced.
+
+## Creating objects (assignment)
+
+To create an object in R, we use the `<-` operator.
+For example, we can create an object called 'x' with the value 1 as follows:
+
+```{r assignment}
+x <- 1
+```
+
+This is called **assignment**.
+So the expression `x <- 1` reads "I assign the value 1 to an object called 'x'."
+
+<!-- Note that there is a keyboard shortcut for inserting this operator: alt + "-" (dash) -->
+
+### Use `<-`, not `=` for assignment
+
+Actually, you could also use `=` to assign values to objects.
+However, it is an R code convention to reserve `=` for passing values to function arguments.
+This makes reading code easier. 
+For example:
+
+```{r, exercise = FALSE}
+res <- length(x = 1:3)
+```
+
+### Evaluating objects 
+
+After assigning an object, it can be used by referring to its name.
+(The technical term is "evaluation".) 
+
+```{r evaluation}
+# create 'x'
+x <- 1
+# "call"/"print" 'x' (i.e. evaluate it)
+x
+```
+
+## Data types
+
+R has many **data types** (see `?typeof`).
+The most common (atomic) types are:
+
+1. "logical",
+2. "integer",
+3. "double",
+4. "character",
+5. `NULL`
+
+### 1. logical
+
+The simplest data type is "logical".
+There are only three valid logical values:  `TRUE`, `FALSE`, or `NA` ("missing").
+You can check whether a value has type logical using `is.logical()`.
+
+```{r type-logical}
+typeof(TRUE)
+typeof(FALSE)
+typeof(NA)
+
+is.logical(TRUE)
+is.logical(FALSE)
+is.logical(NA)
+```
+
+### 2. integer
+
+Integer values are numbers: ..., -1, 0, 1, ...
+You can check whether a value has type logical using `is.integer()`.
+A missing integer can be created with `NA_integer_`.
+
+Note that you have to explicitly force a number to type integer for R to recognize it aas such.
+This can be done by adding an `L` behind the number (e.g. `1L`).
+You need to force this behavior, because R interprets numbers as "double" type by default.
+
+```{r type-integer}
+is.integer(1) # FALSE !!!
+is.integer(1L) # TRUE =)
+is.integer(NA_integer_) 
+```
+
+
+### 3. double
+
+Integer values are *real* numbers in (-&infin;, &infin;)
+You can check whether a value has type logical using `is.double()`.
+A missing integer can be created with `NA_real_` (not `NA_double_`!!!).
+
+```{r type-double}
+typeof(1)
+is.double(1)
+is.double(NA_real_)
+```
+
+#### *Special values*
+
+Note that because the double type implements real-valued mathematical operations in R, 
+there are two special values reserved for *infinity* and *not-a-number* (undefined values):
+
+```{r infinity}
+is.double(Inf)
+Inf
+-Inf
+```
+
+
+```{r nan}
+typeof(NaN)
+is.na(NaN)
+
+# the logical NA and NaN are two different pairs of shoes
+identical(NA, NaN)
+# the same applies to double-type NA
+identical(NA_real_, NaN)
+```
+
+### 4. character
+
+Character values are strings, for example "hello world!"
+You can create a character value by wrapping it inside single or double quotation marks.
+A missing character values can be created with `NA_character_`.
+You can check whether a value has type character using `is.character()`.
+
+```{r type-character}
+is.character('this is a valid character values')
+is.character("this is also a valid character values")
+is.character(NA_character_)
+```
+
+### 5. `NULL`
+
+`NULL` is an object that represents "no data."
+Contrast this with the `NA*` values introduced above.
+
+```{r null-type}
+# in the case of NULL, there is really nothing!
+length(NULL)
+
+# NA values, in contrast, represent some data
+# (the value is unknown, but this is considered valid information)
+length(NA)
+length(NA_integer_)
+length(NA_real_)
+length(NA_character_)
+```
+
+## Vectors
+
+(Ordered) collections of objects of the same type are called **vectors**.
+You probably know vectors from math in school.
+
+```
+1 # a "scalar"
+(1, 2, 0) # a "vector"
+```
+
+In the above example, the vector has three **elements**: 1, 2, and 0
+
+### Creating vectors
+
+In R, you create vectors by **c**ombining logical, integer, double or character values using the `c()` function.
+
+For example, you can combine the three valid logical values in a logical vector:
+
+```{r creating-vectors}
+# create a logical vector
+logicals <- c(TRUE, FALSE, NA)
+typeof(logicals)
+is.logical(logicals)
+```
+
+### Type conversion 
+
+Note however that you can always only combine objects of the same type in an (atomic) vector
+If you violate this rule, R will convert all values to the type according to the following hierarchy: `logical` &#8614; `integer` &#8614; `double` &#8614;	`character`.
+
+That is, if you combine a logical and an integer value, both will be represented as integers; 
+if you combine a logical, an integer and a double value, all will be represented as double values;
+and so on.
+
+This is called **type conversion**.
+
+```{r type-conversion}
+# logical converts (upwards) to integer 
+typeof(c(TRUE, 1L))
+c(TRUE, 1L)
+
+# logical and integer convert (upwards) to double 
+typeof(c(TRUE, 1L, 1.1))
+c(TRUE, 1L, 1.1)
+
+# logical, integer and double convert (upwards) to character 
+typeof(c(TRUE, 1L, 1.1, "one"))
+c(TRUE, 1L, 1.1, "one")
+```
+
+### `NULL` is ignored 
+
+Note that because `NULL` represents "no data," it is *ignored* when creating an atomic vector!
+
+```{r null-in-vector, exercise.lines = 1}
+c(NULL, "value")
+```
+
+Accordingly, it is also ignored when peforming tye conversion.
+
+```{r null-in-type-conversion, exercise.lines = 1}
+c(NULL, TRUE, 1L, 1.1, "one")
+c("NULL", NULL)
+```
+
+### Naming vectors
+
+One thing you haven't seen so far in this tutorial are **named vectors**.
+A named vector is a vector where _each_ element has a corresponding character value that denotes its "name". 
+
+You can create a named vector using name--value syntax, or with the `setNames()` function.
+You can assigning names to an already existing vector using the `names()` function.
+
+```{r naming-vectors}
+# creating a named vector
+c("apple" = 3, "banana" = 2, "lemon" = 1.5)
+setName(c(3, 2, 1.5), c("apple", "banana", "lemon"))
+
+# assigning names to an existing vector
+capitals <- c("Lisbon", "Bejing", "Cape Town")
+names(capitals) <- c("Portugal", "China", "South Afric")
+```
+
+You can access the names of a vector using the `names()` function.
+
+```{r query-names, exercise.lines = 2}
+prices <- c("apple" = 3, "banana" = 2, "lemon" = 1.5)
+names(prices)
+```
+
+And because `names()` returns `NULL` if a vector is unnamed, you can it to check if a vector is named.
+
+```{r check-if-named}
+# create unnamed vector
+x <- logical(3)
+# is named?
+is.null(names(x)) # `FALSE`
+
+# name
+names(x) <- c("a", "b", "c")
+is.null(names(x)) # TRUE
+```
+
+### Extracting values from vectors
+
+Once you have created a vector, you can access its values by **indexing** it.
+To do so, use the `[` function and provide integer values to access positions as follows:
+
+```{r integer-indexing}
+fruits <- c("apple", "banana", "lemon")
+# access first value
+fruits[1]
+# access first two values
+fruits[1:2]
+```
+
+Note that by negating indexes, for example, by adding a negative sign ("dash") in front of an integer index value, you can **omit** ("drop") values:
+
+```{r negative-indexing}
+fruits <- c("apple", "banana", "lemon")
+# omit first value
+fruits[-1]
+# omit first two values
+fruits[-c(1:2)]
+```
+
+### Indexing with logical values
+
+You can also access/omit the values of a vector using logical values.
+(Note that `!` can be used to negate boolean values.)
+
+```{r boolean-indexing}
+idxs <- c(TRUE, FALSE, FALSE)
+# access first value
+fruits[idxs]
+# negate to access last two values
+fruits[!idxs]
+```
+
+### Indexing named vectors
+
+Named vectors are useful because they allow indexing by names:
+```{r name-indexing}
+prices <- c("apple" = 3, "banana" = 2, "lemon" = 1.5)
+prices["apple"]
+prices[c("apple", "lemon")]
+
+# NOTE: 
+#  ... negative indexing doesn't work with names
+prices[-c("apple", "lemon")] # this throws an ERROR!
+#  ... but you can use logical indexing 
+prices[!names(prices) %in% c("apple", "lemon")]
+```
+
+
+### *Empty/zero-length vectors* (optional)
+
+Empty vectors can be created with the following functions:
+
+```{r creating-empty-vectors}
+logical()
+integer()
+double()
+character()
+```
+
+Note that if you pass an positive numeric value to the `length` argument of these functions (the  default is `length = 0L`, see also `?vector`), 
+you can create vectors of given length.
+
+Note, however, that the initial values picked vary between types. 
+
+```{r creating-fixed-length-vectors}
+logical(3) # all values are `FALSE`
+integer(3) # all values are `0L`
+double(3) # all values are `0`
+character(3) # all values are `""`
+```
+
+### *Other functions for creating vectors* (optional)
+
+For certain types, there are shortcuts for creating vectors.
+For example, `seq()` creates a sequence of numeric (double) values.
+Specifically, `seq()` can be used to create sequence of numbers that in- or decreases by a specific amount specified by the `by` argument (the default is `by = 1L`).
+
+```{r creating-increasing-sequences}
+# increasing in steps of 1
+seq(-10, 10) # equivalent to `-10:10` 
+
+# increasing in steps of 5
+seq(-10, 10, by = 5)
+
+# NOTE: if you don't force the value passed to `by` to an integer, 
+#  `seq()` will return a double vector
+typeof(seq(-10, 10, by = 5))
+typeof(seq(-10, 10, by = 5L))
+```
+
+You can also create decreasing sequences!
+But remember to bring the start and end values in the correct order.
+
+```{r creating-decreasing-sequences, exercise.lines = 1}
+seq(-10, 10, by = -5L)
+```
+
+`seq()` can also be called with the argument `length.out`.
+This allows creating a sequence of a pre-defined length.
+
+```{r creating-fixed-length-sequences, exercise.lines = 1}
+seq(-10, 10, length.out = 11)
+```
+
+Other useful functions are `seq_len()` and  `seq_along()`.
+`seq_len()` takes a non-negative number as input and returns an integer sequence of equal length.
+
+```{r seq_len, exercise.lines = 2}
+seq_len(0)
+seq_len(3)
+```
+
+`seq_along()` takes a vector as input and returns an integer sequence of equal length as the input vector.
+
+```{r seq_along, exercise.lines = 2}
+seq_along(c())
+seq_along(c("a", "b", "c"))
+```
+
+## Atomic and recursive types
+
+### Atomic types 
+
+The data types you've encountered so far in this tutorial (logical, integer, double, character, and `NULL`) are **atomic types**.
+They are "atomic" in the sense that they cannot "nest" objects of other type.
+
+So if you use `c()` to create an atomic vector, all values need to have the *same* type.
+Remember that if you violate this rule, R performs *type conversion*  following hierarchy: `logical` &#8614; `integer` &#8614; `double` &#8614;	`character`.
+
+### Recursive types 
+
+In contrast to atomic types, **recursive types** can nest objects of other types.
+The most important recursive type is "list".
+
+## Lists
+
+You can create a list with the `list()` functions
+
+```{r first-list}
+list(TRUE, 1L, 1.1, "one")
+```
+
+### No type conversion inside lists
+
+You'll note that *no* "type conversion" is performed inside lists!
+
+```{r list-no-type-conversion}
+# types are preserved
+list(TRUE, 1L, 1.1, "one")
+# types are  n o t  preserved
+c(TRUE, 1L, 1.1, "one")
+```
+
+### Combining lists 
+
+You can use `c()` to combine multiple list. 
+
+```{r combining-lists, exercise.lines = 1}
+c(list(1), list(2))
+```
+
+But note that when combining a list/lists and a vector/vectors, the vector(s) will be converted to a list(s)!
+So **type conversion** applies beyond atomic vectors 
+
+```{r comibing-lists-type-conversion}
+c(
+  list("hello"), # a list with one character element
+  c("goodbye") # a character vector (!) with one element
+)
+```
+
+### Naming lists
+
+Like vectors, lists can be named:
+
+```{r naming-lists}
+# create named list 
+x <- list("logical" = TRUE, "integer" = 1L, "double" = 1.1, "character" = "one")
+names(x)
+
+# assign names to an existing list
+x <- list(TRUE, 1L, 1.1, "one")
+names(x) <- c("logical", "integer", "double", "character")
+names(x)
+```
+
+### Indexign lists
+
+The difference between atomic and recursive types is important because it matters for how you can **index** objects, that is, access their values.
+
+As already shown, the elements of atomic vectors can be accessed with a single square bracket `[`.
+In contrast, we use double square brackets `[[` to access the elements of a list.
+
+```{r vector-vs-list}
+vec <- c(1, 2)
+vec[1]
+
+lst <- list(1, 2)
+lst[[1]]
+```
+
+This difference in syntax is necessary because, in contrast to atomic types, lists can be multiple levels deep.
+This is illustrated by the example below:
+
+```{r list-grandma}
+# (a list of lists of lists)
+
+# grandma Paula has two children: ...
+paula <- list(
+  # ... Frank
+  "frank" = list(
+    # Frank has two children ...
+    "laura" = list(),
+    "beth" = list()
+  ),
+  # ... and Tom
+  "tom" = list(
+    # ... Tom has no children
+  )
+)
+```
+
+To access elements at the first level (grandma Paula's children), we need to use `[[`.
+For example, So to get the data for Paula' first child, Frank' we need to index the first element of the fist level.
+
+```{r list-grandma-extract-l1}
+# get data for Paula's first child
+paula[[1]]
+
+# alternatively:
+paula[["frank"]]
+paula$frank
+```
+
+And to get at the values at the second level, we need to index even deeper.
+Below, we extract the information for the first child of Frank, who in turn is grandma Paula's first child.
+
+```{r list-grandma-extract-l2}
+# get data for first child of Paula's first child
+paula[[1]][[1]]
+```
+
+
+## Data frames
+
+In R, there are several **data structures** that combine multiple values into a single object.
+You have already encountered two of the most important data structures in R:
+
+- (atomic) vectors (`vector()`): sequence of values of a certain type
+- lists (`list()`): collection of objects, potentially of different types
+
+A third, very important data structure is the **data frame**. 
+A data frame is a tabular data format similar to an Excel spread sheet or a CSV file.
+
+### Creating data frames
+
+Data frames allow us to combine many vectors or lists of the *same length* into a single object.
+We create data frames with the `data.frame()` function.
+
+```{r dataframes}
+student_names <- c("Bill", "Jane", "Sarah", "Fred", "Paul")
+math_scores <- c(80, 75, 91, 67, 56)
+verbal_scores <- c(72, 90, 99, 60, 68)
+
+students <- data.frame(student_names, math_scores, verbal_scores)
+students
+```
+
+Note that `student_names` has a different type (character) than `math_scores` (numeric).
+Nevertheless, you can combine them in a data frame. 
+(This is because a data frame is really just a list of lists with same length.)
+
+### Columns and rows
+
+Because data frames are tabular data structures, we refer to the vectors they combine as *columns.*
+The length of individual columns is equal to the number of *rows* of a data frame.
+You can access this information with the `ncol()` and `nrow()` functions
+
+### Creating new columns
+
+We can also add new columns to an existing data frames by using the assignment operator:
+
+```{r df-class, exercise.lines=20}
+student_names <- c("Bill", "Jane", "Sarah", "Fred", "Paul")
+math_scores <- c(80, 75, 91, 67, 56)
+verbal_scores <- c(72, 90, 99, 60, 68)
+students <- data.frame(student_names, math_scores, verbal_scores)
+
+# add 'final_score' column
+students$final_scores <- (students$math_scores + students$verbal_scores)/2
+```
+
+### Combining data frames 
+
+Often we want to combine two or more data frames.
+
+#### Column-wise combination
+
+If we want to combine them side-by-side, we can "bind" them column-wise using the `cbind()` function:
+```{r cbind}
+a <- data.frame(letters = letters[1:2])
+b <- data.frame(Letters = LETTERS[1:2])
+
+cbind(a, b)
+```
+
+Note, however, that to allow for column-wise combination, the data frames need to have the same amount of rows!
+
+```{r cbind-fail}
+a <- data.frame(letters = letters[1:3])
+b <- data.frame(Letters = LETTERS[1:2])
+
+nrow(a)
+nrow(b)
+
+cbind(a, b)
+```
+
+#### Row-wise combination
+
+If we want to stack two or more data frames on top of one another, we can "bind" them row-wise with the `rbind()` functions:
+
+```{r rbind}
+a <- data.frame(col = letters[1:2])
+b <- data.frame(col = LETTERS[1:2])
+
+rbind(a, b)
+```
+
+Note, however, that the `rbind()` function throws an error if the data frames you want to combine have different column names.
+
+```{r rbind-fail}
+a <- data.frame(letters = letters[1:2])
+b <- data.frame(Letters = LETTERS[1:2])
+
+rbind(a, b)
+```
+
+
+```{r rbind-ok}
+a <- data.frame(letters = letters[1:2])
+b <- data.frame(Letters = LETTERS[1:2])
+names(b) <- "letters"
+
+rbind(a, b)
+```
+
+#### Combining using a list of data frames
+
+A very common scenario is when we have a list of data frames, and we want to bind them together.
+We can do this by passing the list and our desired bind function as arguments to the `do.call()` function
+
+```{r combine-do_call, exercise.lines=20}
+results <- list()
+# let's say here you're scraping 3 websites
+results[[1]] <- data.frame(domain = "google",   url = "www.google.com")
+results[[2]] <- data.frame(domain = "facebook", url = "www.facebook.com")
+results[[3]] <- data.frame(domain = "twitter",  url = "www.twitter.com")
+
+# and now we want to combine all 3 data frames
+do.call(rbind, results)
+```
+
+Alternatively, we can use the `bind_rows` functions in the dplyr package.
+
+```{r combine-bind_rows, exercise.setup = "combine-do_call"}
+bind_rows(results)
+```
+
+## Control flow
+
+Sometimes what you want to do depends on circumstances.
+Implementing this behavior in code is called **control flow** because we control which of many potential streams of actions are executed.
+
+Like in other programming languages, control flow is implemented with `if-else` statements.
+Depending on whether a condition is true or false, we can execute different chunks of code.
+
+### If
+
+Let's start with `if`.
+The logic is: "If something is true, do something."
+
+```{r if-simple}
+print_this <- FALSE
+if (print_this) {
+  print("Hello")
+}
+```
+
+In the above code chunk, because `print_this` evaluates to FALSE, "Hello" is not printed.
+
+Note that you can write everything inside the parantheses after `if` that evaluates to a single logical value (excluding `NA`).
+
+```{r if}
+if (0 == 1) {
+  print("All numbers are equal!")
+}
+```
+
+
+### If-Else
+
+Sometimes you do one thing if a condition applies, and something else if it doesn't.
+
+This can be implemented in R with `if`-`else` control flow:
+
+```{r if-else}
+if (0 == 1) {
+  print("I escape the laws of math!")
+} else {
+  print("zero and one are not equal")
+}
+```
+
+Note that there is the shorthand `ifelse()` function
+
+
+```{r ifelse}
+ifelse(0 == 1, "I escape the laws of math!", "zero and one are not equal")
+```
+
+### If, else, and else-if
+
+If you think beyond binary options, you want to use `else if`:
+
+```{else-if}
+x <- 4
+y <- 5
+if (y > x) {
+  print("`y` is greater than `x`")
+} else if (x > y) {
+  print("`x` is greater than `y`")
+} else {
+  print("`x` and `y` are equal")
+}
+```
+
+## Loops
+
+We use loops whenever we need to  execute the same chunk of code multiple times with some varying input. 
+
+For example, we may use a loop whenever we have multiple Twitter accounts and we want to run sentiment analysis for tweets posted by each of them.
+
+### `for`-loops
+
+`for`-loops are probably the most common type of loop and are easily implemented in R
+
+```{r for-loop}
+vec <- 1:10
+for (i in vec) {
+	print(i)
+}
+```
+
+### Anatomy of a `for`-loop
+
+We can abstract from this to note that a for loop follows the following logic:
+
+```
+for (i in VECTOR) { 
+  do something with i 
+}
+```
+
+Now, let's have a look at the anatomy of a `for`-loop: 
+
+- `for` tells R that you want repeat some code 
+- you write the code you want to repeat *inside* the curly braces (i.e., between `{` and `}`)
+- how often R evaluates this code and how is determined by the expression `(i in VECTOR)`
+  - `VECTOR` is a vector (or list) with several elements
+  - In each *iteration*, `i` is taking on the value of an element of `VECTOR`; first the value of the first element, then the value of the second element, and so on.
+  
+Consequently, when the code inside your loop (i.e., inside the curly braces) involves `i`,
+in each iteration it is evaluated with the *current* value of `i`.
+This allows to repeat code while varying `i`.
+
+### `i` am a placeholder
+
+Look at the following example and not that this code runs smoothly too.
+This shows that instead of  `i`, you can use different word --- the word is is just a placeholder!
+
+```{r fornumber}
+for (number in 1:3) {
+	print(number)
+}
+```
+
+### Filling vectors/lists using for loops
+
+There are many scenarios where you want to "collect" the results of individual for-loop iterations in a separate object.
+Say we have a vector of integer numbers, we want to know if they are greater than 5, and we want to collect the result of this test in a new vector.
+
+
+```{r for-loop-filling}
+numbers <- 4:6
+results <- logical(length = length(numbers))
+for (i in seq_along(numbers)) {
+  results[i] <- numbers[i] > 5
+}
+results
+```
+
+However, in the above example it is assumed that you know the length of the resulting object in advance.
+Specifically, we know we will evaluate each element of `numbers` against the number five.
+Because `numbers` has three elements, we know that we will generate 3 results.
+Hence `results` must have three elements too.
+
+### Appending values using for loops
+
+If you don't know how long the vector you fill will be after all iterations have been completed, you can apply the following logic:
+
+1. you create an empty vector/list
+2. each iteration you generate a valid value, you "append" it by assigning it the the end of the vector/list 
+
+Appending to the last position can be done by assigning a value to the position of the vector/list taht comes after the actual end of this vector, that is, at position `length(vector)+1`
+
+```{r for-loop-appending}
+numbers <- 4:6
+results <- logical() # create zero-length/empty vector
+for (i in seq_along(numbers)) {
+  results[length(results)+1] <- numbers[i] > 5
+}
+results
+```
+
+You can verify yourself that because in this example 
+
+- our `results` vector is empty in the begging (i.e., has length zero)
+- and we iterate over $i = 1, 2, ...$
+
+we can simply write:
+
+```{r for-loop-appending-simple}
+numbers <- 4:6
+results <- logical()
+for (i in seq_along(numbers)) {
+  results[i] <- numbers[i] > 5
+}
+results
+```
+
+### Skipping and Stopping
+
+Two important features of `for` loops is that you can skip iterations or stop them entirely if desired.
+You skip an iteration using the keyword `next`
+
+```{r for-loop-next}
+for (i in 1:4) {
+  # skip if `i` is less than 3
+  if (i < 3) {
+    next
+  # otherwise print current value of `i`
+  } else {
+    print(i)
+  }
+}
+```
+
+You can interrupt a running fro loop with the `break` keyword:
+
+```{r for-loop-break}
+for (i in 1:4) {
+  # stop if `i` is greater than 4
+  if (i > 3) {
+    next
+  } 
+  
+  # otherwise print current value of `i`
+  print(i)
+}
+```
+
+## Functions
+
+A function defines a procedure to return some output based on some inputs.
+
+### Creating functions
+
+We create functions in R using the `function()` function.
+
+```{r function-no-arg}
+hello <- function() {
+  print("Hello")
+}
+```
+
+### Calling functions
+
+We can call this function as follows:
+
+```{r  function-no-arg-call, exercise.setup = "function-no-arg"}
+hello()
+```
+
+Note that because our `hello()` function does not have any arguments (i.e., parameters based on which it adapts its behavior), we do not pass it any values inside the parentheses. 
+
+### Functions with arguments
+
+This changes if we define our function in a way that it requires an input when called.
+In our example, this input is called "name".
+
+
+```{r function-one-arg}
+hello <- function(name) {
+  print(paste("Hello", name))
+}
+```
+
+If we now call the function without passing an input, we get an error
+
+```{r function-one-arg-fail, exercise.setup = "function-one-arg"}
+hello()
+```
+
+
+
