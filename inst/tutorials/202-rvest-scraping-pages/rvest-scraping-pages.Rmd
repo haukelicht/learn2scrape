@@ -1,0 +1,324 @@
+---
+title: "Scraping multiple pages"
+# author: "Theresa Gessler and Hauke Licht"
+# date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+description: >
+  Learn how to scrape data from multiple pages using the `rvest` package.
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r knitr, include=FALSE}
+knitr::opts_chunk$set(
+  # code chunk options
+  echo = TRUE
+  , eval = TRUE 
+  , warning = FALSE
+  , message = FALSE
+  , cached = FALSE 
+  , exercise = TRUE
+)
+```
+
+
+```{r setup, include=FALSE}
+library(learnr)
+library(learn2scrape)
+library(rvest)
+library(urltools)
+quotepage <- read_html(system.file("extdata", "quotepage.html", package = "learn2scrape"))
+```
+
+
+
+## Introduction
+
+*Last revised: `r format(Sys.Date(), '%e %B %Y')`*
+
+So, you have learned how to use some of the basic functions of the `rvest` package: `read_html()`, `html_elements()` and `html_text()`.
+But most of the time, we are not just interested in a single page but multiple pages from the same domain, e.g. all newspaper reports by a specific newspaper or all speeches by a politician. 
+So we need another step: We have to learn to follow links without actually opening the browser and clicking on the link and copying the new path.
+
+In this part of the tutorial, you will learn two things:
+
+- to extract links from webpages
+- ways to automate following these links.
+
+You will see that in the end, web scraping is a function of programming in R. 
+The more you learn to use loops, functions and commands in the apply/map family, the easier will it be to effectively solve real-world web scraping problems. 
+In the end, scraping is just a small step in the whole process of extracting data.
+
+## Extracting links from webpages
+
+### Hyperlinks in HTML code
+
+Remember what the HTML code of a hyperlink looked like?
+
+
+```html
+<p>
+  This is some text 
+  <a href="http://quotes.toscrape.com/">with a link</a>.
+</p>
+```
+
+Links are basically **a**nchor nodes containing an 'href' attribute.
+'href' stands for **h**ypertext **ref**erence and specifies the webpage the link leads to.
+
+### How to extract hyperlink information using 'rvest'
+
+So to extract hyperlinks from a webpage, we need some functionality to *extract attributes* from HTML elements.
+In the `rvest` package, this command is called `html_attr()`. 
+
+We can use `html_attr()` to extract any type of attributes from HTML elements and below we'll use it to extract hyperlink information from anchor nodes.
+To do so, we pass the value 'href' to the `name` argument of the `html_attr()` function.
+For example:
+
+```r
+html_attr(parsed_page, name = "href")
+```
+
+Note, however, that attributes like 'href' are associated with individual web elements.
+So calling `html_attr()` will only work on individual web elements, not on an entire pages.
+
+So to extract hyperlinks from an entire page, we 
+(1) extract all nodes that potentially have an 'href' attribute, and 
+(2) extract the 'href' values of these nodes.
+We can implement the first step using `html_elements()` and the second step by applying html_attr to each extracted element.
+
+**Try it yourself**: Please try two things based on [http://quotes.toscrape.com/](http://quotes.toscrape.com/){target="_blank"}:
+
+1. extract all anchor nodes 
+2. extract all 'href' values from these nodes
+
+<!-- The parsed page is stored in an object called `quotepage` so you do not need to download it again. -->
+
+```{r links}
+url <- "http://quotes.toscrape.com/"
+page <- read_html(url)
+
+## ToDo: extract all anchor nodes (i.e., web elements with an 'a' tag)
+anchor_nodes <- ...
+
+## ToDo: extract all 'href' values of these nodes
+hyperlinks <- ...
+```
+
+#### Why are my links 'incomplete'?
+
+Do you notice something about the links? 
+some of them are missing parts. 
+This is because they are **relative links**, that is, they specify pages *relative* to the root of the folder structure of the webpage. 
+
+To "repair" these links, we need to add the **base URL** of the webpage. 
+This is typically just the URL of the webpage we originally scraped from; in our case  `"http://quotes.toscrape.com/"`.
+
+For adding the base URL in front of the relative links, we can use the `paste()` function. 
+`paste()` combines/glues/concatenates together two or more character values.
+Note that `paste()` accepts an argument `sep` that specifies how the individual values should be separated.
+By default, `sep = " "` so you'll always add a white space between individual values.
+To avoid this, you can either set `sep = ""` or directly use use `paste0()`, which overwrites this default with `sep = ""` so that characters are combined without inserting a white space in between.
+
+If you have never used paste, try it out:
+
+```{r try-paste}
+paste("a", "b")
+paste("a", "b", sep = "")
+paste0("a", "b")
+```
+
+
+Now, completing the paths of the URLs we scraped should not be a problem for you. Re-use the code you used to extract the links of the tags, assign it to an object called `url` and add the base url (http://quotes.toscrape.com/) *in front* of it.
+
+
+```{r paste, exercise=TRUE}
+url <- "http://quotes.toscrape.com/"
+page <- read_html(url)
+
+anchor_nodes <- html_elements(page, "a")
+rel_links <- html_attr(anchor_nodes, "href")
+
+# ToDo: add the base URL in front 
+hyperlinks <- ...
+```
+
+*Watch out for the slashes between the base url and the address of your page - having none or too many slashes is a typical problem!*
+
+#### Getting the base URL right
+
+To make 100% sure that you are adding the right information to relative links, you can use the `url_parse` function in the 'urltools' package to get at the base URL of a page.
+
+
+```{r parse-url}
+parsed_url <- urltools::url_parse("http://quotes.toscrape.com/")
+str(parsed_url, 1)
+# combine sheme (e.g., 'https') and domain info to get base URL
+base_url <- paste0(parsed_url$scheme, "://", parsed_url$domain)
+```
+
+## Extracting specific hyperlinks
+
+Another thing you'll have noticed in the previous exercise is that by extracting *all* anchor nodes and their corresponding 'href' values, we get a lot of (relative) links we might not be interested in.
+In the above exercise, the first five extracted (relative) links were:
+
+```
+[1] "/"                                           
+[2] "/login"                                      
+[3] "/author/Albert-Einstein"                     
+[4] "/tag/change/page/1/"                         
+[5] "/tag/deep-thoughts/page/1/"
+```
+
+The first one points to the page itself, 
+the second one to the login page,
+the third one to the author of the first quote,
+and the last two to tags associated with the first quote.
+
+This can be a problem!
+Suppose you want to extract only the hyperlinks referring to the pages of quote authors.
+In this case you wouldn't want to also extract the link to the Login page or the links behind the tags associated with different quotes, for example.
+Or say you want to build a list of all the tags that are used on http://quotes.toscrape.com/.
+In this case you wouldn't want to also extract the links to author pages or Login page.
+
+**This is a typical challenge in webscraping: we want to extract information from only a subset of of the web elements that make up a web page.**
+
+### Web scraping one step at a time
+
+We tackle this challenge by combining the different commands we can execute on the parsed HTML code of a page in a **pipeline**.
+In the case of extracting the links behind individual tags, for example, we would 
+
+1. parse the page
+2. identify which CSS selector/xpath is used to make web elements appear as "tag" on http://quotes.toscrape.com/
+3. extract all web elements that represent such tags 
+4. extract the 'href' values of the anchor tags associated with these elements
+5. complete them with the base URL information (if necessary)
+
+Let's try this in our example of extracting the links behind individual tags.
+
+First, we need to parse the page.
+We already know how to do this:
+
+```{r , exercise = FALSE}
+# parse URL
+url <- "http://quotes.toscrape.com/"
+page <- read_html(url)
+```
+
+Next, we need to figure out what HTML code makes web elements appear as "tag".
+Again, you have already learned ways to answer this question. 
+For example, you can use *SelectorGadget* or simply inspect the page's HTML soruce code.
+Go to http://quotes.toscrape.com/ to answer the question below  (multiple correct answers)!
+
+```{r tag-css-selector-quiz, exercise = FALSE, echo=FALSE}
+quiz(
+  caption = NULL,
+  question("What piece of HTML code makes web elements appear as 'tag'?",
+    answer("an 'a' HTML tag", message="Almost correct! All 'tag' elements are anchor nodes, but not all anchor nodes are 'tag' elements!"),
+    answer("class='tag'", correct = TRUE),
+    answer("The relative path strats with 'tag/'", correct = TRUE),
+    answer("a 'meta' HTML tag", message="Not quite! All 'tag' elements are nested in a 'meta' node, but individual 'tag' elements are not 'meta' nodes"),
+    allow_retry = TRUE,
+    random_answer_order = TRUE
+  )
+)
+```
+
+So we now know that there are two ways to identify 'tag' elements on this page, one of which we know how to implement from a previous exercise: extracting web elements based on their *class* name.
+
+*A hint if you don't remember*: you can extract web elements based on their class name with use `html_elements()` and the `css` argument by passing the literal class name and a specific punctuation character in front. For example, elements of class 'text' can be addressed with `css = '.text'`.
+
+With this information, we can extract all these nodes and their 'href' values.
+Finally, we add the base URL:
+
+```{r, exercise = FALSE}
+# parse URL
+url <- "http://quotes.toscrape.com/"
+page <- read_html(url)
+
+# extract 'tag' elements based on class name
+tags <- html_elements(page, ".tag")
+tag_hrefs <- html_attr(tags, "href")
+tag_urls <- paste0(url, tag_hrefs)
+```
+
+### The Divide-and-conquer appraoch
+
+This small example illustrates that a **crucial skill in web scraping is to first develop a clear understanding of the individual steps are you need to complete** in order to to reliably extract the data you are interested in.
+You can think of this as a *divide-and-conquer* approach: 
+you divide a big task into several, smaller tasks and then solve these tasks one after another until everything is done.
+In this way, you can concentrate on solving one problem after another without getting overwhelmed by the bigger picture.
+
+
+## Automating the following of links
+
+<!-- As I mentioned, in the end, webscraping is a function of programming.  -->
+Once we have collected all relevant hyperlinks, there are multiple ways to proceed:
+
+- you can use a `for()`-loop that loops over the vector of links, loads and parses the HTML code from each and   scrapes each of them
+- You can write a function that scrapes the content from the page behind any individual link
+    - you can put the function into your loop
+    - you can `apply()` the function to a vector
+
+For now, we will start with the easiest variant and just create a `for`-loop. 
+Later, we will also use `apply()` but there are good reasons why you will often return to simple loops.
+
+I recommend to first write down a few lines of code as if you would just want to scrape the first link:
+
+- extract the links to the pages for each quote
+- parse the first of the quote pages
+- extract the nodes of the quotes on this page
+- extract the text of the first of these nodes using `html_node()` (for now, we extract just the first to make our life a bit easier)
+
+This is also a good exercise to see to which extent you remember what we have learned so far. 
+You can then think about re-writing the code in the next step.
+
+```{r tagpages, exercise.lines=20}
+
+
+
+
+```
+
+
+
+Now, we to analyze the code: which part will vary when you try to repeat this multiple times?
+
+```{r selector-practice, exercise = FALSE, echo = FALSE}
+quiz(
+  caption= "How to repeat this",
+  question("Which parts of the code change when we want to scrape several pages?",
+    answer("the URL", correct = TRUE),
+    answer("the selector",message="Selectors sometimes change but not necessarily!"),
+    answer("the URL and the selector",message="Selectors sometimes change but not necessarily!"),
+    answer("we need to repeat the code for each iteration",message="don't be such a pessimist!"),
+    allow_retry=TRUE
+  )
+)
+```
+
+If you have figured this out, it is time to try it!
+
+## Using `for`-loops
+
+Now, try to write the code into a loop. 
+Remember how `for`-loops work? 
+We need to find a way to *loop* over our list of URLs, parsing one after the other and then reading out the quotes. 
+If you don't know how to do this, you can check the hint!
+
+Also, to keep our results, make sure to create an empty object in which you will store the text of the quotes! Again, you can check the hint if you do not know how to do this.
+
+
+```{r loop, exercise.lines=20}
+
+```
+
+
+
+
+
+
+## Wrap-up
+
+Fantastic, you're done with this lesson! We will repeat to similar tasks in the next days, also using `apply()` and other ways of looping. Still, `for`-loops are super practical for many simple scraping tasks!
+
+The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at scraping in R.

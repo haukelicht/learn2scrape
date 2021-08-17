@@ -1,0 +1,57 @@
+---
+title: "Interactive learning with `learnr` tutorials"
+# author: "Theresa Gessler and Hauke Licht"
+# date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+description: >
+  Learn how to work with itnteractive `learnr` tutorials
+   and
+   about the specifics of tutorials included in the `learn2scrape` package.
+output: 
+  learnr::tutorial:
+    progressive: true
+runtime: shiny_prerendered
+---
+
+```{r knitr, include=FALSE}
+knitr::opts_chunk$set(
+  # code chunk options
+  echo = FALSE
+  , eval = TRUE
+  , warning = FALSE
+  , message = FALSE
+  , cached = FALSE
+  , exercise = TRUE
+)
+```
+
+```{r setup, include=FALSE}
+library(learnr)
+```
+
+<!-- Welcome to web scraping with learn2scrape! -->
+<!-- This is a first attempt at making this class more interactive and fun. -->
+<!-- If you have any feedback, let me know in the next days [or after the course via e-mail](mailto:gessler@ipz.uzh.ch)! -->
+<!-- Also, if you are interested in scraping, feel free to [watch the repository on Github](https://github.com/theresagessler/learn2scrape) to get updates on new elements. -->
+
+The tutorial has explanations but there are many interactive parts where you will be asked to write code. 
+Some notes about the format:
+
+- If you don't know the answer, you can click on *Hint* (where available) or the *Solution* Button to see the solution
+- You can test your code by clicking on *Run Code*
+- Since there is no environment storing R object (like in RStudio), you have to 
+  1. directly call the objects to inspect them, 
+  2. call `str(<obejct>)` to inspect their structure, or 
+  3. use `ls()` to see what is in your environment when you execute the chunk
+- Be cautious about the *Start over* Button: Clicking on it will erase all the code you wrote thus far.
+
+Unlike in a normal R markdown document, all chunks are independent. 
+That means: If you create something in one chunk, it won't be available in the other chunks. 
+Therefore, you will sometimes have to repeat code from previous exercises but I have tried to keep this to a minimum. 
+Either use it as an opportunity to repeat or copy-paste - learnr saves your answers.
+
+##### *Note*
+
+Some of the exercises will use [piping](https://magrittr.tidyverse.org/) (i.e., the `%>%` operator) since it just makes scraping so much easier. 
+If you are not familiar with this or any other code, just let me know.
+
+<!--If you prefer using [swirl](https://swirlstats.com/){target="_blank"}, this first lesson is also available as a swirl-course. As things get more complex later on, I'll ask you to switch to the browser-version! -->
