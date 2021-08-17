@@ -4,7 +4,8 @@
 \name{epsa_paper}
 \alias{epsa_paper}
 \title{EPSA Papers}
-\format{A data frame with columns:
+\format{
+A data frame with columns:
 \describe{
  \item{title}{paper title}
  \item{author1}{first author}
@@ -23,7 +24,8 @@
  \item{abstracts}{Paper abstract}
  \item{panel}{Panel location}
  \item{url}{relative path to abstract}
-}}
+}
+}
 \source{
 EPSA Papers. Scraped from EPSA conference program.
 }
