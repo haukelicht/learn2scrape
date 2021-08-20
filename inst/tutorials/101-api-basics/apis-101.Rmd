@@ -1,15 +1,22 @@
 ---
 title: "Scraping data from APIs"
-# author: "Hauke Licht"
-# date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: >
   Learn the basics of querying data from *Application Programming Interfaces* (APIs)
   with the `httr` R package.
 output: 
   learnr::tutorial:
     progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 ---
+
+
+```{r setup-invisible, include = FALSE}
+library(learnr)
+```
+
 
 ```{r knitr, include=FALSE}
 knitr::opts_chunk$set(
@@ -20,48 +27,95 @@ knitr::opts_chunk$set(
   , message = FALSE
   , cached = FALSE 
   , exercise = TRUE
+  , exercise.completion = TRUE
 )
 ```
 
 ## Introduction
 
-
-
-The *Dad jokes* API
+In this tutorial, you will learn the basics of querying APIs using R.
+We will rely on the *Dad Jokes* API as a running example: https://icanhazdadjoke.com/api
 
 We use the following packages:
-
-```{r setup-invisible, exercise = FALSE, include = FALSE}
-library(learnr)
-```
 
 ```{r setup, exercise = FALSE}
 library(httr)
 library(dplyr)
 ```
 
+## Read the documentation 
 
-## Query a random joke
+Go to https://icanhazdadjoke.com/api and familirize yourself with the API.
+Then answer the following questions.
+
+```{r endpoint-quiz, exercise = FALSE, echo = FALSE}
+quiz(
+  caption = "API endpoints",
+  question(
+    "What is the correct endpoint to randomly query one joke from the *Dad Jokes* database?",
+    answer("https://icanhazdadjoke.com/random", message = "Almost!"), 
+    answer("https://icanhazdadjoke.com/api", message = "No, this is the URL of the API documentation."),
+    answer("https://icanhazdadjoke.com", correct = TRUE),
+    allow_retry = TRUE
+  )
+  , 
+  question(
+    "What is the correct endpoint to search for dad jokes?",
+    answer("https://icanhazdadjoke.com/search", correct = TRUE), 
+    answer("https://icanhazdadjoke.com/j", message = "No, this is the endpoint to query jokes by ID."),
+    answer("https://icanhazdadjoke.com/find", message = "Almost!"),
+    allow_retry = TRUE
+  )
+)
+```
+
+## Simple example
+
+Lets use the endpoint that returns a random joke to learn how to query an API in R.
+The correct endpoint is https://icanhazdadjoke.com
+We first assign the endpoint URL to an object called 'endpoint'.
   
 ```{r random-endpoint, exercise = FALSE}
 endpoint <- "https://icanhazdadjoke.com"
 ```
 
-The default return format is HTML.
+### Making a simple request
+
+No we can make a GET-request to this API endpoint using the `GET()` function from the `httr` package.
+If you check the documentation of this function (type `?httr::GET`), you'll see that it expects the endpoint URL as input to the frist argument.
+Since we just want to query a random joke, and this endpoint accepts no parameters (more on this later), we simply call `GET()` with the endpoint URL as single input:
 
 ```{r random-joke-html}
 resp <- GET(endpoint)
 
 # inspect
 resp 
+```
 
+
+```{r random-joke-html-invisible, exercise = FALSE, echo = FALSE}
+resp <- GET(endpoint)
+```
+
+
+If you print the return object `resp`, you see some important information:
+
+- The [*response status*](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status) is 200. This is the numerical code signalling a "success". Great!
+- The [*content type*](https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types) of the returned data is text/html. So the data is formatted as HTML. This is important when we want to **parse** the response to make it usable in R.
+
+### Parsing
+
+```{r random-joke-html-parse, exercise.setup = "random-joke-html", exercise.lines = 2}
 # parse returned data
 content(resp, "parsed") # this is an xml2/rvest 'html_document' object
 ```
 
+The default return format of the *Dad Jokes* API is HTML for this API.
 Most other APIs, however, return data in JSON format.
-We can modify our query by adding a header.
-The 'Accept' header tells the API that it should return data in JSON format
+
+We can instruct the API to return the data in another format by by adding a header to our query.
+The 'Accept' header tells the API that it should return data in JSON format.
+
 ```{r random-joke-json}
 resp <- GET(endpoint, config = add_headers(Accept = "application/json"))
 
@@ -80,11 +134,20 @@ resp <- GET(endpoint, config = accept_json())
 **Try it yourself!**
 Check the [docu](https://icanhazdadjoke.com/api#api-response-format) and try to obtain the response in plain text format
 
-```{r random-joke-text}
+```{r random-joke-text, exercise.lines = 1}
 resp <- GET(endpoint, config = ...)
 ```
 
-## Keyword search
+## API queries with parameters
+
+The above exampel was quite simple because the endpoint we've queried did not accept any parameters.
+But most APIs have parameters that allow clients to control what data is returned from an API.
+
+In this sense, APIs function just like R functions: you pass a value to a pre-defined argument to manipulate the behavior of the API and to control what data is returned.
+
+This is also why its so important to familiarize yourself with the documentaion when you work with an API: it states what query parameters there are and what kind of inputs they accept/expect.
+
+### Example: Passing a search query
 
 The *Dad Jokes* API also provides a **search endpoint**.
 This is quite common for APIs that provide text data.
@@ -93,7 +156,6 @@ The search endpoint is https://icanhazdadjoke.com/search
 ```{r search-endpoint, exercise = FALSE}
 endpoint <- "https://icanhazdadjoke.com/search"
 ```
-
 
 It accepts three parameters:
 
@@ -115,10 +177,10 @@ resp <- GET(
 )
 ```
 
-````{r , exercise = FALSE, include = FALSE}
+````{r joke-search-drink-invisible, exercise = FALSE, include = FALSE}
 resp <- GET(
-  endpoint, 
-  query = list(term = 'drink'), 
+  endpoint,
+  query = list(term = 'drink'),
   config = accept_json()
 )
 dat <- content(resp, "parsed")
@@ -126,22 +188,22 @@ dat <- content(resp, "parsed")
 
 We can verify that the key-value pair term and 'drink' has been added to the API request:
 
-```{r joke-search-drink-url}
+```{r joke-search-drink-url, exercise.setup = "joke-search-drink", exercise.lines = 1}
 resp$request$url
 ```
 
 We can now inspect the parsed response:
 
-```{r joke-search-drink-structure}
+```{r joke-search-drink-structure, exercise.setup = "joke-search-drink", exercise.lines = 1}
 dat <- content(resp, "parsed")
 
 str(dat, 1)
 ```
 
-Inspect its structure, we see that the API has returned a total 3 jokes (see list element 'total_jokes') and that there is an element called 'results.'
+Inspecting its structure, we see that the API has returned a total 3 jokes (see list element 'total_jokes') and that there is an element called 'results.'
 This element records the jokes matching our key term:
 
-```{r joke-search-drink-results}
+```{r joke-search-drink-results, exercise.setup = "joke-search-drink-structure", exercise.lines = 1}
 dat$results
 ```
 
@@ -149,12 +211,25 @@ dat$results
 
 To query multiple jokes, we will again use the *search endpoint*: https://icanhazdadjoke.com/search
 
-Instead of searching for jokes that include a certain key word, we will try to download *all jokes* in the the *Dad Jokes* database.
-We can do this by passing an empty query string '' to the `term` parameter.
-Since this is the default search term, we can simply omit it from our API request.
+Instead of searching for jokes that include a certain key word, we will now try to download *all* jokes in the the *Dad Jokes* database.
+This example helps to clarify some best practices:
+
+- how to implement "pagination"
+- how to use for-loops to avoid repetitive code
+- how to use custom R functions to make your code robust
+
+### Querying any joke
+
+The first thing to note is that we can pass an empty query string '' to the `term` parameter.
+Because all joke texts will match this query term, the API will return *all* jokes.
+
+*Note:* Since this is the default search term, we can simply omit it from our API request.
 
 In this way we can iterate over pages to extract as many dad jokes as we'd like.
-To see how this can be done, let's first post an initial query to the search endpoint and parse the returned JSON data into an R object:
+
+### Initial query
+
+To see how this can be done, let's first make an initial query to the search endpoint and parse the returned JSON data into an R object:
 
 ```{r joke-search-all-parsed}
 resp <- GET(endpoint, config = accept_json())
@@ -163,65 +238,69 @@ dat <- content(resp, "parse")
 str(dat, 1)
 ```
 
+```{r joke-search-all-parsed-invisible, exercise = FALSE, echo = FALSE}
+resp <- GET(endpoint, config = accept_json())
+dat <- content(resp, "parse")
+```
+
 As you see, in addition to 20 jokes (recorded in the 'results' list element), the returned data indicates 
 
 1. from which page we have currently obtained jokes (page 1, by default),
 2. what is the next page number, and 
 3. how many jokes there are in total
 
-That's great because we can this information to extract more than the first 20 jokes!
-Let's first brainstorm how we'd do this!
+That's great because we can use this information to extract more than the first 20 jokes!
 
-- We also need to find some way of obtaining the joke texts (and maybe also IDs) from a single query.
-- Because we want to collect jokes from multiple API queries, we should also have some R object which collects all jokes while we iterate over pages
-- Finally, we need to find a way to iterate over all pages until we have collected all jokes
+### Plan of attack
 
-### Extracting jokes data
+Let's first brainstorm how we'd do this:
+
+1. We need to find some way to obtain jokes' text (and maybe also ID) from a single query's response.
+2. Next, we need to find a way to iterate over all pages until we have collected all jokes
+
+### Step 1: Extracting jokes data
 
 Let's start with the first point!
 We will use the data returned by our first query.
 As seen above, jokes are in the list element called 'results'.
 
-```{r , exercise = FALSE, include = FALSE}
-resp <- GET(endpoint, config = accept_json())
-dat <- content(resp, "parsed")
-```
-
-```{r search-jokes-all-response-structure}
+```{r search-jokes-all-response-structure, exercise.setup = "joke-search-all-parsed"}
 # 'results' is a list of lists
 str(dat$results, 1)
 # all sub-lists have two elements
-table(lengths(dat$results))
+lengths(dat$results)
 ```
 
 Let's check how a sub-list looks like
 
-```{r search-jokes-all-response-sublist}
+```{r search-jokes-all-response-sublist, exercise.setup = "joke-search-all-parsed", exercise.lines = 1}
 dat$results[[1]]
 ```
 
 We already know this from the random joke endpoint:
 The returned data records jokes' texts and their IDs.
 
-We can obtain this data from the 'results' list element using the dplyr function `bind_rows()`. 
+We can obtain this data from the 'results' list element using the `dplyr` function `bind_rows()`. 
 This results in a data frame with two columns: 'id' and 'joke'
-```{r search-jokes-extact-jokes}
+
+```{r search-jokes-extact-jokes, exercise.setup = "joke-search-all-parsed", exercise.lines = 2}
 jokes <- bind_rows(dat$results)
-glimpse(jokes)
+head(jokes, n = 3) # show first 3 rows
 ```
 
 In base R, we could instead write:
+
 ```{r , exercise = FALSE, eval = FALSE}
 jokes <- lapply(dat$results, as.data.frame.list, stringAsFactor = FALSE)
 jokes <- do.call(rbind, jokes)
 ```
 
-## Pagination
+### Step 2: Pagination
 
 Next, we want to determine the next page to query data from.
 As seen above the parsed API response records this information in a list element called 'next_page.'
 
-```{r search-jokes-next-page-value}
+```{r search-jokes-next-page-value, exercise.setup = "joke-search-all-parsed", exercise.lines = 1}
 dat$next_page
 ```
 
@@ -246,15 +325,95 @@ params <- list(page = second_request$next_page)
 ...
 ```
 
-Intuitively, we could solve this with a `for`-loop.
+#### Using a `for`-loop
+
+We can solve this with a `for`-loop!
 However, a for loop requires us to pre-define the page number!
 
-We can compute this from the information returned by the first request.
-Remember that in the returned data there was a field called 'total_pages.'
-This is exactly what we need!
+Fortunately, we can compute this from the information returned by the first request:
+Remember that in the returned data there was a field called 'total_pages' --- this is exactly what we need!
 
-```{r search-jokes-pagination, exercise.timelimit = 9999, message = TRUE}
-# make first query
+```{r search-jokes-n-pages}
+# extract total number of pages and construct integer sequence
+pages <- seq_len(dat$total_pages)
+
+# inspect
+length(pages)
+range(pages)
+```
+
+#### The for loop anatomy
+
+Now we can think about the code of the for loop:
+
+We want to iterate over pages. 
+So we write `for (i in pages) { ... }`
+
+We replace `...` with the code we want to execute: 
+
+```{r exercise = FALSE, eval = FALSE}
+# make request for page `i`
+resp <- GET(endpoint, query = list("page" = i), accept_json())
+
+# parse response
+dat <- content(resp, "parsed")
+
+# extract jokes data (bind row-wise)
+dat <- bind_rows(dat$results)
+```
+
+Note that in each iteration, we want to collect the result assigned to `dat`.
+We can do this by appending to a list we create beforehand:
+
+```{r exercise = FALSE, eval = FALSE}
+# define list collecting jokes
+all_jokes <- list()
+
+# iterate over pages
+for (i in pages) {
+  
+  ... 
+  # append current data jokes data
+  all_jokes[[page]] <- dat
+}
+```
+
+### Combining results 
+
+After completing all iterations, `all_jokes` will be a list of data frames.
+You probably know (e.g. from the R basics tutorials) that we can again use `bind_rows()` to bind these data frames (by row) to one long data frame
+
+### Being patient
+
+We need to add one more essential ingredient to our code: **Patience**!
+If we run the `for`-loop just like that, it will send a lost of request within just a few second.
+API providers don't like that!
+
+So we need to pause between subsequent request.
+Pausing can be imlemented using the system utility function `Sys.sleep()`.
+This function accepts a number (double or integer) as single input which determines how long the system pauses (in seconds) before returning.
+
+The following code illustrates this
+
+```{r pause}
+# get time at start
+st <- Sys.time()
+# pause for 10.33 seconds
+Sys.sleep(3.33)
+# print difference to start time when done
+st - Sys.time()
+```
+
+*Hint:* We can randomize how long we pause by sampling a single number from a probability distribution such as the uniform distribution (implemented as `runif()` in R).
+
+### Putting everything together
+
+The below code puts everything together.
+It will take quite some time to complete all iterations. 
+So we recommend you copy-paste it to an R file in your editor and run it independently.
+
+```{r search-jokes-pagination-solution, exercise = FALSE, eval = FALSE}
+# make initial query
 resp <- GET(endpoint, accept_json())
 dat <- content(resp, "parsed")
 
@@ -264,7 +423,7 @@ pages <- seq_len(dat$total_pages)
 length(pages); range(pages)
 
 # define list collecting jokes
-jokes <- list()
+all_jokes <- list()
 
 # iterate over pages
 for (page in pages) {
@@ -276,12 +435,6 @@ for (page in pages) {
   # parse response
   dat <- content(resp, "parsed")
   
-  # check that we are on the currect page
-  if (page != dat$current_page) {
-    warning("Something went wrong!")
-    break
-  }
-
   # extract jokes data
   jokes[[page]] <- bind_rows(dat$results)
   
@@ -289,15 +442,9 @@ for (page in pages) {
   Sys.sleep(runif(1, 1, 2))
 }
 
-# Finally: combine jokes data
-jokes <- do.call(rbind, jokes)
-
-# inspect
-str(jokes, 1)
-head(jokes)
+# Finally: combine jokes data in data.frame
+all_jokes <- bind_rows(all_jokes)
 ```
-
-The result is a long data frame of jokes.
 
 ### Making things more efficient
 

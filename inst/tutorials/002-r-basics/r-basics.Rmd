@@ -10,7 +10,6 @@ description: >
   how to loop/iterate,
   and 
   how to write functions.
-# output: html_document
 output: 
   learnr::tutorial:
     progressive: true
