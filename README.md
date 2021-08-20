@@ -1,11 +1,11 @@
 # learn2scrape: Learn to Web Scrape
 
-This package enables to learn web scraping in R with interactive tutorials. 
+This package enables to learn web scraping in R with interactive tutorials.
 
 ## Installation
 
 ```r
-remotes::install_github("haukelicht/learn2scrape")
+remotes::install_github("haukelicht/learn2scrape", ref = "dev")
 ```
 
 ## Tutorials
@@ -30,7 +30,7 @@ If you are running R using the Rstudio IDE (≥ version 1.3), you can alternativ
 
 Please contact [Hauke Licht](mailto:hauke.licht@uzh.ch) or [Theresa Gessler](mailto:gessler@ipz.uzh.ch) with feedback.
 
-Should you encounter any problems when trying to launch tutorials or run code in a tutorial, please open an Issue on Github at https://github.com/haukelicht/learn2scrape/issues
+Should you encounter any problems when trying to launch tutorials or run code in a tutorial, please open an Issue on Github at https://github.com/haukelicht/learn2scrape/issues.
 
 
 
