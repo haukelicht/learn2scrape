@@ -6,7 +6,7 @@ It accompanies the *GESIS Fall Seminar in Computational Social Sciences 2021* co
 ## Installation
 
 ```r
-remotes::install_github("haukelicht/learn2scrape", rev = "gesis2021")
+remotes::install_github("haukelicht/learn2scrape", ref = "gesis2021")
 ```
 
 ## Tutorials
