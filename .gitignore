@@ -1,0 +1,13 @@
+.Rproj.user
+.Rhistory
+.Rdata
+.httr-oauth
+.DS_Store
+
+inst/tutorials/*/*.html
+
+# new tut files
+inst/tutorials/003-downloading-files/
+inst/tutorials/1*/
+inst/tutorials/2*/
+inst/tutorials/3*/
