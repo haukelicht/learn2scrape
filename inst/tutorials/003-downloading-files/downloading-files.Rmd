@@ -1,13 +1,20 @@
 ---
 title: "Downloading files"
-# author: "Theresa Gessler and Hauke Licht"
-# date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: "Learn how to download files using R."
 output: 
   learnr::tutorial:
     progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 ---
+
+
+```{r setup-invisible, include = FALSE}
+library(learnr)
+library(learn2scrape)
+```
 
 ```{r knitr, include=FALSE}
 knitr::opts_chunk$set(
@@ -18,18 +25,14 @@ knitr::opts_chunk$set(
   , message = FALSE
   , cached = FALSE 
   , exercise = TRUE
-  , exercise.eval = FALSE
+  # , exercise.eval = FALSE
+  , exercise.completion	= TRUE
   , fig.align = "center"
   , fig.height = 4
   , fig.width = 5.5
 )
 ```
 
-
-```{r setup-invisible, exercise = FALSE, include = FALSE}
-library(learnr)
-library(learn2scrape)
-```
 
 ## Introduction
 
@@ -40,6 +43,8 @@ Actually, it is one of the tasks for which we do not even need any external pack
 
 The central function for us is `download.file()`. 
 If you have never used it, check [its documentation](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/download.file.html){target="_blank"}.
+
+### Arguments
 
 To use `download.file()`, you need to specify:
 
@@ -55,16 +60,13 @@ The same holds for the download *mode*.
 
 To practice, we download the [APSA Diversity and Inclusion Report](https://www.apsanet.org/Portals/54/diversity%20and%20inclusion%20prgms/DIV%20reports/Diversity%20Report%20Executive%20-%20Final%20Draft%20-%20Web%20version.pdf){target="_blank"}. 
 
-
 Lets first lay out the steps we need to complete to download this PDF to your local system: 
 
 1. specify the path to the file we want to download
 2. specify a path where to write the downloaded file to on your local system
 3. execute the file download
 
-**Try it out!** Complete the following code to download the PDF.
-
-*Hint:* In step 2, you can extract the original PDF file name from the source URL using the `basename()` function.
+**Try it yourself!** Complete the following code to download the PDF.
 
 ```{r practice}
 # step 1
@@ -81,6 +83,9 @@ download.file(url, file_path)
 # verify
 file.exists(file_path)
 ```
+
+
+*Hint:* In step 2, you can extract the original PDF file name from the source URL using the `basename()` function.
 
 *Note:* Because this tutorial is running with a temporary working directory, and we simply passed a file name as destination file, the PDF will be downloaded into this temporary working directory.
 Hence, you won't see it, e.g., in your Desktop folder.
@@ -101,7 +106,7 @@ The function `file.path()` does this in a way that is consistent and reproducibl
 In our example, we write to the 'Desktop' folder of the current user's home (see `Sys.info()["user"]`). 
 ('~' is a short cut for root of the current user's file system to the current user.)   
 
-```{r practice-solution}
+```{r practice-solution, exercise = FALSE, eval = FALSE}
 # 1. specify the URL where the file is located
 source_url <- "https://www.apsanet.org/Portals/54/diversity%20and%20inclusion%20prgms/DIV%20reports/Diversity%20Report%20Executive%20-%20Final%20Draft%20-%20Web%20version.pdf"
 
@@ -128,7 +133,9 @@ file.remove(fp)
 But what if you want to download lots of files?
 Say you want to download the [Congressional Record of the ongoing session](https://www.congress.gov/congressional-record/116th-congress/browse-by-date){target="_blank"} in its [beautiful original layout as a PDF](https://www.congress.gov/116/crec/2019/06/28/CREC-2019-06-28.pdf){target="_blank"}. 
 
-Let's first think about theindividual steps we need to complete to achieve this:
+### Steps to complete 
+
+Let's first think about the individual steps we need to complete to achieve this:
 
 1. identify the CSS selector/xpath of web elements providing links to the PDFs (e.g., using *SelectorGadget*)
 2. collect all these links (using `rvest` functions)
@@ -136,6 +143,8 @@ Let's first think about theindividual steps we need to complete to achieve this:
     - create a file name from the source URL
     - specify a target file path
 4. loop over PDF URLs to download them
+
+### Hands on!
 
 **Try it yourself!** Implement steps 1--4 below.
 
