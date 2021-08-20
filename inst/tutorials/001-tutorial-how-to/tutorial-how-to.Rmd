@@ -3,7 +3,7 @@ title: "Interactive learning with `learnr` tutorials"
 author: "Theresa Gessler and Hauke Licht"
 date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: >
-  Learn how to work with itnteractive `learnr` tutorials
+  Learn how to work with interactive `learnr` tutorials
   and
   about the specifics of tutorials included in the `learn2scrape` package.
 output: 
@@ -16,6 +16,7 @@ runtime: shiny_prerendered
 knitr::opts_chunk$set(
   # code chunk options
   echo = TRUE
+
   , eval = TRUE
   , warning = FALSE
   , message = FALSE

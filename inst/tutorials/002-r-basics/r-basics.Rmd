@@ -36,9 +36,12 @@ knitr::opts_chunk$set(
 library(learnr)
 library(dplyr)
 # library(rvest)
+)
 ```
 
+
 ## Introduction
+
 
 In this tutorial, we will refresh your basic R programming skills.
 It covers some of the essential programming concepts we will need to scrape and clean web data. 
@@ -121,7 +124,7 @@ Integer values are numbers: ..., -1, 0, 1, ...
 You can check whether a value has type logical using `is.integer()`.
 A missing integer can be created with `NA_integer_`.
 
-Note that you have to explicitly force a number to type integer for R to recognize it aas such.
+Note that you have to explicitly force a number to type integer for R to recognize it as such.
 This can be done by adding an `L` behind the number (e.g. `1L`).
 You need to force this behavior, because R interprets numbers as "double" type by default.
 
@@ -254,11 +257,12 @@ Note that because `NULL` represents "no data," it is *ignored* when creating an 
 c(NULL, "value")
 ```
 
-Accordingly, it is also ignored when peforming tye conversion.
+Accordingly, it is also ignored when performing type conversion.
 
 ```{r null-in-type-conversion, exercise.lines = 1}
 c(NULL, TRUE, 1L, 1.1, "one")
 c("NULL", NULL)
+
 ```
 
 ### Naming vectors
@@ -435,6 +439,7 @@ Remember that if you violate this rule, R performs *type conversion*  following 
 ### Recursive types 
 
 In contrast to atomic types, **recursive types** can nest objects of other types.
+
 The most important recursive type is "list".
 
 ## Lists
@@ -467,7 +472,7 @@ c(list(1), list(2))
 But note that when combining a list/lists and a vector/vectors, the vector(s) will be converted to a list(s)!
 So **type conversion** applies beyond atomic vectors 
 
-```{r comibing-lists-type-conversion}
+```{r combining-lists-type-conversion}
 c(
   list("hello"), # a list with one character element
   c("goodbye") # a character vector (!) with one element
@@ -489,7 +494,7 @@ names(x) <- c("logical", "integer", "double", "character")
 names(x)
 ```
 
-### Indexign lists
+### Indexing lists
 
 The difference between atomic and recursive types is important because it matters for how you can **index** objects, that is, access their values.
 
@@ -694,7 +699,7 @@ if (print_this) {
 
 In the above code chunk, because `print_this` evaluates to FALSE, "Hello" is not printed.
 
-Note that you can write everything inside the parantheses after `if` that evaluates to a single logical value (excluding `NA`).
+Note that you can write everything inside the parentheses after `if` that evaluates to a single logical value (excluding `NA`).
 
 ```{r if}
 if (0 == 1) {
@@ -917,5 +922,54 @@ If we now call the function without passing an input, we get an error
 hello()
 ```
 
+So we have to pass a value to the `name` argument
 
+```{r function-one-arg-success, exercise.setup = "function-one-arg"}
+hello("Hauke")
+```
+
+### Returning results
+
+In the functions above, we have just printed a value when calling them.
+Usually, we use functions to compute something which the function is expected to return.
+
+We can return values with the `return()` function that works only inside functions.
+
+```{r function-return}
+add <- function(x, y) {
+  res <- x + y
+  return(res)
+}
+
+add(1, 2)
+```
+
+*Note:* You could actually omit the return in the above function and instead write
+
+```{r function-return-alt, exercise = FALSE}
+add <- function(x, y) {
+  x + y
+}
+
+add(1, 2)
+```
+
+But it aids the readability of your code *a lot* if you explicitly call `return()`.
+
+### Returning early
+
+`return()` can be called at any position in a function.
+This is a particularly powerful feature when combined with control flow:
+
+```{r function-return-anywhere}
+divide <- function(numerator, denominator) {
+  if (denominator == 0)
+    return(NaN)
+
+  if (numerator == 0)
+    return(Inf)
+
+  return(numerator/denominator)
+}
+```
 
