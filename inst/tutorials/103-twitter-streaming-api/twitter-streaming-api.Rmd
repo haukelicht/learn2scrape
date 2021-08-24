@@ -1,7 +1,7 @@
 ---
 title: "Download data using Twitter's Streaming API"
-# author: "Theresa Gessler and Hauke Licht"
-# date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: >
   Learn how to download a random sample of Tweets absed on keywords and other filter criteria 
   using the Twitter Streaming API 
@@ -9,6 +9,7 @@ description: >
 output: 
   learnr::tutorial:
     progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 ---
 
@@ -21,7 +22,8 @@ knitr::opts_chunk$set(
   , message = FALSE
   , cached = FALSE 
   , exercise = TRUE
-  , exercise.eval = FALSE
+  , exercise.completion = TRUE
+  # figs
   , fig.align = "center"
   , fig.height = 4
   , fig.width = 5.5
@@ -38,10 +40,15 @@ library(learn2scrape)
 
 In this tutorial, you will learn how to download data from the *Twitter Streaming* API using the `rtweet` package.
 
+### R setup
+
 We will use the following R packages:
 
 ```{r setup, exercise = FALSE}
+# to access Twitter REST API
 library(rtweet)
+
+# data wrangling
 library(jsonlite)
 library(dplyr)
 library(tidyr)
@@ -110,7 +117,7 @@ If you are interested in a more detailed explanation, check `vignette("auth", pa
 
 To check that it worked, try running the line below:
 
-```{r lookup-theresa}
+```{r lookup-theresa, exercise.lines = 1}
 lookup_users("th_ges")[["name"]]
 ```
 
@@ -124,35 +131,32 @@ If you don't see any output in the console after running the code above, that's 
 To collect tweets as they are sent out, we can use the `stream_tweets()` function.
 By default, `stream_tweets()` downloads a *random sample* of all publicly available tweets.
 
-It has the following paraemters:
+### Function parameters
+
+It has the following parameters:
 
 - `file_name` indicates the file (path) where the tweets will be downloaded to on your local system
 <!-- - `dir` (optional) indicated the file path where to write the downloaded data to -->
 - `timeout` is the number of seconds that the connection will remain open. If you set it to `FALSE`, it will stream indefinitely until the rate limit is reached.
 - `parse` specifies whether the tweets should be parsed from JSON. By default, it is `TRUE`. But if you try to collect more data, your script will run better if you disable this and set `parse = FALSE` because we omit the JSON parsing step before writing to `file_name`. 
 
-Now, we can collect tweets for 10 seconds. 
+### Collecting tweets from the stream 
+
+Now, we can collect tweets for 5 seconds. 
 
 ```{r stream-tweets-default}
-# determine path where to write JSON to
-fp <- file.path(dirname(getwd(), "tweets.json"))
+# collect for 5 seconds
+resp <- stream_tweets(file_name = "tweets.json", timeout = 5, parse = FALSE)
 
-resp <- stream_tweets(file_name = fp, timeout = 10, parse = FALSE)
-```
-
-**_Note:**: We write the JSON to a file in the directory *above* the current working directory, because in `learnr` tutorials, each code chunk has its own temporary directory that is deleted (incl. its contents) after execution.
-
-Once the time out has been reached, we can open the file in R as a data frame with the `parse_stream` function:
-
-```{r parse-stream-tweets}
-fp <- file.path(dirname(getwd(), "tweets.json"))
-tweets <- parse_stream(fp)
+# read from disk and parse
+tweets <- parse_stream("tweets.json")
 
 # inspect
 nrow(tweets) # number of downloaded tweets
 range(tweets$created_at) # time range of downloaded tweets
 ```
 
+**_Note:_** We write the JSON to a file called "tweets.json" because in `learnr` tutorials, each code chunk has its own temporary directory that is deleted (incl. its contents) after execution. Usually, you can pass any file path constructed with `file.path()`, however.
 
 ## Filtering Tweets
 
@@ -171,7 +175,10 @@ There are multiple variants how we can use the streaming API:
 To filter by keyword, we have to specify our search term as query `q`:
 
 ```{r stream-tweets-by-keyword, eval = FALSE}
-stream_tweets(q = "news", timeout = 10, file_name = "news.json")
+tweets <- stream_tweets(q = "news", timeout = 5)
+
+nrow(tweets)
+head(tweets$text)
 ```
 
 ### Filtering by users
@@ -192,28 +199,22 @@ Note the reverse order: it's not (lat, long), but (long, lat)!
 
 In the case of the US, it would be approx. (-125, 26) and (-65, 49). 
 How to find these coordinates? 
-I use: `https://getlatlong.net/` 
-If you have a *Google Maps* API key, you can also use the `lookup_coords()` function built into `rtweet`.
+We use: `https://getlatlong.net/` 
+(If you have a *Google Maps* API key, you can also use the `lookup_coords()` function built into `rtweet`.)
 
 ```{r stream-tweets-by-geo, eval = FALSE}
-fp <- file.path(dirname(getwd()), "tweets_usa.json")
-usa <- stream_tweets(
-  q = c(-125, 26, -65, 49),
-  timeout = 10,
-  file = fp
-)
+usa_tweets <- stream_tweets(q = c(-125, 26, -65, 49), timeout = 5)
 
-usa_tweets <- parse_stream(fp)
+nrow(usa_tweets)
+head(usa_tweets$text)
 ```
 
-And use the maps library to see where most tweets are coming from. 
 Note that there are different types of geographic information on tweets, some of it comes from geo-located tweets and others from tweets with place information.
 `rtweet` has a function called `lat_lng()` that uses whatever geographic information is available to construct latitude and longitude variables. 
 We will work with whatever is available.
 
 ```{r parse-geo-tweets}
-fp <- file.path(dirname(getwd()), "tweets_usa.json")
-usa_tweets <- parse_stream(fp)
+usa_tweets <- stream_tweets(q = c(-125, 26, -65, 49), timeout = 5)
 usa_tweets <- lat_lng(usa_tweets)
 
 # plot lat and lng points onto state map
@@ -231,16 +232,18 @@ This is not the focus of this class and you might want to do this differently, d
 For example, we can ask what are the *most popular hashtags* at the moment? 
 We will use [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) to extract hashtags.
 
-The function `str_extract_all()` in the `stringr` pacakge extracts one or several matches from a character vector. 
+The function `str_extract_all()` in the `stringr` package extracts one or several matches from a character vector. 
 The expression "#\\w+" is a *regular expression*. 
 Specifically, it matches a hashtag-symbol and then any number of uninterrupted alpha-numeric symbols - so numbers or (upper- or lowercase) latin letters, and underscore. 
 Since `str_extract_all()` returns a list of character vectors (one list element per input character value), we have to unlist the return object.
 Finally, to get at the $k$ most popular hashtags, we sort the resulting vector by decreasing frequency.
 
 ```{r extract-hashtags, eval = FALSE}
-# load stream of tweets downloaded before
-fp <- file.path(dirname(getwd(), "tweets.json"))
-tweets <- parse_stream(fp)
+# collect for 5 seconds
+resp <- stream_tweets(file_name = "tweets.json", timeout = 5, parse = FALSE)
+
+# read from disk and parse
+tweets <- parse_stream("tweets.json")
 
 # extract hashtags
 ht <- str_extract_all(tweets$text, "#\\w+")
@@ -260,9 +263,11 @@ We again use a regular expression and `str_extract_all()`.
 Our search string is similar but it starts with an @ - so we find mentions - and this time, we only include Latin characters, numbers, and underscores.
 
 ```{r extract-mentions, eval = FALSE}
-# load stream of tweets downloaded before
-fp <- file.path(dirname(getwd(), "tweets.json"))
-tweets <- parse_stream(fp)
+# collect for 5 seconds
+resp <- stream_tweets(file_name = "tweets.json", timeout = 5, parse = FALSE)
+
+# read from disk and parse
+tweets <- parse_stream("tweets.json")
 
 # extract mentions
 mentions <- str_extract_all(tweets$text, '@[0-9_A-Za-z]+')
@@ -279,9 +284,11 @@ head(sort(table(mentions), decreasing = TRUE), n = 10)
 We try to *detect* tweets that mention either 'Trump' or 'trump' using `str_detect()` and sum them up.
 
 ```{r count-Trump, eval = FALSE}
-# load stream of tweets downloaded before
-fp <- file.path(dirname(getwd(), "tweets.json"))
-tweets <- parse_stream(fp)
+# collect for 5 seconds
+resp <- stream_tweets(file_name = "tweets.json", timeout = 5, parse = FALSE)
+
+# read from disk and parse
+tweets <- parse_stream("tweets.json")
 
 # count number of times terms 'trump'/'Trump' occur
 sum(str_detect(tweets$text, "[Tt]rump"))
