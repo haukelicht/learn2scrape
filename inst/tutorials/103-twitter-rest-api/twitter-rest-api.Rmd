@@ -1,7 +1,7 @@
 ---
 title: "Download data using Twitter's REST API"
-# author: "Theresa Gessler and Hauke Licht"
-# date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: >
   Learn how to download Twitter data like tweets, users' bios, likes and followers
   using the Twitter REST API
@@ -9,6 +9,7 @@ description: >
 output: 
   learnr::tutorial:
     progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 ---
 
@@ -21,13 +22,12 @@ knitr::opts_chunk$set(
   , message = FALSE
   , cached = FALSE 
   , exercise = TRUE
-  , exercise.eval = FALSE
-  , fig.path = tempdir()
+  , exercise.completion = TRUE
+  # fig
   , fig.align = "center"
   , fig.height = 4
   , fig.width = 5.5
 )
-
 ```
 
 
@@ -38,19 +38,28 @@ library(learn2scrape)
 
 ## Introduction
 
-In this tutorial, you'll learn how to obtain Twitter data from the REST API.
-The Twitter REST API provides you with access to the tweets of all users or other user-level information. 
+In this tutorial, you'll learn how to obtain Twitter data from [Twitter's REST API](https://developer.twitter.com/en/docs/twitter-api/v1).
+The Twitter REST API provides you with access to the tweets of all users or other user-level information.
+
+### R Setup
 
 We will use the following R packages:
 
 ```{r setup, eval = TRUE, exercise = FALSE}
-library(rtweet) # to access Twitter REST API
+# to access Twitter REST API
+library(rtweet)
+
+# data cleaning
 library(jsonlite)
 library(dplyr)
 library(tidyr)
 library(stringr)
+
+# visualizating
 library(ggplot2)
 library(maps)
+
+# text analyses
 library(quanteda)
 library(quanteda.textplots)
 options(quanteda_threads = 1L)
@@ -60,7 +69,6 @@ options(quanteda_threads = 1L)
 
 Before getting started, we need to authenticate:
 
-
 ```{r authenticate-invisible, exercise = FALSE, include = FALSE}
 # read credentials from JSON file
 credentials <- fromJSON(system.file("extdata", "tw_credentials.json", package = "learn2scrape"))
@@ -68,6 +76,9 @@ credentials <- fromJSON(system.file("extdata", "tw_credentials.json", package = 
 token <- do.call(create_token, credentials)
 ```
 
+**Try it yourself!**: Copy-past your API token information.
+
+*Hint*: If you haven't yet obtained your API credentials, call `vignette("auth", package = "rtweet")` and follow the instructions.
 
 ```{r authenticate}
 # create your rtweet API 'token' here
@@ -170,10 +181,13 @@ users$description
 
 If you are interested in networks, you can also download friends and followers. 
 *Friends* are the people the account you query follows, while *followers* are the people who follow that account. 
+
+### Requesting friend and follower information
+
 For example, let us look at the friends and followers of the account of my home department: the Political Science Department of the University of Zurich.
 Of course, you can replace that with your department's account:
 
-```{r get-followers-and-friends}
+```{r get-followers-and-friends, exercise.lines = 2}
 followers <- get_followers("IPZ_ch")
 friends <- get_friends("IPZ_ch")
 ```
@@ -241,7 +255,7 @@ The REST API offers also a long list of other endpoints that could be of use in 
 
 You can use `search_users()` to search for users related to specific keywords based on their self-description. For example, you might want to look into users that are interested in methods or politics or or or:
 
-```{r search-users}
+```{r search-users, exercise.lines = 2}
 usrs <- search_users(q = "data journalism", n = 10)
 users$screen_name
 ```
@@ -277,7 +291,7 @@ This is also useful if e.g. you're interested in compiling lists of journalists,
 
 The opposite approach is to search for lists that contain a certain user with `lists_memberships()`. E.g., you could look for all lists that contain Donald Trump.
 
-```{r lists-memberships}
+```{r lists-memberships, exercise.lines = 1}
 trump_lists <- lists_memberships(user = "realDonaldTrump")
 ```
 
@@ -285,6 +299,6 @@ trump_lists <- lists_memberships(user = "realDonaldTrump")
 
 List of users who retweeted a particular tweet --- unfortunately, it's limited to only 100 most recent retweets.
 
-```{r get-retweets}
+```{r get-retweets, exercise.lines = 1}
 rts <- get_retweets(status_id = "896523232098078720")
 ```
