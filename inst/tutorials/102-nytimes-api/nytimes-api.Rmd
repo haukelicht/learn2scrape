@@ -1,13 +1,14 @@
 ---
-title: "Download data using the New York Times' Article Search API"
-# author: "Theresa Gessler and Hauke Licht"
+title: "Download data using the New York Times' *Article Search* API"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: >
   Learn how to query data from the New York Times *Article Search* API with the `httr` R package.
   This tutorial also cover how to authentificate with an API as well as tipps to make your web scraping code robust and less redundant.
-# date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 output: 
   learnr::tutorial:
     progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 ---
 
@@ -20,18 +21,29 @@ knitr::opts_chunk$set(
   , message = FALSE
   , cached = FALSE 
   , exercise = TRUE
+  , exercise.completion = TRUE
+  # figs
+  , fig.align = "center"
+  , fig.height = 4
+  , fig.width = 5.5
+  # , out.width = '50%'
 )
 ```
 
 ## Introduction
 
-In this tutorial, we'll take the New York Times' *Article Search* API as an example to learn more about how to work with APIs in R.
+In this tutorial, we'll take the New York Times (NYT) *Article Search* API as an example to learn more about how to work with APIs in R.
 The NYT *Article Search* API allows users to search articles by key words, publish date (ranges), and many more parameters.
 
 We will use it to return counts of articles and a short description of each article. 
 This will also allow us to create a nice and simple graph for hits for certain keywords over time.
 
-We use the following packages:
+However, to request data, we need to register and authenticate.
+Since is the case for most APIs the NYT *Article Search* API is a more realistic use case than the *Dad Jokes* API we've worked with in the previous API tutorial.
+
+### R Setup 
+
+We rely on the following packages:
 
 ```{r setup-invisible, exercise = FALSE, include = FALSE}
 library(learnr)
@@ -43,45 +55,81 @@ library(httr)
 library(ggplot2)
 ```
 
-
-## First things first
-
-The first step when working with APIs is always to familiarize yourself with the documentation.
-You can find the documentation [here](http://developer.nytimes.com/docs/read/article_search_api_v2).
-Below, we will mostly post GET requests to this API.
-The parameters for get requests are documented [here](https://developer.nytimes.com/docs/articlesearch-product/1/routes/articlesearch.json/get)
-
 ## Authentication
 
-Next, in many cases you need to obtain API credentials that enable you to query the API endpoints. 
-You can obtain an API key for the NYT Article Search API [here]().
+To be able to use the request data from the NYT Article search API, we first need to obtain API credentials. 
 
-**Try it yourself**: Please obtain an API key yourself and replace the one below with it.
+### Create developer account
 
-```{r api-key-invisible, exercise = FALSE, include = FALSE}
-apikey <- 'b75da00e12d54774a2d362adddcc9bef'
+You can obtain an API key for the NYT *Article Search* only if you have an active developer account.
+So please first create a developer account at: https://developer.nytimes.com/accounts/create
+
+### Create an App
+
+Once you have created and verified your account, sing in at https://developer.nytimes.com/accounts/login. 
+
+To use the Article Search API, we next need to create an App:
+
+1. go to https://developer.nytimes.com/my-apps
+2. click "NEW APP" (top-right of window)
+3. create an App (you can call your App however you want) and make sure to enable the *Article Search API*
+
+```{r echo = FALSE, exercise = FALSE, fig.cap="*Fig 1* --- Create your App."}
+knitr::include_graphics("./images/create-app.png")
 ```
 
-```{r api-key}
-apikey <- ''
+### Obtain your API key
+
+Lastly, you need to obtain the App's API key.
+Copy the API key of your App to your clipboard ot save it in a text file.
+
+```{r echo = FALSE, exercise = FALSE, fig.cap="*Fig 2* --- Obtain the API key."}
+knitr::include_graphics("./images/api-key.png")
 ```
+
 
 ## Keyword-based search 
 
-The fist step is to identify URL of the endpoint want to use to query the API. In our case it is: http://api.nytimes.com/svc/search/v2/articlesearch.json
+### Documentation
+
+The first step when working with APIs is always to familiarize yourself with the documentation.
+You can find the documentation [here](http://developer.nytimes.com/docs/read/article_search_api_v2).
+
+In this tutorial, we will exclusively send GET requests to this API.
+The parameters for get requests are documented [here](https://developer.nytimes.com/docs/articlesearch-product/1/routes/articlesearch.json/get)
+
+### Endpoint
+
+The next step is to identify the URL of the API endpoint want to use to request data from. 
+In our case it is: http://api.nytimes.com/svc/search/v2/articlesearch.json
 
 ```{r search-endpoint, exercise = FALSE}
 endpoint <- "http://api.nytimes.com/svc/search/v2/articlesearch.json"
 ```
 
-Now we can do a first API call using the `httr` package.
-**Remember:** We need to pass a search query to the API parameter `q` and our API key to the parameter `api-key` in order succeed with our request!
+### A first request
 
-```{r keyword-search}
-params <- list(q = "democracy", "api-key" = apikey)
+Now we can do a first API call using the `httr` package.
+
+**Try it yourself**: Make a request to the article search endpoint to search fro articles containing the keyword 'democracy'
+
+First set you API key: 
+```{r api-key-invisible, exercise = FALSE, include = FALSE}
+apikey <- 'b75da00e12d54774a2d362adddcc9bef'
+```
+
+```{r api-key, exercise.lines = 1}
+apikey <- ''
+```
+
+Next, pass our keyword to the API's query parameter `q` and our API key to the parameter `api-key`, and send your request!
+
+```{r keyword-search, exercise.setup = "api-key"}
+params <- list(...)
 resp <- GET(endpoint, query = params)
 resp
 ```
+
 ```{r keyword-search-invisible, exercise = FALSE, include = FALSE}
 params <- list(q = "democracy", "api-key" = apikey)
 resp <- GET(endpoint, query = params)
@@ -89,6 +137,8 @@ resp <- GET(endpoint, query = params)
 
 Printing `resp`, we can see that the query was successful ('Status: 200').
 Moreover, the field 'Content-Type' informs us that the return data is represented in JSON format.
+
+### Parse the return data 
 
 We can parse the returned data with `as = 'parsed'`.
 This will convert the associated JSON data into an R list object.
@@ -106,7 +156,7 @@ str(dat$response$docs, 1)
 Alternatively, to extract the data in its original JSON format, you can call `content()` with `as = 'text'`. 
 Looking at the first 100 characters, you'll see that the returned data comes in JSON format.
 
-```{r keyword-search-parse-as-text}
+```{r keyword-search-parse-as-text, exercise.lines = 2}
 txt <- content(resp, 'text', encoding = "UTF-8")
 substr(txt, 1, 100)
 ```
@@ -116,7 +166,7 @@ substr(txt, 1, 100)
 If we check the API documentation, we find that we can subset by date with the `begin_date` and `end_date` parameters. 
 Let's see how this works:
 
-**Try it out!** 
+**Try it yourself!** 
 
 1. Send a request to the NYT *Article Search* API, limiting the search to dates in the window 1 January to 31 December 2016.
 2. Parse the response into an R list object.
@@ -135,8 +185,8 @@ dat <- ...
 ```
 
 <details>
-<summary>**_Solution_**</summary>
-```{r , exercise = FALSE, include = FALSE}
+<summary>**_Example Solution_**</summary>
+```{r , exercise = FALSE}
 params <- list(
   "q" = "democracy", 
   "api-key" = apikey, 
@@ -153,16 +203,18 @@ Looking at the value recorded in `dat$response$meta$hits`, we learn that there w
 
 ## Multiple API requests
 
-Now imagine we want to look at the evolution of mentions of articles containing the term 'democracy' over time. 
+Now imagine we want to look at the evolution of mentions of articles containing the term 'democracy' over time.
+
+### Defining a function 
+
 Following coding best practices, we want to write a function that 
 
 - *takes* a keyword and a start and end dates as *arguments input*,
 - and *returns* the counts of articles in this date range.
 
-**Try it out!** Write a function 
-This would function basically wraps :
+**Try it yourself!** Write this function!
 
-```{r search-function}
+```{r search-function, eval = FALSE}
 #' @param q a character value used to search for matching articles 
 #' @param since an integer/character values specifying the 'begin' date (format: 'YYYYmmdd')
 #' @param until an integer/character values specifying the 'end' date (format: 'YYYYmmdd')
@@ -190,8 +242,7 @@ nyt_count(q = "democracy", since = 20160101, until = 20160131)
 
 <details>
 <summary>**_Example Solution_**</summary>
-
-```{r , exercise = FALSE, include=FALSE}
+```{r , exercise = FALSE}
 nyt_count <- function(q, since, until){
   
   # construct API query
@@ -201,10 +252,13 @@ nyt_count <- function(q, since, until){
     "begin_date" = since,
     "end_date" = until
   )
+  
   # query API
   resp <- GET(endpoint, query = params, timeout(30))
+  
   # parse response
   dat <- content(resp, "parsed")
+  
   # return number of hits
   return(dat$response$meta$hits)
 }
@@ -212,7 +266,7 @@ nyt_count <- function(q, since, until){
 </details>
 <br/>
 
-Ok, so this seems to work. 
+### Iterating over years
 
 But we want to get counts for individual years.
 So we need to call our `nyt_count()` function multiple times with corresponding date windows, e.g.,
@@ -238,7 +292,7 @@ nyt_years_count <- function(q, years){
   # iterate over years (values of integer sequence)
   for (year in years){
     
-    # retrieve count
+    # retrieve count (using your custom function)
     ... <- nyt_count(
         q = q
         , since = ...
@@ -306,6 +360,8 @@ counts
 
 <br/>
 
+### Plotting he result
+
 We will plot this to visualize the over-time development.
 
 ```{r plot-year-counts}
@@ -321,7 +377,6 @@ ggplot(
 ) +
   geom_point() + 
   geom_smooth() + 
-  scale_x_continuous(breaks = 2010:2020) + 
   labs(
     title = "Mentions of democracy on the NYT, by year",
     x = "Year", 
