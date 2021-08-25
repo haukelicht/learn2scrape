@@ -43,6 +43,8 @@ The Twitter REST API provides you with access to the tweets of all users or othe
 
 ### R Setup
 
+#### *R packages*
+
 We will use the following R packages:
 
 ```{r setup, eval = TRUE, exercise = FALSE}
@@ -65,32 +67,25 @@ library(quanteda.textplots)
 options(quanteda_threads = 1L)
 ```
 
-## Authentication 
+#### *Twitter API access token*
 
-Before getting started, we need to authenticate:
+Make sure that you have your Twitter API credentials ready:
 
-```{r authenticate-invisible, exercise = FALSE, include = FALSE}
-# read credentials from JSON file
-credentials <- fromJSON(system.file("extdata", "tw_credentials.json", package = "learn2scrape"))
-# create rtweet 'token' object
+
+```{r create-token, exercise.eval = FALSE}
+# ToDo: specify path to your secrets JSON file
+fp <- file.path(...)
+credentials <- fromJSON(fp)
 token <- do.call(create_token, credentials)
 ```
 
-**Try it yourself!**: Copy-past your API token information.
 
-*Hint*: If you haven't yet obtained your API credentials, call `vignette("auth", package = "rtweet")` and follow the instructions.
-
-```{r authenticate}
-# create your rtweet API 'token' here
-token <- create_token(
-  # ToDo: add App name and secrets
-  app = ...,
-  consumer_key = ...,
-  consumer_secret = ...,
-  access_token = ...,
-  access_secret = ...
-)
+```{r , exercise = FALSE, echo = FALSE}
+credentials <- fromJSON(system.file("extdata", "tw_credentials.json", package = "learn2scrape"))
+token <- do.call(create_token, credentials)
 ```
+
+*Note:* If you don't, first go through the steps described in tutorial "103-twitter-setup" in the learn2scrape package: `learnr::run_tutorial("103-twitter-setup", package = "learn2scrape")`
 
 ## Searching recent tweets
 

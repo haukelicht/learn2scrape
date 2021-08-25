@@ -42,6 +42,8 @@ In this tutorial, you will learn how to download data from the *Twitter Streamin
 
 ### R setup
 
+#### *R packages*
+
 We will use the following R packages:
 
 ```{r setup, exercise = FALSE}
@@ -55,76 +57,24 @@ library(tidyr)
 library(stringr)
 ```
 
+#### *Twitter API access token*
 
-## Authenticating
+Make sure that you have your Twitter API credentials ready:
 
-Before we can start collecting Twitter data, we need to create an OAuth token that will allow us to authenticate our connection and access our personal data.
-
-Obtaining valid API credentials requires submitting an application for a developer account at https://developer.twitter.com/en/apps
-This may take a few days. 
-For teaching purposes only, I will temporarily share the credentials of one of my Apps, so that we can use the API without having to do the authentication.
-Below, I load these credentials and create an rtweet 'token' object from them.
-(Note: `do.call()` just calls `create_token()` while passing the name-value pairs specified in the list object 'credentials')
-
-```{r authenticate, exercise = FALSE}
-# specify path to credientials JSON
-creds_fp <- system.file("extdata", "tw_credentials.json", package = "learn2scrape")
-
-# read credentials from packaged JSON file
-credentials <- fromJSON(creds_fp)
-
-# create rtweet 'token' object
+```{r create-token, exercise.eval = FALSE}
+# ToDo: specify path to your secrets JSON file
+fp <- file.path(...)
+credentials <- fromJSON(fp)
 token <- do.call(create_token, credentials)
 ```
 
-<br/>
-<details>
-<summary>**How to obtain Twitter API credentials**</summary>
 
-Follow these steps to create your token.
-
-1. Go to https://developer.twitter.com/en/apps and sign in with your Twitter account.  
-2. If you don't have a developer account, you will need to apply for one first. Fill in the application form and wait for a response.
-3. Once it's approved, click on "Create New App". You will need to have a phone number associated with your account in order to be able to create a token.  
-4. Fill name, description, and website (it can be anything, even http://www.google.com). Make sure you leave 'Callback URL' empty.
-5. Agree to user conditions.  
-6. create an empty JSON file with the following structure
-
-```json
-{
-  "app": "",
-  "consumer_key": "",
-  "consumer_secret": "",
-  "access_token": "",
-  "access_secret": ""
-}
-```
-
-6. From the "Keys and Access Tokens" tab, copy-paste the consumer key and consumer secret information into the JSON file
-7. Click on "Create my access token", then copy--paste your access token and access token secret into the JSON file
-8. save the JSON file somewhere secure.
-
-With the following R code, you can then always read the API credentials and create an rtweet 'token' object: 
-
-```{r , exercise = FALSE, eval = FALSE}
-library(jsonlite)
-library(rtweet)
+```{r , exercise = FALSE, echo = FALSE}
 credentials <- fromJSON(system.file("extdata", "tw_credentials.json", package = "learn2scrape"))
 token <- do.call(create_token, credentials)
 ```
 
-If you are interested in a more detailed explanation, check `vignette("auth", package = "rtweet")`
-
-To check that it worked, try running the line below:
-
-```{r lookup-theresa, exercise.lines = 1}
-lookup_users("th_ges")[["name"]]
-```
-
-**What can go wrong here?**
-Make sure all the consumer and token keys are pasted here as is, without any additional space character. 
-If you don't see any output in the console after running the code above, that's a good sign.
-</details>
+*Note:* If you don't, first go through the steps described in tutorial "103-twitter-setup" in the learn2scrape package: `learnr::run_tutorial("103-twitter-setup", package = "learn2scrape")`
 
 ## Collecting tweets
 
