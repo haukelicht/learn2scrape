@@ -3,7 +3,7 @@ title: "Download data using Twitter's Streaming API"
 author: "Theresa Gessler and Hauke Licht"
 date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: >
-  Learn how to download a random sample of Tweets absed on keywords and other filter criteria 
+  Learn how to download a random sample of Tweets based on keywords and other filter criteria 
   using the Twitter Streaming API 
   with the `rtweet` R package.
 output: 
