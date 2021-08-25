@@ -14,7 +14,7 @@ runtime: shiny_prerendered
 ```{r knitr, include=FALSE}
 knitr::opts_chunk$set(
   # code chunk options
-  echo = FALSE
+  echo = TRUE
   , eval = TRUE
   , warning = FALSE
   , message = FALSE
@@ -44,6 +44,8 @@ In this tutorial, you'll learn how to extract data from HTML files with the `rve
 
 ### R setup
 
+We use just the `rvest` package in this tutorial:
+
 ```{r setup, exercise = FALSE}
 library(rvest)
 ```
@@ -54,6 +56,8 @@ library(rvest)
 Imagine, you want to extract information from (i.e., "scrape") a simple webpage.
 For example [http://quotes.toscrape.com/](http://quotes.toscrape.com/){target="_blank"}, a webpage full of quotes.
 
+### Plan of attack
+
 Here is what you need to do:
 
 1. Specify the page address (URL)
@@ -63,7 +67,7 @@ Here is what you need to do:
 Please first assign the page URL http://quotes.toscrape.com/ to an object called 'url.'
 Next, use the `read_html()` function to read and parse this page.
 
-```{r read, exercise.line = 2}
+```{r read-html, exercise.lines = 2}
 # TO DO: read the HTML code of this URL
 "http://quotes.toscrape.com/"
 ```
@@ -75,12 +79,21 @@ This is because we extract only the HTML code of this page.
 HTML is there for organizing web data (i.e., content), not how this data is dispayed (i.e., style).
 
 If you instead look at the **source code** of the webpage, you'll see that we exactly got this information when calling `read_html()`.
-Depending on the browser you are using, you can probably select 'view source' after a right-clicking the page. 
-If you have trouble, [google has an up-to-date explanation](https://www.google.com/search?hl=&site=&q=how+to+view+webpage+source+code+in+browser){target="_blank"}. 
+Depending on the browser you are using, you can probably select 'view source' after a right-clicking the page (see Figure 1)
 
 ```{r echo = FALSE, exercise = FALSE, fig.cap="*Fig 1* --- How to view page source code of quotes.toscrape.com in Google Chrome"}
-knitr::include_graphics("./images/view-source-code.png")
+knitr::include_graphics("images/view-source-code.png")
 ```
+
+What you then see should look similar to the screenshot shown in Figure 2.
+
+```{r echo = FALSE, exercise = FALSE, fig.cap="*Fig 2* --- Screenshot of source code of quotes.toscrape.com"}
+knitr::include_graphics("images/source-code.png")
+```
+
+
+*Note:* If you have trouble, [google has an up-to-date explanation](https://www.google.com/search?hl=&site=&q=how+to+view+webpage+source+code+in+browser){target="_blank"}. 
+
 
 ## Extracting text
 
@@ -93,9 +106,10 @@ We can use the function `html_text()`.
 **Try it yourself!**
 
 1. assign the parsed page to an object called 'page' 
-2. call `html_text()` on 'page' and assign the result to an object called 'page_text'
+2. call `html_text()` on 'page' and assign the result to an object called 'page_text' (*hint:* set argument `strip = TRUE`)
+3. print the fist six lines of extracted text (*hint:* try to use `cat()` isntead of `print()`)
 
-```{r text, exercise.lines=2}
+```{r extract-text}
 url <- "http://quotes.toscrape.com/"
 
 # TO DO: write the result of the below line to an object called 'page'
@@ -114,10 +128,10 @@ Luckily, there is.
 ## Extracting specific elements
 
 The `html_elements()` command allows us to select specific elements from the HTML code. 
-Please have a look at the documentation of the `?html_elements()` command.
+Please have a look at the documentation of the `?html_elements()` command (see Figure 3).
 
 
-```{r echo = FALSE, exercise = FALSE, fig.cap="*Fig 2* --- R documentation of `html_elements()`"}
+```{r echo = FALSE, exercise = FALSE, fig.cap="*Fig 3* --- R documentation of `html_elements()`"}
 knitr::include_graphics("images/html_elements_docu.png")
 ```
 
@@ -195,7 +209,7 @@ The CSS selector will select all elements with that tag name.
 Select all 'a' (anchor) tags
 <!-- As I said, we will focus more on gathering specific information but if you just want to parse large amounts of data, the universal selector can be very useful. Now, let's practice! -->
 
-```{r select_tag,}
+```{r select-tag}
 url <- "http://quotes.toscrape.com/"
 page <- read_html(url)
 # TO DO: select all 'a' tags using CSS selectors
@@ -208,7 +222,7 @@ To select elements with a specific **class**, just pass the class name to the `c
 <!-- with some of the class you have spotted when inspecting the source code of the quotes webpage.**  -->
 Select all HTML elements with class 'quote'.
 
-```{r select_class,}
+```{r select-class,}
 url <- "http://quotes.toscrape.com/"
 page <- read_html(url)
 # TO DO: select elements with class 'quote'
@@ -250,7 +264,7 @@ If you have a different browser, drag this link into your [bookmark bar and clic
 
 Of course, *SelectorGadget* is not perfect and sometimes will not be able to find a useful CSS selector. Sometimes starting from a different element helps.
 
-```{r selector-practice, exercise = FALSE, echo = FALSE}
+```{r selector-quiz, exercise = FALSE, echo = FALSE}
 quiz(
   caption = "Quiz about CSS selectors",
   question(
@@ -283,7 +297,7 @@ Since each exercise chunk is independent, there will be a bit of repetition invo
 Then, inspect the results by calling the object using `str()`!
 
 
-```{r nodes, exercise.setup="page-setup"}
+```{r select-text-nodes, exercise.setup="page-setup"}
 # TO DO: extract all elements from the quotes webpage
 #        that match the '.text' CSS selector
 ```
@@ -294,6 +308,6 @@ Try applying the `html_text()` command we used before to the nodes which we extr
 This way, we get just the text from the nodes we selected. 
 You can copy the code you used to extract the nodes and continue working on that!
 
-```{r textnodes,  exercise.setup='page-setup'}
+```{r select-text-nodes-texts,  exercise.setup='page-setup'}
 
 ```
