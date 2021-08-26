@@ -1,7 +1,7 @@
 ---
 title: "Advanced web scraping techniques with the `rvest` R package"
-# author: "Theresa Gessler and Hauke Licht"
-# date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: >
   Learn about a number of advanced web scaping techniques with the `rvest` package:
   using sessions,
@@ -11,30 +11,33 @@ description: >
   managing user argents.
 output: 
   learnr::tutorial:
-    progressive: false
+    progressive: true
+    allow_skip: true
 runtime: shiny_prerendered
 ---
 
 ```{r knitr, include=FALSE}
 knitr::opts_chunk$set(
   # code chunk options
-  echo = FALSE
+  echo = TRUE
   , eval = TRUE
   , warning = FALSE
   , message = FALSE
   , cached = FALSE 
+  # learnr
   , exercise = TRUE
-  , context = "data"
+  , exercise.completion = TRUE
+    # figs
+  , fig.align = "center"
+  , fig.height = 4
+  , fig.width = 5.5
+  , out.width = '50%'
 )
 ```
 
-```{r setup, include = FALSE, exercise = FALSE}
+```{r setup-invisible, include = FALSE, exercise = FALSE}
 library(learnr)
-library(dplyr)
-# library(learn2scrape)
-library(rvest)
 ```
-
 
 ## Introduction
 
@@ -45,22 +48,128 @@ In this tutorial, we show some important advanced web scraping techniques.
 2. Logging in
 4. User agents
 
+### R setup
+
+We will use the following R packaages:
+
+```{r setup, exercise = FALSE}
+library(rvest)
+library(dplyr)
+library(purrr)
+```
+
 
 ## Using session
 
-Thus far, we have relied on `xml2::read_html()` to read and parse websites HTML code.
+Thus far, we have relied on `xml2::read_html()` to read and parse websites' HTML code.
 This is fine for many purposes.
-But a more flexible way to interact with websites is through a Browser session.
+But a more flexible way to interact with websites is through a browser session.
 This has many advantages
 
-- you can pass configuration like user agents
+- you cn check the HTTP status code of your request
+- you can pass configuration like "user agents"
 - you can submit forms
 - you can navigate, e.g., by following links
 
-Sessions an be created in `rvest` with the `session()` function (`html_session()` for rvest < 2.0.0).
-The only required parameter is `url` --- the address of the webpage to request.
+### Creating a session 
 
-Additional (optional) parameters can be passed to `...`, however, and they are forwarded to `httr::GET()`.
+Sessions an be created in `rvest` with the `session()` function (`html_session()` before version 2.0.0).
+The only required parameter is `url`, the address of the webpage to request.
+
+**Try it yourself!**
+Create a session using https://scrapethissite.com/pages/simple/ as URL.
+
+```{r create-session}
+url <- "https://scrapethissite.com/pages/simple/"
+# To Do: create a session
+sess <- ...
+```
+
+```{r create-session-invisble, exercise = FALSE, include = FALSE}
+url <- "https://scrapethissite.com/pages/simple/"
+sess <- session(url)
+```
+
+### Structure of a session object
+
+If we inspect the return object assigned to `sess`, we see that it is a 'rvest_session' object.
+
+```{r session-class, exercise.eval = TRUE, exercise.lines = 1}
+class(sess)
+```
+
+Among others, objects of this class contain `httr` 'handle', 'request' and 'response' objects.
+
+```{r session-str, exercise.eval = TRUE, exercise.lines = 1}
+str(sess, 1)
+```
+
+The 'response' element is particularly useful because it
+
+1. states the HTTP status code of the response, and
+2. records the HTML code of the page your have requested (if the request had status '200')
+
+```{r session-response, exercise.eval = TRUE, exercise.lines = 1}
+sess$response
+```
+
+In addition, 'rvest_session' objects record the current URL
+
+```{r session-url, exercise.eval = TRUE, exercise.lines = 1}
+sess$url
+```
+
+### Parsing HTML code from a ssession object
+
+Because the (parsed) HTML code of the requested page is associated with the 'rvest_session' object, we can call any `rvest` functions on it as we would do on the `xml_document` returned by `xml2::read_html()`.
+
+For example:
+
+```{r session-html_elements}
+url <- "https://scrapethissite.com/pages/simple/"
+sess <- session(url)
+
+sess %>% 
+  html_elements(".country-name") %>% 
+  html_text(trim = TRUE) %>% 
+  data.frame(country_name = .)
+```
+
+### Navigating
+
+Session objects also allow navigating between pages.
+To navigate to a new page, simply call `session_jump_to()` function on the session object and the target URL.
+
+The session object then will keep track of the current URL and all previously visited URLs.
+They can be reported by calling `session_history()`.
+
+And because the session object 'remembers' the previous URL, we can go not only forward, but also backward.
+
+```{r session-navigation}
+url <- "https://scrapethissite.com/pages/simple/"
+sess <- session(url)
+
+# move forward
+sess <- session_jump_to(sess, "https://www.scrapethissite.com/pages/forms")
+
+# inspect history
+sess$url
+sess$back
+session_history(sess)
+
+# back to first page
+sess <- session_back(sess)
+sess$url
+
+# and again back to second page
+sess <- session_forward(sess)
+sess$url
+```
+
+
+### Optional function parameters
+
+Additional (optional) parameters can be passed to `session()`'s `...` argument, however, and they are forwarded to `httr::GET()`.
 This makes configuring `rvest` sessions particularly easy.
 Some of the most important features are 
 
@@ -70,15 +179,6 @@ Some of the most important features are
 - and using proxies (with  `httr::use_proxy()`).
 
 More on this later.
-```{r create-session}
-url <- "https://scrapethissite.com/pages/simple/"
-sess <- session(url)
-```
-
-```{r create-session-invisble, exercise = FALSE, include = FALSE}
-url <- "https://scrapethissite.com/pages/simple/"
-sess <- session(url)
-```
 
 <details>
 <summary>**_A peek under the hood of `rvest::session()`_**</summary>
@@ -123,110 +223,75 @@ Specifically,
 4. it makes the get request
 5. it parses the response and adds information to the 'session' input object, which is returned enhanced with information like GET request response status
 
-So `rvest::session()` is basically a wrapper around `httr::GET()` that eases interaction with request and reponse objects.
+So `rvest::session()` is basically a wrapper around `httr::GET()` that eases interaction with request and response objects.
 </details> 
 <br/>
 
-If we inspect the return object assigned to 'sess', we see that it is a 'rvest_session' object.
-Objects of this class containing `httr` 'handle', 'request' and 'response' objects.
-In addition, 'rvest_session' objects record the current URL and the current pages HTML code (in the 'cache' element).
-
-```{r inspect-session}
-url <- "https://scrapethissite.com/pages/simple/"
-sess <- session(url)
-
-sess
-str(sess, 1)
-sess$response
-```
-
-because the (parsed) HTML code of the requested page is associated with the 'rvest_session' object, we can call any `rvest` function on it as we would do on the `html_document` returned by `xml2::read_html()`.
-For example:
-
-```{r session-html_elements}
-url <- "https://scrapethissite.com/pages/simple/"
-sess <- session(url)
-
-sess %>% 
-  html_elements(".country-name") %>% 
-  html_text(trim = TRUE) %>% 
-  tibble(country_name = .)
-```
-
-### Navigating
-
-But session objects also allow navigating.
-To navigate to a new page, simply call `session_jump_to()` function on the session object and the target URL.
-
-The session object then will keep track of the current URL and all previously visited URLs.
-They can be reported by calling `session_history()`.
-
-And because the session object 'remembers' the previous URL, we can go not only forward, but also backward.
-
-
-```{r session-navigation}
-url <- "https://scrapethissite.com/pages/simple/"
-sess <- session(url)
-
-# move forward
-sess <- session_jump_to(sess, "https://www.scrapethissite.com/pages/forms")
-
-# inspect history
-sess$url
-sess$back
-session_history(sess)
-
-# back to first page
-sess <- session_back(sess)
-sess$url
-
-# and again back to second page
-sess <- session_forward(sess)
-sess$url
-```
-
 ## Interacting with HTML forms
 
-HTML forms allow collecting user input. 
-The page https://scrapethissite.com/pages/forms/ shows a simple example of a form --- in this case a search bar.
+HTML forms allow collecting user input.
+
+The page https://scrapethissite.com/pages/forms/ shows a simple example of a form --- in this case a *search bar*.
 The search bar allows users entering key words to filter the data by that is shown in the table below the search bar.
 
-Let's use this example to see how to interact with forms using `revest`.
-
-```{r form-session}
-url <- "https://scrapethissite.com/pages/forms/"
-sess <- session(url)
-```
+Let's use this example to see how to interact with forms using `rvest`.
 
 ```{r form-session-invisible, exercise = FALSE, include = FALSE, eval = FALSE}
 url <- "https://scrapethissite.com/pages/forms/"
 sess <- session(url)
 ```
 
+### Interacting with forms
+
+The two most elemental ways of interacting with HTML forms are 
+
+1. setting values
+2. submitting the form
+
+Before we can implement these in R, we first need to extract the form's corresponding R object and  understand its structure.
+
 ### Extracting forms
 
 Forms included in a page can be extracted with the `html_form()` function.
-This function returns a list of 'rvest_form' objects.
+Similar to `html_table()` (see tutorial "203-rvest-scraping-tables"), 
+`html_form()` returns 
+
+- a 'rvest_form' object if you input a single 'form' web element (i.e., a 'xml_node' object where `html_name(<obj>) == 'form'`), and 
+- otherwise a list of 'rvest_form' objects.
+
+**Try it yourself!** 
+Extract all forms from https://scrapethissite.com/pages/forms/
 
 ```{r extract-forms}
 url <- "https://scrapethissite.com/pages/forms/"
 sess <- session(url)
 
-forms <- html_form(sess)
+# To Do: extract all forms
+forms <- ...
+
+# To Do: inspect the return object
 str(forms, 1)
 ```
 
-*Note:* if you apply `html_form()` directly to a 'form' web element (instead of a list of web elements as returned by `html_element()`), then this will return the 'rvest_form' object directly instead of in a list.
+<!-- *Note:* if you apply `html_form()` directly to a 'form' web element (instead of a list of web elements as returned by `html_element()`), then this will return the 'rvest_form' object directly instead of in a list. -->
 
 To interact with a specific form, we extract it from the list.
 In this example, there is only one form that corresponds to the search bar displayed in the top of the page.
+
+**Try it yourself!** 
+Extract the frist form from https://scrapethissite.com/pages/forms/
 
 ```{r extract-a-form}
 url <- "https://scrapethissite.com/pages/forms/"
 sess <- session(url)
 
+# get all forms
 forms <- html_form(sess)
-a_form <- forms[[1]]
+
+# To Do: extract the first form
+a_form <- ...
+
+# To Do: inspect the return object
 str(a_form, 1)
 ```
 
@@ -236,28 +301,34 @@ sess <- session(url)
 a_form <- html_form(sess)[[1]]
 ```
 
-### Structure of form objects
+### Structure of a form objects
+
+Let's have a look how form objects are structured!
+
+```{r one-form, exercise.eval = TRUE, exercise.lines = 1}
+str(a_form, 1)
+```
 
 If the form is named, its name can be accessed in the 'name' element.
 The 'method' element notes the HTTP method.
-Most important is the 'fields' element.
-It records the fields of the form.
 
-```{r form-fields}
+Most important is the 'fields' element. It records the fields of the form.
+
+```{r form-fields, exercise.eval = TRUE, exercise.lines = 1}
 a_form$fields
 ```
 
 Each element is a 'form_field' object with four elements:
 
+```{r a-form-field, exercise.eval = TRUE, exercise.lines = 2}
+a_field <- a_form$fields[[1]]
+str(a_field, 1)
+```
+
 - 'type': the [form field type](https://www.w3schools.com/html/html_form_input_types.asp)
 - 'name': the form parameter name (here, 'q' for "query")
 - 'value': the value that is currently set on the field
 - 'attr': attributes of the 'rvest_field' object
-
-```{r a-form-field}
-a_field <- a_form$fields[[1]]
-str(a_field, 1)
-```
 
 *Note:* 
 Other field types may have additional elements.
@@ -277,11 +348,11 @@ To set a value in a form, we use the `html_form_set()` function (previously `rve
 For example, we can set a the query to a search term: "New York"
 We pass this information as parameter--value pair to the function:
 
-```{r fill-a-form}
+```{r fill-a-form, exercise.lines = 1}
 a_form_filled <- html_form_set(a_form, q = "New York")
 ```
 
-*Note:* If you want to set more than one form input parameter, simply add additional parameter--value pairs to the function call
+*Note:* If you want to set more than one form input parameter, simply add additional parameter--value pairs to the function call (e.g., `html_form_set(form, p1=v1, p2=v2, p3=v3)`).
 
 ```{r fill-a-form-invisible, exercise = FALSE, include = FALSE}
 a_form_filled <- html_form_set(a_form, q = "New York")
@@ -289,7 +360,7 @@ a_form_filled <- html_form_set(a_form, q = "New York")
 
 We can look at the value of the 'q' text field to verify that our query has been set:
 
-```{r fill-a-form-check-value}
+```{r fill-a-form-check-value, exercise.lines = 1}
 a_form_filled$fields$q$value
 ```
 
@@ -298,10 +369,11 @@ a_form_filled$fields$q$value
 To submit a form, we require the current session object and the filled form.
 We then pass these objects to the `session_submit()` function:
 
-```{r submit-a-form}
+```{r submit-a-form, exercise.lines = 1}
 sess <- session_submit(sess, a_form_filled)
 ```
 
+*Note:* Because by submitting the form the page content may change, we "update" the session object by simply overwriting it .
 
 ```{r submit-a-form-invisble, exercise = FALSE, include = FALSE}
 sess <- session_submit(sess, a_form_filled)
@@ -321,12 +393,12 @@ Great! The names of all listed Hockey team contain the term "New York".
 
 ## Login
 
-Simple sing-on login is easy to handle once you know how to handle HTTP forms with `rvest`
+Simple sign-on login is easy to handle once you know how to handle HTTP forms with `rvest`.
 We simply
 
-1. locate the Login form,
+1. locate the login form,
 2. pass our user information (email/user name and password), and
-3. submit the filled Login form
+3. submit the filled login form
 
 You can try this on https://www.stealmylogin.com/demo.html
 
@@ -378,7 +450,7 @@ That is, we tell the server what **user agent** we are.
 
 Because to scrape content from websites, `rvest` relies on `httr` for making HTTP requests, which, in turn, makes these request using the [`curl` program](https://curl.se/), by default we send this as user agent information when we execute `httr::GET` or `rvest::session()`.
 
-```{r default-user_agent}
+```{r default-user-agent, exercise.lines = 1}
 sess$response$request$options$useragent
 ```
 
