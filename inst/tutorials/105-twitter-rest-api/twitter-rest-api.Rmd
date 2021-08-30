@@ -1,0 +1,299 @@
+---
+title: "Download data using Twitter's REST API"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+description: >
+  Learn how to download Twitter data like tweets, users' bios, likes and followers
+  using the Twitter REST API
+  with the `rtweet` R package.
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r knitr, include=FALSE}
+knitr::opts_chunk$set(
+  # code chunk options
+  echo = TRUE
+  , eval = TRUE
+  , warning = FALSE
+  , message = FALSE
+  , cached = FALSE 
+  , exercise = TRUE
+  , exercise.completion = TRUE
+  # fig
+  , fig.align = "center"
+  , fig.height = 4
+  , fig.width = 5.5
+)
+```
+
+
+```{r setup-invisible, exercise = FALSE, include = FALSE}
+library(learnr)
+library(learn2scrape)
+```
+
+## Introduction
+
+In this tutorial, you'll learn how to obtain Twitter data from [Twitter's REST API](https://developer.twitter.com/en/docs/twitter-api/v1).
+The Twitter REST API provides you with access to the tweets of all users or other user-level information.
+
+### R Setup
+
+#### *R packages*
+
+We will use the following R packages:
+
+```{r setup, eval = TRUE, exercise = FALSE}
+# to access Twitter REST API
+library(rtweet)
+
+# data cleaning
+library(jsonlite)
+library(dplyr)
+library(tidyr)
+library(stringr)
+
+# visualizating
+library(ggplot2)
+library(maps)
+
+# text analyses
+library(quanteda)
+library(quanteda.textplots)
+options(quanteda_threads = 1L)
+```
+
+#### *Twitter API access token*
+
+Make sure that you have your Twitter API credentials ready:
+
+
+```{r create-token, exercise.eval = FALSE}
+# ToDo: specify path to your secrets JSON file
+fp <- file.path(...)
+credentials <- fromJSON(fp)
+token <- do.call(create_token, credentials)
+```
+
+
+```{r , exercise = FALSE, echo = FALSE}
+credentials <- fromJSON(system.file("extdata", "tw_credentials.json", package = "learn2scrape"))
+token <- do.call(create_token, credentials)
+```
+
+*Note:* If you don't, first go through the steps described in tutorial "103-twitter-setup" in the learn2scrape package: `learnr::run_tutorial("103-twitter-setup", package = "learn2scrape")`
+
+## Searching recent tweets
+
+Twitter allows the downloading of recent tweets based on keywords.
+However, the REST API will only return tweets that have been posted in the last 6 to 9 days (and in some cases not all of them). 
+You can check the documentation about the options for string search [here](https://dev.twitter.com/rest/public/search).
+
+
+```{r search-tweets}
+tweets <- search_tweets(q = "covid",  n = 10)
+
+nrow(tweets)
+head(tweets, 3)
+```
+
+### Downloading many, many tweets
+
+By default, the Twitter API allows you to download up to 18.000 Tweets. 
+To return more than 18.000 tweets with a single search, you can set `retryonratelimit = TRUE`.
+
+## Searching by Geocode
+
+Now, we can again search for tweets with a geocode. Hopefully, when also including past tweets, we will receive more results, so we will try to do this with Tweets 50km around *Central European University* (CEU).
+(You can lookup places' coordinates like described [here](https://support.google.com/maps/answer/18539).)
+
+```{r search-tweets-by-geocode}
+# search for tweets created (by users) near CEU
+ceu <- search_tweets(geocode = "47.500586,19.049482,50km", n = 100)
+
+# convert to latitude and longitude
+ceu <- rtweet::lat_lng(ceu)
+
+# plot
+maps::map("world", regions = "Hungary")
+with(ceu, points(lng, lat, col = rgb(0, .3, .7, .75)))
+```
+
+
+## Downloading user's tweets and bios
+
+Instead of just looking for key words or geo-coded tweets, you can also analyze specific users.
+
+You can download **up to 3,200 most recent tweets** from a Twitter account using `get_timeline()`. 
+`rtweet` also has some in-built functions for plotting the results, namely `ts_plot()`.
+So do you see any changes to the German Social Democrat's tweeting behavior over the past months?
+
+**Hint:** if you want to query tweets for more than one user, use `get_timelines()`. 
+
+
+```{r get-timeline}
+tweets <- get_timeline("spdbt", n = 100)
+
+# plot
+ts_plot(tweets, color = "gray", lwd = .5) + 
+  geom_smooth() + 
+  scale_x_datetime(date_labels = "%b %Y") +
+  theme_bw()
+```
+
+`get_timeline()` returns a lot of information associated with tweets.
+Most importantly:
+
+- tweet author-related information 
+  - 'user_id': the unique user identifier
+  - 'screen_name': the user name
+  - 'name': the clear name
+  - 'description': the self-authored user bio
+  - '\*_counts': several variables counting the authors total followers, statuses (i.e., tweets), and favorites (i.e., likes)
+  - and many more
+- tweet-related information 
+  - 'status_id': the unique identifier of the tweet
+  - 'created_at': the date and time when the tweet was posted
+  - 'reply_to_status_id': the tweet ID of the tweet the current tweet replies to (if any)
+  - '\*_counts: several variables counting likes (aka 'favorites'), quotes, replies and retweets
+  - 'hashtags': a list column recording all hashtags used per tweet 
+
+Hence, if you want to get users' self-descriptions, you can also use the `get_timeline()` function. 
+
+But actually, if you really only want to get the description of the users, you can also simply use `lookup_users()`.
+
+```{r lookup-users}
+wh <- c("realDonaldTrump", "POTUS", "VP", "FLOTUS")
+users <- lookup_users(user = wh)
+users$description
+```
+
+## Building friend and follower networks
+
+If you are interested in networks, you can also download friends and followers. 
+*Friends* are the people the account you query follows, while *followers* are the people who follow that account. 
+
+### Requesting friend and follower information
+
+For example, let us look at the friends and followers of the account of my home department: the Political Science Department of the University of Zurich.
+Of course, you can replace that with your department's account:
+
+```{r get-followers-and-friends, exercise.lines = 2}
+followers <- get_followers("IPZ_ch")
+friends <- get_friends("IPZ_ch")
+```
+
+We can also compare these lists --- whom does my department follow, who follows my department?
+
+```{r follower-network}
+follower_network <- friends %>% 
+    select(user_id) %>% 
+    mutate(ipz_follows = TRUE) %>% 
+    full_join(
+      mutate(followers, follows_ipz = TRUE), 
+      by = 'user_id'
+    ) %>% 
+    mutate_all(replace_na, FALSE)
+
+# tabulate
+with(follower_network, table(follows_ipz, ipz_follows))
+```
+
+### Anaylzing followers bios
+
+What are the most common words that friends of my department's account use to describe themselves on Twitter?
+
+We do a bit more text analysis now by visualizing the results with a word cloud using the `quanteda` R package.
+This allows us to remove things like URLs or non-meaningful words before we visualize the user descriptions.
+
+```{r bios-wordcloud}
+# extract profile descriptions
+users <- lookup_users(user = friends$user_id)
+
+# create corpus of user descriptions
+corp <- users %>% 
+  filter(!is.na(description), trimws(description) != "") %>% 
+  select(user_id, screen_name, name, description, account_created_at) %>% 
+  corpus(text_field = "description", docid_field = "user_id")
+
+# convert to document-term matrix (bag-of-words)
+bow <- corp %>% 
+  tokens(
+    remove_punct = TRUE,
+    remove_symbols = TRUE,
+    remove_url = TRUE
+  ) %>% 
+  tokens_remove(c(stopwords("en"), stopwords("de"))) %>% 
+  dfm()
+
+topfeatures(bow, n = 15)
+
+# create a wordcloud
+textplot_wordcloud(
+  bow,
+  rotation = 0,
+  min_size = 1,
+  max_size = 5,
+  max_words = 100
+)
+```
+
+## Other types of data
+
+The REST API offers also a long list of other endpoints that could be of use in your projects.
+
+### Searching users
+
+You can use `search_users()` to search for users related to specific keywords based on their self-description. For example, you might want to look into users that are interested in methods or politics or or or:
+
+```{r search-users, exercise.lines = 2}
+usrs <- search_users(q = "data journalism", n = 10)
+users$screen_name
+```
+
+### Downloading tweets data by ID
+
+If you know the ID of the tweets, you can download it directly from the API using `lookup_statuses()`.
+
+This is useful because tweets cannot be redistributed as part of the replication materials of a published paper, but the list of tweet IDs can be shared:
+
+```{r lookup-statuses}
+# Downloading tweets when you know the ID
+status <- lookup_statuses(statuses = c("896523232098078720"))
+status$text
+```
+
+### Downloading lists
+
+"Lists" of Twitter users, compiled by other users, are also accessible through the API. 
+There are many lists of politicians, leaders etc. that you can use.
+
+You can search by 'slug', that is name, if you specify the list owner, otherwise you have to find the `list_id`
+
+```{r lists-members}
+# download user information from a list
+world_leaders <- lists_members(
+  slug = "world-leaders",
+  owner_user = "twiplomacy"
+)
+```
+
+This is also useful if e.g. you're interested in compiling lists of journalists, because media outlets offer these lists in their profiles.
+
+The opposite approach is to search for lists that contain a certain user with `lists_memberships()`. E.g., you could look for all lists that contain Donald Trump.
+
+```{r lists-memberships, exercise.lines = 1}
+trump_lists <- lists_memberships(user = "realDonaldTrump")
+```
+
+### Downloading retweets
+
+List of users who retweeted a particular tweet --- unfortunately, it's limited to only 100 most recent retweets.
+
+```{r get-retweets, exercise.lines = 1}
+rts <- get_retweets(status_id = "896523232098078720")
+```
