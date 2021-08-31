@@ -47,7 +47,11 @@ In this tutorial, we will go through the steps required to
 To apply for a developer account, you need to have an active Twitter account.
 You can create one at https://twitter.com/i/flow/signup
 
-Next, you can then apply for a developer account at https://developer.twitter.com/en/apply-for-access
+
+Normally, you will then have to apply for a developer account at https://developer.twitter.com/en/apply-for-access
+We describe how to do that below. However, if you are attending a course with us and do not have a developer account yet, please do not apply for now: We can add users who have not applied for a developer account to our 'class account' for the duration of the course.
+
+After the course, you may want to turn your access permanent by applying for a developer account so we describe the steps here:
 Note that while applying you need to specify what you intended to use the API and Twitter data for  (your "use case"). 
 Specifically, Twitter states on its [*developer platform*](https://developer.twitter.com/en/docs/developer-portal/overview)
 

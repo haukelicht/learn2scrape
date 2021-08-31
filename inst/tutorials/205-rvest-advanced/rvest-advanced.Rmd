@@ -191,7 +191,7 @@ HTML forms allow collecting user input.
 The page https://scrapethissite.com/pages/forms/ shows a simple example of a form --- in this case a search bar.
 The search bar allows users entering key words to filter the data by that is shown in the table below the search bar.
 
-Let's use this example to see how to interact with forms using `revest`.
+Let's use this example to see how to interact with forms using `rvest`.
 
 ```{r form-session}
 url <- "https://scrapethissite.com/pages/forms/"
