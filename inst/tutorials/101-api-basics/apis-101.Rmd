@@ -144,7 +144,7 @@ Check the [docu](https://icanhazdadjoke.com/api#api-response-format) and try to 
 resp <- GET(endpoint, config = ...)
 ```
 
-```{r text-solution,exercise=F}
+```{r text-solution}
 resp <- GET(endpoint, config = accept_json())
 ```
 
