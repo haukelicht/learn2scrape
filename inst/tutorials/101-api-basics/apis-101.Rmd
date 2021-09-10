@@ -144,7 +144,7 @@ Check the [docu](https://icanhazdadjoke.com/api#api-response-format) and try to 
 resp <- GET(endpoint, config = ...)
 ```
 
-```{r random-joke-text-solution, eval = FALSE}
+```{r random-joke-text-solution}
 resp <- GET(endpoint, config = accept_json())
 ```
 
@@ -230,7 +230,7 @@ This example helps to clarify some best practices:
 
 ### Querying any joke
 
-The first thing to note is that we can pass an empty query string '' to the `term` parameter.
+The first thing to note is that we can pass an empty query string '''' to the `term` parameter.
 Because all joke texts will match this query term, the API will return *all* jokes.
 
 *Note:* Since this is the default search term, we can simply omit it from our API request.
