@@ -108,19 +108,19 @@ To return more than 18.000 tweets with a single search, you can set `retryonrate
 
 ## Searching by Geocode
 
-Now, we can again search for tweets with a geocode. Hopefully, when also including past tweets, we will receive more results, so we will try to do this with Tweets 50km around *Central European University* (CEU).
+Now, we can again search for tweets with a geocode. Hopefully, when also including past tweets, we will receive more results, so we will try to do this with Tweets 50km around *GESIS*.
 (You can lookup places' coordinates like described [here](https://support.google.com/maps/answer/18539).)
 
 ```{r search-tweets-by-geocode}
-# search for tweets created (by users) near CEU
-ceu <- search_tweets(geocode = "47.500586,19.049482,50km", n = 100)
+# search for tweets created (by users) near GESIS
+gesis <- search_tweets(geocode = "50.94268842250975, 6.952277084819257,50km", n = 100)
 
 # convert to latitude and longitude
-ceu <- rtweet::lat_lng(ceu)
+gesis <- rtweet::lat_lng(gesis)
 
 # plot
-maps::map("world", regions = "Hungary")
-with(ceu, points(lng, lat, col = rgb(0, .3, .7, .75)))
+maps::map("world", regions = "Germany")
+with(gesis, points(lng, lat, col = rgb(0, .3, .7, .75)))
 ```
 
 
@@ -167,7 +167,7 @@ Hence, if you want to get users' self-descriptions, you can also use the `get_ti
 But actually, if you really only want to get the description of the users, you can also simply use `lookup_users()`.
 
 ```{r lookup-users}
-wh <- c("realDonaldTrump", "POTUS", "VP", "FLOTUS")
+wh <- c("JoeBiden", "POTUS", "VP", "FLOTUS")
 users <- lookup_users(user = wh)
 users$description
 ```
@@ -272,22 +272,24 @@ status$text
 "Lists" of Twitter users, compiled by other users, are also accessible through the API. 
 There are many lists of politicians, leaders etc. that you can use.
 
-You can search by 'slug', that is name, if you specify the list owner, otherwise you have to find the `list_id`
+You can search by 'slug', that is name, if you specify the list owner, otherwise you have to find the `list_id`. Try to find information about this <a href="https://twitter.com/i/lists/1044685725369815040">list of world leaders</a>.
 
 ```{r lists-members}
 # download user information from a list
 world_leaders <- lists_members(
-  slug = "world-leaders",
-  owner_user = "twiplomacy"
+  list_id = "1044685725369815040",
+  owner_user = "@TwitterGov"
 )
+world_leaders
 ```
 
 This is also useful if e.g. you're interested in compiling lists of journalists, because media outlets offer these lists in their profiles.
 
-The opposite approach is to search for lists that contain a certain user with `lists_memberships()`. E.g., you could look for all lists that contain Donald Trump.
+The opposite approach is to search for lists that contain a certain user with `lists_memberships()`. E.g., you could look for all lists that contain Joe Biden.
 
 ```{r lists-memberships, exercise.lines = 1}
-trump_lists <- lists_memberships(user = "realDonaldTrump")
+biden_lists <- lists_memberships(user = "JoeBiden")
+biden_lists
 ```
 
 ### Downloading retweets

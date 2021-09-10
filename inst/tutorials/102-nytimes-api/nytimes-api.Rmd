@@ -4,7 +4,7 @@ author: "Theresa Gessler and Hauke Licht"
 date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: >
   Learn how to query data from the New York Times *Article Search* API with the `httr` R package.
-  This tutorial also cover how to authentificate with an API as well as tipps to make your web scraping code robust and less redundant.
+  This tutorial also covers how to authentificate with an API as well as tipps to make your web scraping code robust and less redundant.
 output: 
   learnr::tutorial:
     progressive: true

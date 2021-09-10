@@ -40,7 +40,7 @@ library(rvest)
 
 In this tutorial, we show some important advanced web scraping techniques.
 
-1. Using `session`s
+1. Using `sessions`
 3. Interacting with HTML forms
 2. Logging in
 4. User agents
@@ -70,6 +70,9 @@ Some of the most important features are
 - and using proxies (with  `httr::use_proxy()`).
 
 More on this later.
+
+First, have a look at <a href="https://scrapethissite.com/pages/simple/">this page</a> which we will scrape in the example.
+
 ```{r create-session}
 url <- "https://scrapethissite.com/pages/simple/"
 sess <- session(url)
@@ -81,7 +84,7 @@ sess <- session(url)
 ```
 
 <details>
-<summary>**_A peek under the hood of `rvest::session()`_**</summary>
+<summary>**_Extra: A peek under the hood of `rvest::session()`_**</summary>
 
 What does `rvest::session()`actually do?
 The documentation (`?rvest::session`) is not particularly informative.
@@ -191,7 +194,7 @@ HTML forms allow collecting user input.
 The page https://scrapethissite.com/pages/forms/ shows a simple example of a form --- in this case a search bar.
 The search bar allows users entering key words to filter the data by that is shown in the table below the search bar.
 
-Let's use this example to see how to interact with forms using `revest`.
+Let's use this example to see how to interact with forms using `rvest`.
 
 ```{r form-session}
 url <- "https://scrapethissite.com/pages/forms/"
