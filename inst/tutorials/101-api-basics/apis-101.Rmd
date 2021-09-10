@@ -37,10 +37,15 @@ In this tutorial, you will learn the basics of querying APIs using R.
 We will rely on the *Dad Jokes* API as a running example: https://icanhazdadjoke.com/api
 
 We use the following packages:
-
-```{r setup, exercise = FALSE}
+```{r, exercise = FALSE}
 library(httr)
 library(dplyr)
+detach("package:learn2scrape", unload = TRUE)
+```
+```{r setup, exercise = FALSE,include=F}
+library(httr)
+library(dplyr)
+endpoint <- "https://icanhazdadjoke.com"
 ```
 
 ## Read the documentation 
