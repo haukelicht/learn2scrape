@@ -140,11 +140,11 @@ resp <- GET(endpoint, config = accept_json())
 **Try it yourself!**
 Check the [docu](https://icanhazdadjoke.com/api#api-response-format) and try to obtain the response in plain text format
 
-```{r random-joke-text, exercise.lines = 1}
+```{r text, exercise.lines = 3}
 resp <- GET(endpoint, config = ...)
 ```
 
-```{r random-joke-text-solution}
+```{r text-solution,exercise=F}
 resp <- GET(endpoint, config = accept_json())
 ```
 
