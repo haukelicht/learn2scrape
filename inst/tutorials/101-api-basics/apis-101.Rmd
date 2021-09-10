@@ -40,7 +40,6 @@ We use the following packages:
 ```{r, exercise = FALSE}
 library(httr)
 library(dplyr)
-detach("package:learn2scrape", unload = TRUE)
 ```
 ```{r setup, exercise = FALSE,include=F}
 library(httr)
@@ -110,7 +109,7 @@ If you print the return object `resp`, you see some important information:
 
 ### Parsing
 
-```{r random-joke-html-parse, exercise.setup = "random-joke-html", exercise.lines = 2}
+```{r random-joke-html-parse, exercise.setup = "random-joke-html-invisible", exercise.lines = 3}
 # parse returned data
 content(resp, "parsed") # this is an xml2/rvest 'html_document' object
 ```
@@ -130,7 +129,7 @@ content(resp, "parsed")
 
 Note that we could also simply specify `config = accept_json()`:
 
-```{r , exercise = FALSE, eval = FALSE}
+```{r, exercise = FALSE, eval = FALSE}
 resp <- GET(endpoint, config = accept_json())
 ```
 
@@ -141,6 +140,10 @@ Check the [docu](https://icanhazdadjoke.com/api#api-response-format) and try to 
 
 ```{r random-joke-text, exercise.lines = 1}
 resp <- GET(endpoint, config = ...)
+```
+
+```{r random-joke-text-solution, exercise = FALSE, eval = FALSE}
+resp <- GET(endpoint, config = accept_json())
 ```
 
 ## API queries with parameters
