@@ -3,12 +3,12 @@ title: "Advanced web scraping techniques with the `rvest` R package"
 author: "Theresa Gessler and Hauke Licht"
 date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
 description: >
-  Learn about a number of advanced web scaping techniques with the `rvest` package:
+  Learn about a number of advanced web scraping techniques with the `rvest` package:
   using sessions,
   interacting with HTML forms,
   handling login,
   and 
-  managing user argents.
+  managing user agents.
 output: 
   learnr::tutorial:
     progressive: true
@@ -43,14 +43,14 @@ library(learnr)
 
 In this tutorial, we show some important advanced web scraping techniques.
 
-1. Using `session`s
+1. Using `sessions`
 3. Interacting with HTML forms
 2. Logging in
 4. User agents
 
 ### R setup
 
-We will use the following R packaages:
+We will use the following R packages:
 
 ```{r setup, exercise = FALSE}
 library(rvest)
@@ -66,18 +66,19 @@ This is fine for many purposes.
 But a more flexible way to interact with websites is through a browser session.
 This has many advantages
 
-- you cn check the HTTP status code of your request
+- you can check the HTTP status code of your request
 - you can pass configuration like "user agents"
 - you can submit forms
 - you can navigate, e.g., by following links
 
 ### Creating a session 
 
-Sessions an be created in `rvest` with the `session()` function (`html_session()` before version 2.0.0).
+Sessions can be created in `rvest` with the `session()` function (`html_session()` before version 2.0.0).
 The only required parameter is `url`, the address of the webpage to request.
 
 **Try it yourself!**
-Create a session using https://scrapethissite.com/pages/simple/ as URL.
+First, have a look at https://scrapethissite.com/pages/simple/ which we will scrape in the example.
+Next, create a session object using this URL.
 
 ```{r create-session}
 url <- "https://scrapethissite.com/pages/simple/"
@@ -119,7 +120,7 @@ In addition, 'rvest_session' objects record the current URL
 sess$url
 ```
 
-### Parsing HTML code from a ssession object
+### Parsing HTML code from a session object
 
 Because the (parsed) HTML code of the requested page is associated with the 'rvest_session' object, we can call any `rvest` functions on it as we would do on the `xml_document` returned by `xml2::read_html()`.
 
@@ -180,8 +181,7 @@ Some of the most important features are
 
 More on this later.
 
-<details>
-<summary>**_A peek under the hood of `rvest::session()`_**</summary>
+### *Advanced*: A peek under the hood
 
 What does `rvest::session()`actually do?
 The documentation (`?rvest::session`) is not particularly informative.
@@ -224,8 +224,6 @@ Specifically,
 5. it parses the response and adds information to the 'session' input object, which is returned enhanced with information like GET request response status
 
 So `rvest::session()` is basically a wrapper around `httr::GET()` that eases interaction with request and response objects.
-</details> 
-<br/>
 
 ## Interacting with HTML forms
 
