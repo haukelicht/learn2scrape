@@ -45,7 +45,7 @@ you can also work through them on your own.
 
 You can view all tutorials contained in the `learn2scrape` package by running the following code in your R console:
 
-```{r list-tutorials}
+```{r list-tutorials, exercise.lines = 1}
 learnr::available_tutorials(package = "learn2scrape")
 ```
 
@@ -98,9 +98,14 @@ The most important thing about tutorials, and what makes them interactive, is th
 So you cannot only execute the below code chunk interactively by clicking the "Run Code" button.
 You can also alter the R code in any way you want!
 
-**Try it yourself!** Replace the string `'Hello world!'` with some text of your choice and click "Run Code"
+**Try it yourself!** 
+Replace the string `'Hello world!'` with some text of your choice and click "Run Code"
 
-```{r interactive-example, exercise.eval = TRUE}
+*Note:* When executing the code, the result is printed interactively below the code chunk. 
+Text that reports results (i.e., evaluated code) begins with two hashtags `##`.
+
+
+```{r interactive-example, exercise.eval = TRUE, exercise.lines = 2}
 string <- 'Hello world!'
 string
 ```
@@ -119,7 +124,7 @@ One important thing to know about **interactive code chunks** is that they **are
 So if you define an R objects or function in one code chunk, it *won't be available* in the following code chunks!
 
 This is shown below. 
-We first assing 1 to object `one`.
+We first assign 1 to object `one`.
 
 ```{r defined, exercise.lines = 1}
 one <- 1
@@ -140,9 +145,9 @@ Therefore, you will usually need to repeat code from previous exercises.
 ### Viewing solutions
 
 When we ask you to write some code on your own, we provide solutions.
-You can view solutions by clicking on the "&#8227;" symbol below an interactive code chunk.
+You can view solutions by clicking on the link below an interactive code chunk.
 
-In the below example, your task would be to find the remaineder when 5 is divided by 2 (indicated by the "ToDo" comment).
+In the below example, your task would be to find the remainder when 5 is divided by 2 (indicated by the "ToDo" comment).
 The solution can be viewed below this code chunk.
 
 ```{r example-exercise}
@@ -151,9 +156,9 @@ The solution can be viewed below this code chunk.
 ```
 
 <details>
-<summary>View the solution!</summary>
+<summary>**_Click here to view the solution!_**</summary>
 ```{r example-exercise-solution, exercise = FALSE}
-# ToDo: find the remainder when 5 is divided by 2
+# find the remainder when 5 is divided by 2
 5 %% 2
 ```
 </details>

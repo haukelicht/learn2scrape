@@ -10,7 +10,6 @@ description: >
   how to loop/iterate,
   and 
   how to write functions.
-# output: html_document
 output: 
   learnr::tutorial:
     progressive: true
@@ -32,11 +31,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup-invisble, exercise = FALSE, include=FALSE}
+```{r setup-invisible, exercise = FALSE, include=FALSE}
 library(learnr)
 library(dplyr)
-# library(rvest)
-)
 ```
 
 
@@ -590,7 +587,7 @@ You can access this information with the `ncol()` and `nrow()` functions
 
 We can also add new columns to an existing data frames by using the assignment operator:
 
-```{r df-class, exercise.lines=20}
+```{r df-class}
 student_names <- c("Bill", "Jane", "Sarah", "Fred", "Paul")
 math_scores <- c(80, 75, 91, 67, 56)
 verbal_scores <- c(72, 90, 99, 60, 68)
@@ -660,7 +657,7 @@ rbind(a, b)
 A very common scenario is when we have a list of data frames, and we want to bind them together.
 We can do this by passing the list and our desired bind function as arguments to the `do.call()` function
 
-```{r combine-do_call, exercise.lines=20}
+```{r combine-do_call}
 results <- list()
 # let's say here you're scraping 3 websites
 results[[1]] <- data.frame(domain = "google",   url = "www.google.com")
