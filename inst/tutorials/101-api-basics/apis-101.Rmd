@@ -85,17 +85,6 @@ We first assign the endpoint URL to an object called 'endpoint'.
 endpoint <- "https://icanhazdadjoke.com"
 ```
 
-```{r try}
-
-```
-
-```{r try-solution,exercise=F,echo=F,eval=F}
-
-small_long %>%
-  filter(party!="Republikaner") %>%
-  group_by(party==partychoice) %>%
-  summarize_all(mean,na.rm=T)
-```
 
 ### Making a simple request
 
