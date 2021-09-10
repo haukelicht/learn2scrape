@@ -450,7 +450,7 @@ all_jokes <- bind_rows(all_jokes)
 
 The above code can be made more efficient in two ways:
 
-1. instead of starting to iterate from the first page, we could actually start from the second page. Why? because to determine the total number of pages, we have queried data fro mthe first page.
+1. instead of starting to iterate from the first page, we could actually start from the second page. Why? because to determine the total number of pages, we have queried data from the first page.
 2. We could increase the number of jokes per page to 30 (the API-internal maximum number). In this way, we would need to iterate over fewer pages, hence making fewer API request. This would reduce the amount of web traffic we generate as well as the total amount of seconds we pause between subsequent API requests.
 
 
