@@ -93,7 +93,7 @@ resp
 ```
 
 
-```{r random-joke-html-invisible, exercise = FALSE, echo = FALSE}
+```{r random-joke-html-invisible, exercise = FALSE, echo = FALSE, exercise.setup = "random-endpoint"}
 resp <- GET(endpoint)
 ```
 
