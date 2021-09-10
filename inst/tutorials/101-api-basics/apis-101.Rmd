@@ -45,6 +45,8 @@ library(dplyr)
 library(httr)
 library(dplyr)
 endpoint <- "https://icanhazdadjoke.com"
+searchendpoint <- "https://icanhazdadjoke.com/search"
+
 ```
 
 ## Read the documentation 
@@ -142,7 +144,7 @@ Check the [docu](https://icanhazdadjoke.com/api#api-response-format) and try to 
 resp <- GET(endpoint, config = ...)
 ```
 
-```{r random-joke-text-solution, exercise = FALSE, eval = FALSE}
+```{r random-joke-text-solution, eval = FALSE}
 resp <- GET(endpoint, config = accept_json())
 ```
 
@@ -162,7 +164,7 @@ This is quite common for APIs that provide text data.
 The search endpoint is https://icanhazdadjoke.com/search
 
 ```{r search-endpoint, exercise = FALSE}
-endpoint <- "https://icanhazdadjoke.com/search"
+searchendpoint <- "https://icanhazdadjoke.com/search"
 ```
 
 It accepts three parameters:
@@ -179,7 +181,7 @@ So we need to add `query = list(term = 'drink')` when calling get
 
 ```{r joke-search-drink, exercise.setup = "random-joke-html"}
 resp <- GET(
-  endpoint, 
+  searchendpoint, 
   query = list(term = 'drink'), 
   config = accept_json()
 )
@@ -187,7 +189,7 @@ resp <- GET(
 
 ```{r joke-search-drink-invisible, exercise = FALSE, include = FALSE, exercise.setup = "random-joke-html"}
 resp <- GET(
-  endpoint,
+  searchendpoint,
   query = list(term = 'drink'),
   config = accept_json()
 )
@@ -196,13 +198,13 @@ dat <- content(resp, "parsed")
 
 We can verify that the key-value pair term and 'drink' has been added to the API request:
 
-```{r joke-search-drink-url, exercise.setup = "joke-search-drink", exercise.lines = 1}
+```{r joke-search-drink-url, exercise.setup = "joke-search-drink-invisible", exercise.lines = 1}
 resp$request$url
 ```
 
 We can now inspect the parsed response:
 
-```{r joke-search-drink-structure, exercise.setup = "joke-search-drink", exercise.lines = 1}
+```{r joke-search-drink-structure, exercise.setup = "joke-search-drink-invisible", exercise.lines = 1}
 dat <- content(resp, "parsed")
 
 str(dat, 1)
@@ -211,7 +213,7 @@ str(dat, 1)
 Inspecting its structure, we see that the API has returned a total 3 jokes (see list element 'total_jokes') and that there is an element called 'results.'
 This element records the jokes matching our key term:
 
-```{r joke-search-drink-results, exercise.setup = "joke-search-drink-structure", exercise.lines = 1}
+```{r joke-search-drink-results, exercise.setup = "joke-search-drink-invisible", exercise.lines = 1}
 dat$results
 ```
 
@@ -240,14 +242,14 @@ In this way we can iterate over pages to extract as many dad jokes as we'd like.
 To see how this can be done, let's first make an initial query to the search endpoint and parse the returned JSON data into an R object:
 
 ```{r joke-search-all-parsed, exercise.setup = "random-joke-html"}
-resp <- GET(endpoint, config = accept_json())
+resp <- GET(searchendpoint, config = accept_json())
 
 dat <- content(resp, "parse")
 str(dat, 1)
 ```
 
 ```{r joke-search-all-parsed-invisible, exercise = FALSE, echo = FALSE, exercise.setup = "random-joke-html"}
-resp <- GET(endpoint, config = accept_json())
+resp <- GET(searchendpoint, config = accept_json())
 dat <- content(resp, "parse")
 ```
 
@@ -272,7 +274,7 @@ Let's start with the first point!
 We will use the data returned by our first query.
 As seen above, jokes are in the list element called 'results'.
 
-```{r search-jokes-all-response-structure, exercise.setup = "joke-search-all-parsed"}
+```{r search-jokes-all-response-structure, exercise.setup = "joke-search-all-parsed-invisible"}
 # 'results' is a list of lists
 str(dat$results, 1)
 # all sub-lists have two elements
@@ -281,7 +283,7 @@ lengths(dat$results)
 
 Let's check how a sub-list looks like
 
-```{r search-jokes-all-response-sublist, exercise.setup = "joke-search-all-parsed", exercise.lines = 1}
+```{r search-jokes-all-response-sublist, exercise.setup = "joke-search-all-parsed-invisible", exercise.lines = 1}
 dat$results[[1]]
 ```
 
@@ -291,7 +293,7 @@ The returned data records jokes' texts and their IDs.
 We can obtain this data from the 'results' list element using the `dplyr` function `bind_rows()`. 
 This results in a data frame with two columns: 'id' and 'joke'
 
-```{r search-jokes-extact-jokes, exercise.setup = "joke-search-all-parsed", exercise.lines = 2}
+```{r search-jokes-extact-jokes, exercise.setup = "joke-search-all-parsed-invisible", exercise.lines = 2}
 jokes <- bind_rows(dat$results)
 head(jokes, n = 3) # show first 3 rows
 ```
@@ -308,7 +310,7 @@ jokes <- do.call(rbind, jokes)
 Next, we want to determine the next page to query data from.
 As seen above the parsed API response records this information in a list element called 'next_page.'
 
-```{r search-jokes-next-page-value, exercise.setup = "joke-search-all-parsed", exercise.lines = 1}
+```{r search-jokes-next-page-value, exercise.setup = "joke-search-all-parsed-invisible", exercise.lines = 1}
 dat$next_page
 ```
 
@@ -322,11 +324,11 @@ So if after a current request, we get the value from the 'next_page' field of th
 So the R (pseudo) code would be:
 ```{r , exercise = FALSE, eval = FALSE}
 # STEP 1
-first_request <- GET(endpoint)
+first_request <- GET(searchendpoint)
 params <- list(page = first_request$next_page)
 
 # STEP 2
-second_request <- GET(endpoint, params)
+second_request <- GET(searchendpoint, params)
 params <- list(page = second_request$next_page)
 
 # STEP K 
@@ -361,7 +363,7 @@ We replace `...` with the code we want to execute:
 
 ```{r exercise = FALSE, eval = FALSE}
 # make request for page `i`
-resp <- GET(endpoint, query = list("page" = i), accept_json())
+resp <- GET(searchendpoint, query = list("page" = i), accept_json())
 
 # parse response
 dat <- content(resp, "parsed")
@@ -378,7 +380,7 @@ We can do this by appending to a list we create beforehand:
 all_jokes <- list()
 
 # iterate over pages
-for (i in pages) {
+for (page in pages) {
   
   ... 
   # append current data jokes data
@@ -406,10 +408,10 @@ The following code illustrates this
 ```{r pause}
 # get time at start
 st <- Sys.time()
-# pause for 10.33 seconds
+# pause for 3.33 seconds
 Sys.sleep(3.33)
 # print difference to start time when done
-st - Sys.time()
+Sys.time()-st
 ```
 
 *Hint:* We can randomize how long we pause by sampling a single number from a probability distribution such as the uniform distribution (implemented as `runif()` in R).
