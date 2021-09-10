@@ -85,6 +85,18 @@ We first assign the endpoint URL to an object called 'endpoint'.
 endpoint <- "https://icanhazdadjoke.com"
 ```
 
+```{r try}
+
+```
+
+```{r try-solution,exercise=F,echo=F,eval=F}
+
+small_long %>%
+  filter(party!="Republikaner") %>%
+  group_by(party==partychoice) %>%
+  summarize_all(mean,na.rm=T)
+```
+
 ### Making a simple request
 
 No we can make a GET-request to this API endpoint using the `GET()` function from the `httr` package.
@@ -142,10 +154,6 @@ Check the [docu](https://icanhazdadjoke.com/api#api-response-format) and try to 
 
 ```{r text, exercise.lines = 3}
 resp <- GET(endpoint, config = ...)
-```
-
-```{r text-solution}
-resp <- GET(endpoint, config = accept_json())
 ```
 
 ## API queries with parameters
