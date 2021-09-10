@@ -45,7 +45,7 @@ library(dplyr)
 
 ## Read the documentation 
 
-Go to https://icanhazdadjoke.com/api and familirize yourself with the API.
+Go to https://icanhazdadjoke.com/api and familiarize yourself with the API.
 Then answer the following questions.
 
 ```{r endpoint-quiz, exercise = FALSE, echo = FALSE}
@@ -85,7 +85,7 @@ No we can make a GET-request to this API endpoint using the `GET()` function fro
 If you check the documentation of this function (type `?httr::GET`), you'll see that it expects the endpoint URL as input to the frist argument.
 Since we just want to query a random joke, and this endpoint accepts no parameters (more on this later), we simply call `GET()` with the endpoint URL as single input:
 
-```{r random-joke-html}
+```{r random-joke-html, exercise.setup = "random-endpoint"}
 resp <- GET(endpoint)
 
 # inspect
@@ -116,7 +116,7 @@ Most other APIs, however, return data in JSON format.
 We can instruct the API to return the data in another format by by adding a header to our query.
 The 'Accept' header tells the API that it should return data in JSON format.
 
-```{r random-joke-json}
+```{r random-joke-json, exercise.setup = "random-joke-html"}
 resp <- GET(endpoint, config = add_headers(Accept = "application/json"))
 
 # if we directly parse the JSON, we get an R 'list' object
@@ -169,7 +169,7 @@ We will ignore the last two parameters for the moment and just use the `term` pa
 With `httr::GET()`, API parameters need to be passed to the function parameter `query` as a list.
 So we need to add `query = list(term = 'drink')` when calling get
 
-```{r joke-search-drink}
+```{r joke-search-drink, exercise.setup = "random-joke-html"}
 resp <- GET(
   endpoint, 
   query = list(term = 'drink'), 
@@ -177,7 +177,7 @@ resp <- GET(
 )
 ```
 
-```{r joke-search-drink-invisible, exercise = FALSE, include = FALSE}
+```{r joke-search-drink-invisible, exercise = FALSE, include = FALSE, exercise.setup = "random-joke-html"}
 resp <- GET(
   endpoint,
   query = list(term = 'drink'),
@@ -231,14 +231,14 @@ In this way we can iterate over pages to extract as many dad jokes as we'd like.
 
 To see how this can be done, let's first make an initial query to the search endpoint and parse the returned JSON data into an R object:
 
-```{r joke-search-all-parsed}
+```{r joke-search-all-parsed, exercise.setup = "random-joke-html"}
 resp <- GET(endpoint, config = accept_json())
 
 dat <- content(resp, "parse")
 str(dat, 1)
 ```
 
-```{r joke-search-all-parsed-invisible, exercise = FALSE, echo = FALSE}
+```{r joke-search-all-parsed-invisible, exercise = FALSE, echo = FALSE, exercise.setup = "random-joke-html"}
 resp <- GET(endpoint, config = accept_json())
 dat <- content(resp, "parse")
 ```
