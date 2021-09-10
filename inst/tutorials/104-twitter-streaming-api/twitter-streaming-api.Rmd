@@ -125,11 +125,23 @@ There are multiple variants how we can use the streaming API:
 To filter by keyword, we have to specify our search term as query `q`:
 
 ```{r stream-tweets-by-keyword, eval = FALSE}
+tweets <- stream_tweets(...,timeout=5)
+
+nrow(tweets)
+head(tweets$text)
+```
+
+
+<details>
+<summary>**_Example Solution (click)_**</summary>
+```{r , exercise = FALSE}
 tweets <- stream_tweets(q = "news", timeout = 5)
 
 nrow(tweets)
 head(tweets$text)
 ```
+
+</details>
 
 ### Filtering by users
 

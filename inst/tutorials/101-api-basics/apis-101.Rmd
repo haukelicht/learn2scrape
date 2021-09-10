@@ -177,12 +177,20 @@ With `httr::GET()`, API parameters need to be passed to the function parameter `
 So we need to add `query = list(term = 'drink')` when calling get
 
 ```{r joke-search-drink, exercise.setup = "random-joke-html"}
+
+
+```
+
+<details>
+<summary>**_Example Solution (click)_**</summary>
+```{r , exercise = FALSE}
 resp <- GET(
   searchendpoint, 
   query = list(term = 'drink'), 
   config = accept_json()
 )
 ```
+</details>
 
 ```{r joke-search-drink-invisible, exercise = FALSE, include = FALSE, exercise.setup = "random-joke-html"}
 resp <- GET(
@@ -193,7 +201,7 @@ resp <- GET(
 dat <- content(resp, "parsed")
 ```
 
-We can verify that the key-value pair term and 'drink' has been added to the API request:
+We can verify that the key-value pair term and 'drink' has been added to the API request by checking the URL:
 
 ```{r joke-search-drink-url, exercise.setup = "joke-search-drink-invisible", exercise.lines = 1}
 resp$request$url
@@ -202,10 +210,18 @@ resp$request$url
 We can now inspect the parsed response:
 
 ```{r joke-search-drink-structure, exercise.setup = "joke-search-drink-invisible", exercise.lines = 1}
+
+```
+<details>
+<summary>**_Example Solution (click)_**</summary>
+```{r , exercise = FALSE}
 dat <- content(resp, "parsed")
 
 str(dat, 1)
+)
 ```
+</details>
+
 
 Inspecting its structure, we see that the API has returned a total 3 jokes (see list element 'total_jokes') and that there is an element called 'results.'
 This element records the jokes matching our key term:
@@ -415,11 +431,51 @@ Sys.time()-st
 
 ### Putting everything together
 
-The below code puts everything together.
+Now try to put everything together.
 It will take quite some time to complete all iterations. 
 So we recommend you copy-paste it to an R file in your editor and run it independently.
 
 ```{r search-jokes-pagination-solution, exercise = FALSE, eval = FALSE}
+# make initial query
+
+
+
+# extract total number of pages and construct integer sequence
+
+
+
+# define list collecting jokes
+
+
+
+# iterate over pages
+for (page in pages) {
+
+
+  
+  # query API
+
+
+  # parse response
+
+
+  
+  # extract jokes data
+
+
+  
+  # pause for 1-2 seconds
+
+
+}
+
+# Finally: combine jokes data in data.frame
+
+```
+
+<details>
+<summary>**_Example Solution (click)_**</summary>
+```{r , exercise = FALSE}
 # make initial query
 resp <- GET(endpoint, accept_json())
 dat <- content(resp, "parsed")
@@ -452,6 +508,9 @@ for (page in pages) {
 # Finally: combine jokes data in data.frame
 all_jokes <- bind_rows(all_jokes)
 ```
+
+</details>
+
 
 ### Making things more efficient
 
