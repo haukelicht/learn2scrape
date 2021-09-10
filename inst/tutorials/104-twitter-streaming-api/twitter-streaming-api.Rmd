@@ -229,19 +229,19 @@ head(sort(table(mentions), decreasing = TRUE), n = 10)
 </details>
 
 <details>
-<summary>How many tweets mention Donald Trump?</summary> 
+<summary>How many tweets mention Joe Biden?</summary> 
 
-We try to *detect* tweets that mention either 'Trump' or 'trump' using `str_detect()` and sum them up.
+We try to *detect* tweets that mention either 'Biden' or 'biden' using `str_detect()` and sum them up.
 
-```{r count-Trump, eval = FALSE}
+```{r count-Biden, eval = FALSE}
 # collect for 5 seconds
 resp <- stream_tweets(file_name = "tweets.json", timeout = 5, parse = FALSE)
 
 # read from disk and parse
 tweets <- parse_stream("tweets.json")
 
-# count number of times terms 'trump'/'Trump' occur
-sum(str_detect(tweets$text, "[Tt]rump"))
+# count number of times terms 'biden'/'Biden' occur
+sum(str_detect(tweets$text, "[Bb]iden"))
 ```
 </details>
 
