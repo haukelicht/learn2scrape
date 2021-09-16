@@ -730,7 +730,7 @@ ifelse(0 == 1, "I escape the laws of math!", "zero and one are not equal")
 
 If you think beyond binary options, you want to use `else if`:
 
-```{else-if}
+```{r else-if}
 x <- 4
 y <- 5
 if (y > x) {
@@ -761,7 +761,7 @@ for (i in vec) {
 
 ### Anatomy of a `for`-loop
 
-We can abstract from this to note that a for loop follows the following logic:
+We can abstract from this to note that a `for`-loop follows the following logic:
 
 ```
 for (i in VECTOR) { 
@@ -771,9 +771,9 @@ for (i in VECTOR) {
 
 Now, let's have a look at the anatomy of a `for`-loop: 
 
-- `for` tells R that you want repeat some code 
+- `for` tells R that you want repeat some code ("iterate")
 - you write the code you want to repeat *inside* the curly braces (i.e., between `{` and `}`)
-- how often R evaluates this code and how is determined by the expression `(i in VECTOR)`
+- how often R evaluates this code is determined by the expression `(i in VECTOR)`
   - `VECTOR` is a vector (or list) with several elements
   - In each *iteration*, `i` is taking on the value of an element of `VECTOR`; first the value of the first element, then the value of the second element, and so on.
   
@@ -783,8 +783,8 @@ This allows to repeat code while varying `i`.
 
 ### `i` am a placeholder
 
-Look at the following example and not that this code runs smoothly too.
-This shows that instead of  `i`, you can use different word --- the word is is just a placeholder!
+Look at the following example and note that this code runs smoothly, too.
+This shows that instead of  `i`, you can use a different word --- the word is is just a placeholder!
 
 ```{r fornumber}
 for (number in 1:3) {
@@ -794,7 +794,7 @@ for (number in 1:3) {
 
 ### Filling vectors/lists using for loops
 
-There are many scenarios where you want to "collect" the results of individual for-loop iterations in a separate object.
+There are many scenarios where you want to "collect" the results of individual `for`-loop iterations in a separate object.
 Say we have a vector of integer numbers, we want to know if they are greater than 5, and we want to collect the result of this test in a new vector.
 
 
@@ -807,19 +807,19 @@ for (i in seq_along(numbers)) {
 results
 ```
 
-However, in the above example it is assumed that you know the length of the resulting object in advance.
+However, in the above example it is *assumed* that you know the length of the resulting object in advance.
 Specifically, we know we will evaluate each element of `numbers` against the number five.
 Because `numbers` has three elements, we know that we will generate 3 results.
-Hence `results` must have three elements too.
+Hence `results` must have three elements, too.
 
 ### Appending values using for loops
 
-If you don't know how long the vector you fill will be after all iterations have been completed, you can apply the following logic:
+If you *don't* know how long the vector you fill will be after all iterations have been completed, you can apply the following logic:
 
-1. you create an empty vector/list
-2. each iteration you generate a valid value, you "append" it by assigning it the the end of the vector/list 
+1. you create an *empty* vector/list (e.g. using `integer()`, or `list()`)
+2. whenever you generate a valid value in an iteration, you "append" it by assigning it the the end of the vector/list.
 
-Appending to the last position can be done by assigning a value to the position of the vector/list taht comes after the actual end of this vector, that is, at position `length(vector)+1`
+Appending to the last position can be done by assigning a value to the position of the vector/list that comes after the actual end of this vector, that is, at position `length(vector)+1`:
 
 ```{r for-loop-appending}
 numbers <- 4:6
@@ -848,8 +848,9 @@ results
 
 ### Skipping and Stopping
 
-Two important features of `for` loops is that you can skip iterations or stop them entirely if desired.
-You skip an iteration using the keyword `next`
+Two important features of `for`-loops are that, if desired, you can *skip* iterations or even *stop* the loop from continuing to iterate.
+
+You **skip** an iteration using the keyword `next`
 
 ```{r for-loop-next}
 for (i in 1:4) {
@@ -863,7 +864,7 @@ for (i in 1:4) {
 }
 ```
 
-You can interrupt a running fro loop with the `break` keyword:
+You can **interrupt/stop** a running `for`-loop with the `break` keyword:
 
 ```{r for-loop-break}
 for (i in 1:4) {
@@ -885,7 +886,7 @@ A function defines a procedure to return some output based on some inputs.
 
 We create functions in R using the `function()` function.
 
-```{r function-no-arg}
+```{r function-no-arg, exercise.eval = TRUE}
 hello <- function() {
   print("Hello")
 }
@@ -895,17 +896,18 @@ hello <- function() {
 
 We can call this function as follows:
 
-```{r  function-no-arg-call, exercise.setup = "function-no-arg"}
+```{r  function-no-arg-call, exercise.setup = "function-no-arg", exercise.lines = 2}
+hello <- function() { print("Hello") }
 hello()
 ```
 
-Note that because our `hello()` function does not have any arguments (i.e., parameters based on which it adapts its behavior), we do not pass it any values inside the parentheses. 
+Note that this function works without us passing any inputs.
+This is because our `hello()` function has no arguments (i.e., parameters based on which it adapts its behavior)
 
 ### Functions with arguments
 
 This changes if we define our function in a way that it requires an input when called.
 In our example, this input is called "name".
-
 
 ```{r function-one-arg}
 hello <- function(name) {
@@ -913,15 +915,22 @@ hello <- function(name) {
 }
 ```
 
-If we now call the function without passing an input, we get an error
+```{r function-one-arg-setup, exercise = FALSE, echo = FALSE}
+hello <- function(name) {
+  print(paste("Hello", name))
+}
+```
 
-```{r function-one-arg-fail, exercise.setup = "function-one-arg"}
+If we now call the function without passing an input, we get an error:
+
+```{r function-one-arg-fail, exercise.setup = "function-one-arg-setup", exercise.lines = 1}
 hello()
 ```
 
-So we have to pass a value to the `name` argument
+So we have to pass a value to the `name` argument.
+We do this inside the parentheses behind the function name: 
 
-```{r function-one-arg-success, exercise.setup = "function-one-arg"}
+```{r function-one-arg-success, exercise.setup = "function-one-arg-setup", exercise.lines = 1}
 hello("Hauke")
 ```
 
@@ -941,7 +950,7 @@ add <- function(x, y) {
 add(1, 2)
 ```
 
-*Note:* You could actually omit the return in the above function and instead write
+*Note:* You could actually omit the return in the above function and instead write because whatever is evaluated last in a function is returned.
 
 ```{r function-return-alt, exercise = FALSE}
 add <- function(x, y) {
@@ -960,13 +969,22 @@ This is a particularly powerful feature when combined with control flow:
 
 ```{r function-return-anywhere}
 divide <- function(numerator, denominator) {
-  if (denominator == 0)
+  if (denominator == 0) {
+    message("exiting early because denominator is 0")
     return(NaN)
-
-  if (numerator == 0)
+  }
+    
+  if (numerator == 0) {
+    message("exiting early because numerator is 0")
     return(Inf)
+  }
 
   return(numerator/denominator)
 }
+
+# try it out
+divide(0, 1)
+divide(1, 0)
+divide(1, 2)
 ```
 
