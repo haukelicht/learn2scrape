@@ -185,7 +185,7 @@ dat <- ...
 ```
 
 <details>
-<summary>**_Example Solution_**</summary>
+<summary>**_Click here to see an example solution!_**</summary>
 ```{r , exercise = FALSE}
 params <- list(
   "q" = "democracy", 
@@ -241,7 +241,7 @@ nyt_count(q = "democracy", since = 20160101, until = 20160131)
 ```
 
 <details>
-<summary>**_Example Solution_**</summary>
+<summary>**_Click here to see an example solution!_**</summary>
 ```{r , exercise = FALSE}
 nyt_count <- function(q, since, until){
   
@@ -312,7 +312,7 @@ counts
 ```
 
 <details>
-<summary>**_Example Solution_**</summary>
+<summary>**_Click here to see an example solution!_**</summary>
 ```{r , exercise = FALSE}
 nyt_years_count <- function(q, years){
   

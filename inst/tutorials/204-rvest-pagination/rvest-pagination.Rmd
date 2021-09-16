@@ -212,7 +212,7 @@ extract_quote_texts <- function(page) {
 ```
 
 <details>
-<summary>**_Example Solution_**</summary>
+<summary>**_Click here to see an example solution!_**</summary>
 ```{r extract-quotes-fun-solution, exercise = FALSE}
 extract_quote_texts <- function(page) {
   # (optional) check that `page` is a parsed XML/HTML object
@@ -328,7 +328,7 @@ unlist(quotes)
 ```
 
 <details> 
-<summary>**_Example Solution_** </summary> 
+<summary>**_Click here to see an example solution!_** </summary> 
 ```{r exercise = FALSE, eval = FALSE}
 # base URL
 base_url <- "https://quotes.toscrape.com/"

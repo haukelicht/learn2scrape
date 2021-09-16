@@ -392,7 +392,7 @@ out <- data.frame(...)
 
 
 <details>
-<summary>**_Example Solution_**</summary>
+<summary>**_Click here to see an example solution!_**</summary>
 ```{r scrape-author-page-solution, exercise = FALSE, eval = FALSE}
 
 # parse HTML 
@@ -474,7 +474,7 @@ do.call(rbind, out)
 ```
 
 <details>
-<summary>**_Example Solution_**</summary>
+<summary>**_Click here to see an example solution!_**</summary>
 ```{r scrape-author-pages-solution, exercise = FALSE, eval = FALSE}
 # create a list collecting the extracted data
 results <- list()

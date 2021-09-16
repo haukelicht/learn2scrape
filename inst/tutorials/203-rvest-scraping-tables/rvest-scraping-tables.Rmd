@@ -184,7 +184,7 @@ table_df <- ...
 ```
 
 <details>
-<summary>**_Example Solution_**</summary>
+<summary>**_Click here to see an example solution!_**</summary>
 ```{r one-table-solution}
 url <- "https://en.wikipedia.org/wiki/List_of_tallest_buildings"
 
@@ -241,7 +241,7 @@ list_of_table_dfs <- ...
 ```
 
 <details>
-<summary>**_Example Solution_**</summary>
+<summary>**_Click here to see an example solution!_**</summary>
 ```{r many-tables-solution}
 url <- "https://en.wikipedia.org/wiki/List_of_tallest_buildings"
 page <- read_html(url)
@@ -467,7 +467,7 @@ As shown below, you'll need to rely on Xpath and use nesting predicates and axes
 We will pick up this challenge when speaking more about Xpath!
 
 <details>
-<summary>**_Example Solution_**</summary>
+<summary>**_Click here to see an example solution!_**</summary>
 ```{r , exercise = FALSE, eval = FALSE}
 url <- "https://en.wikipedia.org/wiki/Wine_Country_(film)"
 page <- read_html(url)
