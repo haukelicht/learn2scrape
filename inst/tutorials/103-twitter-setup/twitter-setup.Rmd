@@ -155,7 +155,7 @@ If you are interested in a more detailed explanation, check `vignette("auth", pa
 To check that your token works, try running some `rtweet` code, for example:
 
 ```{r eval = FALSE}
-lookup_users("th_ges")[["name"]]
+lookup_users("@gesis_org")[["name"]]
 ```
 
 If it doesn't work, double-check that you correctly copy-pasted your consumer and token keys and secrets into the JSON file.

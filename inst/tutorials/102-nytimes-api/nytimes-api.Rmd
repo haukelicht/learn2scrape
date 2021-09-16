@@ -349,22 +349,32 @@ nyt_years_count <- function(q, years){
   # return counts
   return(out)
 }
-```
 
-```{r yearwise-counts-function-test, eval = FALSE}
 # test it
 counts <- nyt_years_count(q = "democracy", years = 2010:2020)
 counts
 ```
+
 </details>
 
 <br/>
 
-### Plotting he result
+### Plotting the result
 
-We will plot this to visualize the over-time development.
+We will plot this to visualize the over-time development. Note that this will plot based on the data we downloaded, in case you've changed the keywords
 
 ```{r plot-year-counts}
+# use pre-downloaded data
+counts <- learn2scrape::nyt_year_counts
+
+# plot
+
+```
+
+
+<details>
+<summary>**_Example Solution (click)_**</summary>
+```{r , exercise = FALSE}
 # use pre-downloaded data
 counts <- learn2scrape::nyt_year_counts
 
@@ -382,7 +392,10 @@ ggplot(
     x = "Year", 
     y = "Article Count"
   )
+
 ```
+
+</details>
 
 <br/>
 

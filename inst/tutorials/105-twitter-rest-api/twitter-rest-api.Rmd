@@ -164,13 +164,22 @@ Most importantly:
 
 Hence, if you want to get users' self-descriptions, you can also use the `get_timeline()` function. 
 
-But actually, if you really only want to get the description of the users, you can also simply use `lookup_users()`.
+But actually, if you really only want to get the description of the users, you can also simply use `lookup_users()`. Look for some twitter user ids and try it out.
 
 ```{r lookup-users}
+
+```
+
+
+<details>
+<summary>**_Example Solution (click)_**</summary>
+```{r , exercise = FALSE}
 wh <- c("JoeBiden", "POTUS", "VP", "FLOTUS")
 users <- lookup_users(user = wh)
 users$description
 ```
+
+</details>
 
 ## Building friend and follower networks
 
@@ -248,12 +257,21 @@ The REST API offers also a long list of other endpoints that could be of use in 
 
 ### Searching users
 
-You can use `search_users()` to search for users related to specific keywords based on their self-description. For example, you might want to look into users that are interested in methods or politics or or or:
+You can use `search_users()` to search for users related to specific keywords based on their self-description. For example, you might want to look into users that are interested in methods or politics or or or. Think of a topic and look at the screen names of the users you find:
 
 ```{r search-users, exercise.lines = 2}
+
+```
+
+
+<details>
+<summary>**_Example Solution (click)_**</summary>
+```{r , exercise = FALSE}
 usrs <- search_users(q = "data journalism", n = 10)
 users$screen_name
 ```
+
+</details>
 
 ### Downloading tweets data by ID
 
@@ -275,6 +293,13 @@ There are many lists of politicians, leaders etc. that you can use.
 You can search by 'slug', that is name, if you specify the list owner, otherwise you have to find the `list_id`. Try to find information about this <a href="https://twitter.com/i/lists/1044685725369815040">list of world leaders</a>.
 
 ```{r lists-members}
+
+```
+
+
+<details>
+<summary>**_Example Solution (click)_**</summary>
+```{r , exercise = FALSE}
 # download user information from a list
 world_leaders <- lists_members(
   list_id = "1044685725369815040",
@@ -283,14 +308,25 @@ world_leaders <- lists_members(
 world_leaders
 ```
 
+</details>
+
 This is also useful if e.g. you're interested in compiling lists of journalists, because media outlets offer these lists in their profiles.
 
 The opposite approach is to search for lists that contain a certain user with `lists_memberships()`. E.g., you could look for all lists that contain Joe Biden.
 
 ```{r lists-memberships, exercise.lines = 1}
+
+```
+
+
+<details>
+<summary>**_Example Solution (click)_**</summary>
+```{r , exercise = FALSE}
 biden_lists <- lists_memberships(user = "JoeBiden")
 biden_lists
 ```
+
+</details>
 
 ### Downloading retweets
 
