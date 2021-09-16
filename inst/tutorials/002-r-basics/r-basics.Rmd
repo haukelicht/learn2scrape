@@ -273,7 +273,7 @@ You can assigning names to an already existing vector using the `names()` functi
 ```{r naming-vectors}
 # creating a named vector
 c("apple" = 3, "banana" = 2, "lemon" = 1.5)
-setName(c(3, 2, 1.5), c("apple", "banana", "lemon"))
+setNames(c(3, 2, 1.5), c("apple", "banana", "lemon"))
 
 # assigning names to an existing vector
 capitals <- c("Lisbon", "Bejing", "Cape Town")
@@ -329,6 +329,8 @@ You can also access/omit the values of a vector using logical values.
 (Note that `!` can be used to negate boolean values.)
 
 ```{r boolean-indexing}
+fruits <- c("apple", "banana", "lemon")
+
 idxs <- c(TRUE, FALSE, FALSE)
 # access first value
 fruits[idxs]
@@ -397,8 +399,9 @@ typeof(seq(-10, 10, by = 5L))
 You can also create decreasing sequences!
 But remember to bring the start and end values in the correct order.
 
-```{r creating-decreasing-sequences, exercise.lines = 1}
-seq(-10, 10, by = -5L)
+```{r creating-decreasing-sequences, exercise.lines = 2}
+seq(-10, 10, by = -5L) # doesn't work
+seq(10, -10, by = -5L) # works!
 ```
 
 `seq()` can also be called with the argument `length.out`.
@@ -443,7 +446,7 @@ The most important recursive type is "list".
 
 You can create a list with the `list()` functions
 
-```{r first-list}
+```{r first-list, exercise.lines = 1}
 list(TRUE, 1L, 1.1, "one")
 ```
 
@@ -509,7 +512,7 @@ lst[[1]]
 This difference in syntax is necessary because, in contrast to atomic types, lists can be multiple levels deep.
 This is illustrated by the example below:
 
-```{r list-grandma}
+```{r list-grandma, exercise = FALSE}
 # (a list of lists of lists)
 
 # grandma Paula has two children: ...
@@ -595,6 +598,8 @@ students <- data.frame(student_names, math_scores, verbal_scores)
 
 # add 'final_score' column
 students$final_scores <- (students$math_scores + students$verbal_scores)/2
+
+students
 ```
 
 ### Combining data frames 
@@ -670,7 +675,13 @@ do.call(rbind, results)
 
 Alternatively, we can use the `bind_rows` functions in the dplyr package.
 
-```{r combine-bind_rows, exercise.setup = "combine-do_call"}
+```{r combine-bind_rows}
+results <- list()
+results[[1]] <- data.frame(domain = "google",   url = "www.google.com")
+results[[2]] <- data.frame(domain = "facebook", url = "www.facebook.com")
+results[[3]] <- data.frame(domain = "twitter",  url = "www.twitter.com")
+
+# combine
 bind_rows(results)
 ```
 
@@ -722,7 +733,7 @@ if (0 == 1) {
 Note that there is the shorthand `ifelse()` function
 
 
-```{r ifelse}
+```{r ifelse, exercise.lines = 1}
 ifelse(0 == 1, "I escape the laws of math!", "zero and one are not equal")
 ```
 
@@ -970,12 +981,12 @@ This is a particularly powerful feature when combined with control flow:
 ```{r function-return-anywhere}
 divide <- function(numerator, denominator) {
   if (denominator == 0) {
-    message("exiting early because denominator is 0")
+    print("exiting early because denominator is 0")
     return(NaN)
   }
     
   if (numerator == 0) {
-    message("exiting early because numerator is 0")
+    print("exiting early because numerator is 0")
     return(Inf)
   }
 
