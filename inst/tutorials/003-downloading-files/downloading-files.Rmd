@@ -191,7 +191,7 @@ urls <- page %>%
     paste0("https://www.congress.gov", .)
 
 # number of PDFs
-lenght(urls)
+length(urls)
 
 # 3. download PDFs
 
