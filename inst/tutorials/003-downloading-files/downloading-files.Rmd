@@ -123,6 +123,8 @@ However, you'll still need to make sure to address an existing folder so the com
 In our example, we write to the 'Desktop' folder of the current user's home (see `path.expand("~")`). 
 Note that `fs::path_home()` is a short cut for root of the current user's file system to the current user.
 
+Sometimes, the downloaded file will not be correct - in that case, have a look at the different `method` options inside `download.file()` - you may have to choose a different option here.
+
 ```{r practice-solution-3, exercise = FALSE, eval = FALSE}
 # 2.b) specify the file path (`fp`) where to download the file to
 file_path <- file.path(fs::path_home(), "Desktop", file_name)
