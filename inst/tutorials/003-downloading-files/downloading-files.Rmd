@@ -119,25 +119,26 @@ file_name <- URLdecode(file_name)
 
 Next, we construct the file path that determines where the file will be downloaded to on your local system. 
 The function `file.path()` does this in a way that is consistent and reproducible across operation systems.
+However, you'll still need to make sure to address an existing folder so the commands will depend on your operating system. The example below is for 
 In our example, we write to the 'Desktop' folder of the current user's home (see `path.expand("~")`). 
-Note that '~' is a short cut for root of the current user's file system to the current user.
+Note that `fs::path_home()` is a short cut for root of the current user's file system to the current user.
 
 ```{r practice-solution-3, exercise = FALSE, eval = FALSE}
 # 2.b) specify the file path (`fp`) where to download the file to
-file_path <- file.path("~", "Desktop", file_name)
+file_path <- file.path(fs::path_home(), "Desktop", file_name)
 ```
 
 Now we are ready to download the file from `url` to `file_path`:
 
 ```{r practice-solution-4, exercise = FALSE, eval = FALSE}
 # 3. download
-download.file(url = source_url, destfile = fp)
+download.file(url = source_url, destfile = file_path)
 ```
 
 You can verify that the file has been successfully downloaded by looking for it on your local system: 
 ```{r practice-solution-5, exercise = FALSE, eval = FALSE}
 # check:
-file.exists(fp)
+file.exists(file_path)
 ```
 </details> 
 
@@ -145,6 +146,8 @@ file.exists(fp)
 
 But what if you want to download lots of files?
 Say you want to download the [Congressional Record of the ongoing session](https://www.congress.gov/congressional-record/116th-congress/browse-by-date){target="_blank"} in its [beautiful original layout as a PDF](https://www.congress.gov/116/crec/2019/06/28/CREC-2019-06-28.pdf){target="_blank"}. 
+
+Note that this presumes you already know how to scrape - so if you do the exercise early in the course, use this as an opportunity to pause and to return here in the future!
 
 ### Steps to complete 
 
