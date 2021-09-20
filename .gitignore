@@ -7,6 +7,5 @@
 inst/tutorials/*/*.html
 
 # new tut files
-inst/tutorials/1*/
 inst/tutorials/2*/
 inst/tutorials/3*/
