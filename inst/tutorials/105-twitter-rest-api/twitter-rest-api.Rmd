@@ -101,27 +101,9 @@ head(tweets, 3)
 By default, the Twitter API allows you to download up to 18.000 Tweets. 
 To return more than 18.000 tweets with a single search, you can set `retryonratelimit = TRUE`.
 
-## Searching by Geocode
-
-Now, we can again search for tweets with a geocode. Hopefully, when also including past tweets, we will receive more results, so we will try to do this with Tweets 50km around *GESIS*.
-(You can lookup places' coordinates like described [here](https://support.google.com/maps/answer/18539).)
-
-```{r search-tweets-by-geocode}
-# search for tweets created (by users) near GESIS
-gesis <- search_tweets(geocode = "50.94268842250975, 6.952277084819257,50km", n = 100)
-
-# convert to latitude and longitude
-gesis <- rtweet::lat_lng(gesis)
-
-# plot
-maps::map("world", regions = "Germany")
-with(gesis, points(lng, lat, col = rgb(0, .3, .7, .75)))
-```
-
-
 ## Downloading user's tweets and bios
 
-Instead of just looking for key words or geo-coded tweets, you can also analyze specific users.
+Instead of just looking for key words, you can also analyze specific users.
 
 You can download **up to 3,200 most recent tweets** from a Twitter account using `get_timeline()`. 
 `rtweet` also has some in-built functions for plotting the results, namely `ts_plot()`.
@@ -294,11 +276,11 @@ rts <- get_retweets(status_id = "896523232098078720")
 
 
 
-### Optional: Analyzing followers bios
+## Optional: Analyzing followers bios
 
 What are the most common words that friends of my department's account use to describe themselves on Twitter?
 
-We do a bit more text analysis now by visualizing the results with a word cloud using the `quanteda` R package.
+We can do a bit more text analysis now by visualizing the results with a word cloud using the `quanteda` R package.
 This allows us to remove things like URLs or non-meaningful words before we visualize the user descriptions.
 
 ```{r bios-wordcloud,eval=F}
