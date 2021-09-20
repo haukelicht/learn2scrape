@@ -17,7 +17,7 @@ runtime: shiny_prerendered
 knitr::opts_chunk$set(
   # code chunk options
   echo = TRUE
-  , eval = TRUE
+  , eval = F
   , warning = FALSE
   , message = FALSE
   , cached = FALSE 
@@ -75,7 +75,7 @@ token <- do.call(create_token, credentials)
 ```
 
 
-```{r , exercise = FALSE, echo = FALSE}
+```{r , exercise = FALSE, echo = FALSE,eval=T}
 credentials <- fromJSON(system.file("extdata", "tw_credentials.json", package = "learn2scrape"))
 token <- do.call(create_token, credentials)
 ```
