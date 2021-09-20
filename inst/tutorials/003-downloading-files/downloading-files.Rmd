@@ -1,0 +1,227 @@
+---
+title: "Downloading files"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+description: "Learn how to download files using R."
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+
+```{r setup-invisible, include = FALSE}
+library(learnr)
+library(learn2scrape)
+```
+
+```{r knitr, include=FALSE}
+knitr::opts_chunk$set(
+  # code chunk options
+  echo = TRUE
+  , eval = TRUE
+  , warning = FALSE
+  , message = FALSE
+  , cached = FALSE 
+  , exercise = TRUE
+  # , exercise.eval = FALSE
+  , exercise.completion	= TRUE
+  , fig.align = "center"
+  , fig.height = 4
+  , fig.width = 5.5
+)
+```
+
+
+## Introduction
+
+Downloading files in R is pretty easy. 
+Actually, it is one of the tasks for which we do not even need any external packages because it can be accomplished with base-R code.
+
+## Downloading a file in R
+
+The central function for us is `download.file()`. 
+If you have never used it, check [its documentation](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/download.file.html){target="_blank"}.
+
+### Arguments
+
+To use `download.file()`, you need to specify:
+
+- the **url** you are downloading from,
+- the **destfile** (destination file) specifying where and with what name to write the downloaded file to
+- and the download **method**
+
+The download method works a bit different on each operating system, and it's easiest to just use method "auto".
+If this does not work for you, check the [documentation](https://stat.ethz.ch/R-manual/R-devel/library/utils/html/download.file.html){target="_blank"} for alternatives. 
+The same holds for the download *mode*.
+
+### An example 
+
+To practice, we download the [APSA Diversity and Inclusion Report](https://www.apsanet.org/Portals/54/diversity%20and%20inclusion%20prgms/DIV%20reports/Diversity%20Report%20Executive%20-%20Final%20Draft%20-%20Web%20version.pdf){target="_blank"}. 
+
+Lets first lay out the steps we need to complete to download this PDF to your local system: 
+
+1. specify the path to the file we want to download
+2. specify a path where to write the downloaded file to on your local system
+3. execute the file download
+
+**Try it yourself!** Complete the following code to download the PDF.
+
+```{r practice}
+# step 1
+url <- "https://www.apsanet.org/Portals/54/diversity%20and%20inclusion%20prgms/DIV%20reports/Diversity%20Report%20Executive%20-%20Final%20Draft%20-%20Web%20version.pdf"
+
+# step 2: define the path where the file should be written
+# ToDo: define the file path/name where to download the PDF to
+# (make sure to end it on '.pdf')
+file_path <- ...
+
+# step 3: download
+# ToDo: download the file from `url` to `file_path`
+... 
+
+# verify
+file.exists(file_path)
+```
+
+
+*Hint:* In step 2, you can extract the original PDF file name from the source URL using the `basename()` function.
+
+*Note:* Because this tutorial is running with a temporary working directory, and we simply passed a file name as destination file, the PDF will be downloaded into this temporary working directory.
+Hence, you won't see it, e.g., in your Desktop folder.
+You can use `file.path()` to construct a proper file path instead of using just a file name as download destination.
+
+<details> 
+<summary>**_Click here for the solution!_**</summary> 
+
+<br/> 
+In step 2, we first extract the PDF file name from the source URL.
+To do so, we use the function `basename()` that parses the last part (file or directory name) from a file path. 
+(Since an URL is like a path, his works just fine.)
+
+```{r practice-solution-1, exercise = FALSE, eval = FALSE}
+# 1. specify the URL where the file is located
+source_url <- "https://www.apsanet.org/Portals/54/diversity%20and%20inclusion%20prgms/DIV%20reports/Diversity%20Report%20Executive%20-%20Final%20Draft%20-%20Web%20version.pdf"
+
+# 2.a) extract PDF file name 
+file_name <- basename(source_url) 
+````
+
+
+In addition, we use the function `URLdecode()` to "clean" the [URL-encoded](https://en.wikipedia.org/wiki/Percent-encoding#Percent-encoding_in_a_URI) file name parsed from the URL. 
+This makes it human-readable.
+(Hint: if you want to avoid white spaces in your file names, you can use the `gsub()` function.) 
+
+```{r practice-solution-2, exercise = FALSE, eval = FALSE}
+file_name <- URLdecode(file_name)
+```
+
+Next, we construct the file path that determines where the file will be downloaded to on your local system. 
+The function `file.path()` does this in a way that is consistent and reproducible across operation systems.
+However, you'll still need to make sure to address an existing folder so the commands will depend on your operating system. The example below is for 
+In our example, we write to the 'Desktop' folder of the current user's home (see `path.expand("~")`). 
+Note that `fs::path_home()` is a short cut for root of the current user's file system to the current user.
+
+Sometimes, the downloaded file will not be correct - in that case, have a look at the different `method` options inside `download.file()` - you may have to choose a different option here.
+
+```{r practice-solution-3, exercise = FALSE, eval = FALSE}
+# 2.b) specify the file path (`fp`) where to download the file to
+file_path <- file.path(fs::path_home(), "Desktop", file_name)
+```
+
+Now we are ready to download the file from `url` to `file_path`:
+
+```{r practice-solution-4, exercise = FALSE, eval = FALSE}
+# 3. download
+download.file(url = source_url, destfile = file_path)
+```
+
+You can verify that the file has been successfully downloaded by looking for it on your local system: 
+```{r practice-solution-5, exercise = FALSE, eval = FALSE}
+# check:
+file.exists(file_path)
+```
+</details> 
+
+## Downloading multiple files
+
+But what if you want to download lots of files?
+Say you want to download the [Congressional Record of the ongoing session](https://www.congress.gov/congressional-record/116th-congress/browse-by-date){target="_blank"} in its [beautiful original layout as a PDF](https://www.congress.gov/116/crec/2019/06/28/CREC-2019-06-28.pdf){target="_blank"}. 
+
+Note that this presumes you already know how to scrape - so if you do the exercise early in the course, use this as an opportunity to pause and to return here in the future!
+
+### Steps to complete 
+
+Let's first think about the individual steps we need to complete to achieve this:
+
+1. identify the CSS selector/Xpath of web elements providing links to the PDFs (e.g., using *SelectorGadget*)
+2. collect all these links (using `rvest` functions)
+3. for each PDF 
+    - create a file name from the source URL
+    - specify a target file path
+4. loop over PDF URLs to download them
+
+### Hands on!
+
+**Try it yourself!** Implement steps 1--4 below.
+
+*Hint:* In step 3 you can could define a custom function that accepts a PDF URL as single parameter. You could then use this function in step 4 to iterate over URLs.
+
+*Caution:* Don't download all files. We won't use them. Just cut the vector of URLs to the first 5 or 6 elements.
+
+```{r scraping-congress-records}
+
+```
+
+<details>
+<summary>**_Click here for an example solution!_**</summary>
+```{r scraping-congress-records-solution, exercise.eval = FALSE}
+library(rvest)
+library(dplyr)
+
+# 1. read the HTML page into R
+url <- "https://www.congress.gov/congressional-record/116th-congress/browse-by-date"
+page <- read_html(url)
+
+# 2. collect PDF URLs
+urls <- page %>% 
+    html_elements(xpath = "//td/a[contains(@href, '.pdf')]") %>% 
+    html_attr("href") %>% 
+    paste0("https://www.congress.gov", .)
+
+# number of PDFs
+length(urls)
+
+# 3. download PDFs
+
+# a) define function that downloads and saves PDF
+
+#' @param url character specifying URL of PDF to be downloaded
+#' @param .dir character specifying path of directory on local system to download PDF to
+download_congress_record <- function(url, .dir) {
+    fn <- basename(url)
+    fp <- file.path(.dir, fn)
+    download.file(url = url, destfile = fp, quiet = TRUE)
+}
+
+# b) create temporary directory
+target_dir <- tempdir(check = TRUE)
+
+# c) iterate over (first three) URLs to download individual PDFs to the target directory
+for (url in urls[1:3]) {
+  download_congress_record(url, .dir = target_dir)
+  
+  # pause 2 seconds
+  Sys.sleep(2)
+}
+
+# d) check 
+(pdfs <- list.files(target_dir, pattern = ".pdf$"))
+
+# 4. clean up (remove all downloaded PDFs)
+lapply(file.path(target_dir, pdfs), file.remove)
+```
+
+</details>
+
