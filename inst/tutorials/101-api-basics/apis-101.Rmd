@@ -218,7 +218,7 @@ We can now inspect the parsed response:
 dat <- content(resp, "parsed")
 
 str(dat, 1)
-)
+
 ```
 </details>
 
