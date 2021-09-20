@@ -13,7 +13,7 @@ output:
 runtime: shiny_prerendered
 ---
 
-```{r knitr, include=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   # code chunk options
   echo = TRUE
