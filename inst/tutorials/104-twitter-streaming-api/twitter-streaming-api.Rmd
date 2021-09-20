@@ -70,7 +70,7 @@ library(stringr)
 
 Make sure that you have your Twitter API credentials ready:
 
-```{r create-token, exercise.eval = FALSE}
+```{r create-token, exercise.eval = FALSE,eval=F}
 # ToDo: specify path to your secrets JSON file
 fp <- file.path(...)
 credentials <- fromJSON(fp)
