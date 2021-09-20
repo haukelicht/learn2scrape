@@ -21,7 +21,7 @@ This lists all tutorials, mapping tutorial IDs (e.g. '001-tutorial-how-to'), to 
 To **launch a tutorial**, call 
 
 ```r
-run_tutorial('001-tutorial-how-to' package = 'learn2scrape')
+run_tutorial('001-tutorial-how-to', package = 'learn2scrape')
 ```
 
 If you are running R using the Rstudio IDE (≥ version 1.3), you can alternatively launch tutorials using the *Tutorial* panel (see [this blog post]( https://blog.rstudio.com/2020/02/25/rstudio-1-3-integrated-tutorials/) for instructions).
