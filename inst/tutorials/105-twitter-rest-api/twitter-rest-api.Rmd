@@ -60,8 +60,6 @@ library(stringr)
 # visualizating
 library(ggplot2)
 library(maps)
-
-
 ```
 
 #### *Twitter API access token*
@@ -69,7 +67,7 @@ library(maps)
 Make sure that you have your Twitter API credentials ready:
 
 
-```{r create-token, exercise.eval = FALSE}
+```{r create-token, exercise.eval = FALSE,eval=F}
 # ToDo: specify path to your secrets JSON file
 fp <- file.path(...)
 credentials <- fromJSON(fp)
