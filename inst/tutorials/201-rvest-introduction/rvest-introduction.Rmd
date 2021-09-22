@@ -298,7 +298,7 @@ We can use the function `html_text()`.
 **Try it yourself!**
 
 1. assign the parsed page to an object called 'page' 
-2. call `html_text()` on 'page' and assign the result to an object called 'page_text' (*hint:* set argument `strip = TRUE`)
+2. call `html_text()` on 'page' and assign the result to an object called 'page_text' (*hint:* set argument `trim = TRUE`)
 3. print the fist six lines of extracted text (*hint:* try to use `cat()` isntead of `print()`)
 
 ```{r extract-text}
