@@ -1,0 +1,751 @@
+---
+title: "Scraping multiple pages with the `rvest` R package"
+author: "Theresa Gessler and Hauke Licht"
+date: "last updated: `r format(Sys.Date(), '%e %B %Y')`"
+description: >
+  Learn how to scrape data from multiple pages using the `rvest` package.
+output: 
+  learnr::tutorial:
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+---
+
+```{r knitr, include=FALSE}
+knitr::opts_chunk$set(
+  # code chunk options
+  echo = TRUE
+  , eval = TRUE 
+  , warning = FALSE
+  , message = FALSE
+  , cached = FALSE 
+  , exercise = TRUE
+)
+```
+
+
+```{r setup-invisible, include=FALSE}
+library(learnr)
+library(learn2scrape)
+library(rvest)
+library(urltools)
+quotepage <- read_html(system.file("extdata", "quotepage.html", package = "learn2scrape"))
+```
+
+
+
+## Introduction
+
+In tutorial "201-rvest-introduction", you have learned how to use some of the basic functions of the `rvest` package: `read_html()`, `html_elements()` and `html_text()`.
+But most of the time, we are not just interested in a single page but multiple pages from the same domain, e.g. all newspaper reports by a specific newspaper or all speeches by a politician. 
+
+So we usually need another step in our *data extraction pipeline*.
+<!-- We have to learn to follow links without actually opening the browser and clicking on the link and copying the new path. -->
+Accordingly, you will learn two things:
+
+- to extract links from webpages
+- ways to automate reading data from these links
+
+You will see that effective web scraping  relies on some fundamental R programming techniques. 
+So the more you get used to write loops and functions, the easier will it be to effectively solve real-world web scraping problems. 
+Once you manage these tasks, web scraping will become in an easy-to-handle step of your data collection projects.
+
+## R setup
+
+We will use the following R packages in this tutorial:
+
+```{r setup, exercise = FALSE}
+library(rvest)
+library(urltools)
+```
+
+
+## Extracting links from webpages
+
+Our first goal is to extract a number of links from a web page.
+
+In your browser you recognize links by 
+
+- their styling (e.g., they are blue and underlined, or change if you hover your cursor over them) and - the fact that when you click on them, you are directed to another page 
+
+Now we've already seen that *what* you see in your browser is determined by underlying HTML code.
+So we first need to understand how links are defined in HTML.
+
+### HTML recap
+
+We have previously discussed HTML elements and their properties.
+You will remember that each HTML element has a certain type that is described by its "tag"
+and that individual elements can have attributes associated with them.
+For example, a paragraph HTML element may belong to class "quote", which would be written in HTML as 
+
+```html
+<p class="quote">...</p>
+```
+
+### Hyperlinks in HTML code
+
+This knowledge helps us to understand how links can appear on a webpage.
+An example of HTML code is shown below:
+
+```html
+<p>
+  This is some text 
+  <a href="http://quotes.toscrape.com/">with a link</a>.
+</p>
+```
+
+The first part of this sentence ("This is some text") would appear as ordinary text.
+However, the second part ("with a link") would appear differently and clicking on it would direct you to  http://quotes.toscrape.com/:
+
+> This is some text [with a link]("http://quotes.toscrape.com/").
+
+This is because the text "with a link" is wrapped in an anchor tag.
+So links are basically **a**nchor elements containing an 'href' attribute.
+'href' stands for **h**ypertext **ref**erence and specifies the webpage the link leads to.
+
+### How to extract hyperlink information using `rvest`
+
+So to extract hyperlinks from a webpage, we need some functionality to
+
+1. *locate anchor tags* and 
+2. *extract attributes* from HTML elements.
+
+In the `rvest` package, this can be achieved with the `html_elements()` and `html_attr()` functions respectively. 
+
+How you use `html_elements()` to select elements by their tag name has already been covered in a previous tutorial: you simply pass the tag name to the `css` argument of `html_elements()`.
+
+`html_attr()`, in turn, can be used to extract any type of attributes from HTML elements and below we'll use it to extract hyperlink information from anchor elements.
+To do so, we pass the value 'href' to the `name` argument of the `html_attr()` function.
+For example:
+
+```r
+html_attr(parsed_page, name = "href")
+```
+
+Note, however, that attributes like 'href' are associated with individual web elements.
+So calling `html_attr()` will only work on *individual* web elements, not on an entire pages or list of elements.
+
+So to extract hyperlinks from an entire page, we 
+
+1. extract all elements that potentially have an 'href' attribute, and 
+2. extract the 'href' values of each of these elements.
+
+We can implement the first step using `html_elements()` and the second step by applying `html_attr()` to each extracted element.
+
+**Try it yourself**: Please try two things based on [http://quotes.toscrape.com/](http://quotes.toscrape.com/){target="_blank"}:
+
+1. extract all anchor elements 
+2. extract all 'href' values from these elements
+
+<!-- The parsed page is stored in an object called `quotepage` so you do not need to download it again. -->
+
+```{r links}
+url <- "http://quotes.toscrape.com/"
+page <- read_html(url)
+
+## ToDo: extract all anchor elements (i.e., web elements with an 'a' tag)
+anchor_elements <- ...
+
+## ToDo: extract all 'href' values of these elements
+hyperlinks <- ...
+```
+
+### Why are my links "incomplete"?
+
+Do you notice something about the links? 
+Some of them are missing parts!
+
+This is because they are **relative links**, that is, they specify pages *relative* to the root of the folder structure of the webpage. 
+
+To "repair" these links, we need to add the **base URL** of the webpage. 
+This is typically just the URL of the webpage we originally scraped from; in our case  `"http://quotes.toscrape.com/"`.
+
+For adding the base URL in front of the relative links, we can use the `paste()` function. 
+`paste()` combines/glues/concatenates together two or more character values.
+Note that `paste()` accepts an argument `sep` that specifies how the individual values should be separated.
+By default, `sep = " "` so you'll always add a white space between individual values.
+To avoid this, you can either set `sep = ""` or directly use use `paste0()`, which overwrites this default with `sep = ""` so that characters are combined without inserting a white space in between.
+
+**Try it yourself** if you have never used paste:
+
+```{r try-paste}
+paste("a", "b")
+paste("a", "b", sep = "")
+paste0("a", "b")
+```
+
+
+Now, completing the paths of the URLs we scraped should not be a problem for you. 
+Re-use the code you used to extract the links of the tags, assign it to an object called `url` and add the base url (http://quotes.toscrape.com/) *in front* of it.
+
+
+```{r paste, exercise=TRUE}
+url <- "http://quotes.toscrape.com/"
+page <- read_html(url)
+
+anchor_elements <- html_elements(page, "a")
+rel_links <- html_attr(anchor_elements, "href")
+
+# ToDo: add the base URL in front 
+hyperlinks <- ...
+```
+
+*Caution*: Watch out for the slashes between the base url and the address of your page - having none or too many slashes is a typical problem!*
+
+#### *Getting the base URL right*
+
+To make 100% sure that you are adding the right information to relative links, you can use the `url_parse` function in the 'urltools' package to get at the base URL of a page.
+
+
+```{r parse-url}
+parsed_url <- urltools::url_parse("http://quotes.toscrape.com/")
+str(parsed_url, 1)
+# combine sheme (e.g., 'https') and domain info to get base URL
+base_url <- paste0(parsed_url$scheme, "://", parsed_url$domain)
+```
+
+## Extracting specific hyperlinks
+
+Another thing you'll have noticed in the previous exercise is that by extracting *all* anchor elements and their corresponding 'href' values, we get a lot of (relative) links we might not be interested in.
+In the above exercise, the first five extracted (relative) links were:
+
+```
+[1] "/"                                           
+[2] "/login"                                      
+[3] "/author/Albert-Einstein"                     
+[4] "/tag/change/page/1/"                         
+[5] "/tag/deep-thoughts/page/1/"
+```
+
+The first one points to the page itself, 
+the second one to the login page,
+the third one to the author of the first quote,
+and the last two to tags associated with the first quote.
+
+### When this can be problematic
+
+Depending on your use case, this can be a problem!
+As a **running example**, suppose you want to build a list of all the tags that are used on http://quotes.toscrape.com/.
+In this case you wouldn't want to also extract the links to author pages or the login page.
+
+**This is a typical challenge in web scraping: we usually want to extract information from only a subset of of the web elements that make up a web page.**
+
+### Web scraping one step at a time
+
+We tackle this challenge by combining the different functions we can execute on the parsed HTML code of a page in a **pipeline**.
+
+In the case of extracting the links behind individual tags, for example, we would 
+
+1. parse the page
+2. identify which CSS selector/xpath is used to make web elements appear as "tag" on http://quotes.toscrape.com/
+3. extract all web elements that represent such tags 
+4. extract the 'href' values of the anchor tags associated with these elements
+5. complete them with the base URL information (if necessary)
+
+Let's try this in our example of extracting the links behind individual tags.
+
+### Read and parse the HTML code
+
+First, we need to parse the page.
+We already know how to do this:
+
+```{r , exercise = FALSE}
+# parse URL
+url <- "http://quotes.toscrape.com/"
+page <- read_html(url)
+```
+
+### Identify how to extract relevant web elements
+
+Next, we need to figure out what HTML code makes web elements appear as "tag".
+Again, you have already learned ways to answer this question. 
+For example, you can use *SelectorGadget* or simply inspect the page's HTML soruce code.
+Go to http://quotes.toscrape.com/ to answer the question below  (multiple correct answers)!
+
+```{r tag-css-selector-quiz, exercise = FALSE, echo=FALSE}
+quiz(
+  caption = NULL,
+  question("What piece of HTML code makes web elements appear as 'tag'?",
+    answer("an 'a' HTML tag", message="Almost correct! All 'tag' elements are anchor elements, but not all anchor elements are 'tag' elements!"),
+    answer("class='tag'", correct = TRUE),
+    answer("The relative path strats with 'tag/'", correct = TRUE),
+    answer("a 'meta' HTML tag", message="Not quite! All 'tag' elements are nested in a 'meta' element, but individual 'tag' elements are not 'meta' elements"),
+    allow_retry = TRUE,
+    random_answer_order = TRUE
+  )
+)
+```
+
+So we now know that there are two ways to identify 'tag' elements on this page, one of which we know how to implement from a previous exercise: extracting web elements based on their *class* name.
+
+*Hint:* 
+In case you don't remember this, you can extract web elements based on their class name with use `html_elements()` and the `css` argument by passing the literal class name and a specific punctuation character in front. 
+For example, elements of class 'text' can be addressed with `css = '.text'`.
+
+### Extract hyperlinks
+
+With this information, we can extract all these elements and their 'href' values.
+Finally, we add the base URL:
+
+```{r, exercise = FALSE}
+# parse URL
+url <- "http://quotes.toscrape.com/"
+page <- read_html(url)
+
+# extract 'tag' elements based on class name
+tags <- html_elements(page, ".tag")
+tag_hrefs <- html_attr(tags, "href")
+tag_urls <- paste0(url, tag_hrefs)
+```
+
+## The divide-and-conquer appraoch
+
+The previous example illustrates that a **_crucial skill_ in web scraping is to first develop a clear understanding of the individual steps are you need to complete** in order to to reliably extract the data you are interested in.
+You can think of this as a *divide-and-conquer* approach: 
+you divide a big task into several, smaller tasks and then solve these tasks one after another until everything is done.
+In this way, you can concentrate on solving one problem after another without getting overwhelmed by the bigger picture.
+
+## Automating things
+
+Take another toy example: 
+Suppose you want to extract only the hyperlinks referring to the pages of quoted authors.
+Next, you want to extract the information where and when each author was born (if available) from individual author pages (e.g., http://quotes.toscrape.com/author/Albert-Einstein/)
+
+Once we have collected all relevant hyperlinks, there are multiple ways to achieve this:
+
+- you can use a `for`-loop that loops over the vector of links, loads and parses the HTML code from each and scrapes the relevant information from each of them
+- You can write a function that scrapes the content from the page behind any individual link
+    - you can put the function into your loop
+    - you can `lapply()` the function to a vector
+
+For now, we will start with the easiest variant and just create a `for`-loop. 
+Later, we will also use `lapply()` but there are good reasons why you will often return to simple loops.
+
+### Scraping one link only
+
+Let's brainstorm what we need to accomplish to scrape the relevant information from a single link:
+
+- read and parse the HTML code
+- extract the name of the author
+- extract the information where and when the author was born
+
+### Identifying relevant CSS selectors 
+
+We already know how to accomplish the first step with `read_html()`.
+We also know already that we can accomplish steps 2 and 3 using `html_element()`.
+
+However, what we need to figure out is which CSS selectors we need to pass to `html_element()` to extract an author's name, birth date and birth place.
+
+**Try it yourself!** 
+View the HTML source code or use the *SelectorGadget* to answer the following questions.
+
+```{r selector-practice, exercise = FALSE, echo = FALSE}
+quiz(
+  caption = NULL, #,"CSS slectors identifying author information",
+  question("What CSS selector allows you to unambiguously extract an author's **name**",
+    answer("the 'name' tag"),
+    answer("the 'author-title' class", correct = TRUE),
+    answer("the 'author-details' class", message = "Almost! What you're looking for is nested in this web element!"),
+    allow_retry=TRUE
+  ),
+  question("What CSS selector allows you to unambiguously extract an author's **birth date**",
+    answer("the 'born' tag"),
+    answer("the 'author-born-date' class", correct = TRUE),
+    answer("the 'author-details' class", message = "Almost! What you're looking for is nested in this web element!"),
+    allow_retry=TRUE
+  ),
+  question("What CSS selector allows you to unambiguously extract an author's **birth place**",
+    answer("the 'born' tag"),
+    answer("the 'author-born-location' class", correct = TRUE),
+    answer("the 'author-details' class", message = "Almost! What you're looking for is nested in this web element!"),
+    allow_retry=TRUE
+  )
+)
+```
+
+### Using R code  
+
+If you have figured this out, it is time to write some R code that extracts this information.
+
+**Try it yourself**: Write code that extract an author's name, birth date and birth place.
+Use http://quotes.toscrape.com/author/Jane-Austen/ as an example.
+Write the results to a data frame with columns 
+
+- 'author_name', 
+- 'author_born_on' (birth date)
+- 'author_born_at' (birth place)
+
+```{r scrape-author-page}
+url <- "http://quotes.toscrape.com/author/Jane-Austen/"
+
+# parse HTML 
+page <- read_html(url)
+
+# To Do: extract the relevant information
+author_name <- ...
+author_born_on <- ....
+author_born_at <- ...
+
+# cobmine (column-wise) in a data frame
+out <- data.frame(...)
+```
+
+
+<details>
+<summary>**_Click here to see an example solution!_**</summary>
+```{r scrape-author-page-solution, exercise = FALSE, eval = FALSE}
+
+# parse HTML 
+url <- "http://quotes.toscrape.com/author/Jane-Austen/"
+page <- read_html(url)
+
+# extract the relevant information
+author_name <- html_text(html_element(page, ".author-title"), trim = TRUE)
+author_born_on <- html_text(html_element(page, ".author-born-date"), trim = TRUE)
+author_born_at <- html_text(html_element(page, ".author-born-location"), trim = TRUE)
+
+# combine (column-wise) in a data frame
+out <- data.frame(author_name, author_born_on, author_born_at)
+```
+</details>
+
+
+### Scraping multiple pages using `for`-loops
+
+Now, try to write the code into a loop. 
+
+Remember how `for`-loops work? 
+We take a vector and iterate over elements.
+In our case this vector is called `author_urls` and it records the URLs of the first 4 authors whose quotes are listed on http://quotes.toscrape.com/
+
+```{r exercise = FALSE, echo = FALSE, eval = TRUE}
+url <- "http://quotes.toscrape.com"
+page <- read_html(url)
+author_urls <- paste0(url, html_attr(html_elements(page, xpath = "//a[text()='(about)']"), "href"))[1:4]
+```
+
+```{r exercise = FALSE, eval = TRUE}
+author_urls
+```
+
+Next, we want to extract the same information from each URL.
+We can recycle the code above:
+
+**Try it yourself!**
+Scrape the author name, brith date and birth place from each URL in `author_urls` using a `for`-loop. 
+
+*Caution*: 
+Remember to pause some seconds between iterations to avoid overloading the server you are sending your requests to! 
+In case you don't remember from the API tutorials: you can use `Sys.sleep()` for this.
+
+<!-- We need to find a way to *loop* over a vector of URLs, parsing one after the other and then reading out the quotes.  -->
+<!-- If you don't know how to do this, you can check the hint! -->
+
+<!-- Also, to keep our results, make sure to create an empty object in which you will store the text of the quotes! Again, you can check the hint if you do not know how to do this. -->
+
+
+```{r scrape-author-pages}
+# create a list collecting the extracted data
+results <- list()
+
+# To Do: complete the code to make the for-loop work
+for (...) {
+  
+  # parse HTML (To Do: pass the object name that is returned by the foor loop)
+  page <- read_html(...)
+  
+  # To Do: extract the relevant information
+  author_name <- ...
+  author_born_on <- ....
+  author_born_at <- ...
+  
+  # To Do: combine (column-wise) in a data frame
+  out <- data.frame(...)
+  
+  # To Do: add `out` as an element to results
+  results[[...]] <- out
+  
+  # pause
+  Sys.sleep(3)
+}
+
+# row-bind data frames
+do.call(rbind, out)
+```
+
+<details>
+<summary>**_Click here to see an example solution!_**</summary>
+```{r scrape-author-pages-solution, exercise = FALSE, eval = FALSE}
+# create a list collecting the extracted data
+results <- list()
+
+# iterate over URLs
+for (url in author_urls) {
+  
+  # parse HTML
+  page <- read_html(url)
+  
+  # extract the relevant information
+  author_name <- html_text(html_element(page, ".author-title"), trim = TRUE)
+  author_born_on <- html_text(html_element(page, ".author-born-date"), trim = TRUE)
+  author_born_at <- html_text(html_element(page, ".author-born-location"), trim = TRUE)
+  
+  # combine (column-wise) in a data frame
+  out <- data.frame(author_name, author_born_on, author_born_at)
+  
+  # add `out` as an element to results
+  results[[url]] <- out
+}
+
+# row-bind data frames
+do.call(rbind, results)
+```
+</details>
+
+### Wraping the data extracting step in a function
+
+You'll have noticed that you have executed the code inside the `for`-loop with a different URL in each iteration.
+In this example, this works just fine.
+Depending on what you do inside the `for`-loop, it can be better to wrap the code in the for loop into a custom function.
+
+#### *Why a function*
+
+Some of the pro arguments for this are
+
+- it improves the readability of your code
+- you can modularize your code (i.e., split it up into several building block)
+- you can more neatly separate the data extraction task (applied to a single URL) from the iteration task (repeating stuff for multiple URLs)
+- you can implement coding best practices, such as  (i) testing the validity of function inputs, (ii) error handling and (iii) ensuring return formats
+
+#### *An simple example function*
+
+When analyzing the code you have written above to extract author information from individual pages,
+you'll notice that the only thing that changes between iterations is the URL you are extracting data from.
+Hence, our data extraction function should have a parameter that expects this information: `url`
+
+We can then basically copy-paste the rest of the code to the function body:
+
+```{r func-simple}
+scrape_author_page <- function(url) {
+  
+  page <- read_html(url)
+  
+  # To Do: extract the relevant information
+  author_name <- ...
+  author_born_on <- ....
+  author_born_at <- ...
+  
+  # To Do: combine (column-wise) in a data frame
+  out <- data.frame(...)
+  
+  # return data
+  return(out)
+}
+```
+
+That's already it!
+
+## Making functions (more) robust
+
+There are  several things we could do to make this function more robust:
+
+1. checking function inputs 
+  1. check if the input passed to argument `url` is a valid URL
+  2. check if requesting `url` returns a valid HTTP response
+2. handling errors
+  1. when requesting `url` *does not* return a valid HTTP response
+  2. when author name, birth place, and/or birth location cannot be found
+3. ensuring the return format (e.g. always return a 1-row data frame with character columns 'author_name', 'author_born_on' and 'author_born_at')
+
+### Checking function inputs
+
+To check that `url` is a valid URL, we could for example verify the follwoing logical tests:
+
+```{r function-args-test-1, eval = FALSE}
+url <- "http://quotes.toscrape.com/author/Marilyn-Monroe/"
+
+# `url` is a character vector?
+is.character(url)
+# only one URL is passed?
+length(url) == 1L
+# `url` starts with 'http://' or 'https://'?
+grepl("^https?://", url) 
+```
+
+We could add these using `stopifnot()` before calling `page <- read_html(url)` in the function body.
+
+To check that requesting `url` returns a valid HTTP response, we could wrap `page <- read_html(url)` in a the following code:
+
+```{r function-args-test-2, exercise = FALSE, eval = FALSE}
+url <- "http://quotes.toscrape.com/author/Marilyn-Monroe/"
+
+# try request URL; catch error (if any)
+page <- tryCatch(read_html(url), error = function(err) err)
+
+# if an error was catched
+if (inherits(page, "error")) {
+  stop("could not read page")
+}
+```
+
+*Note:* 
+An alternative is to call `resp <- httr::GET(url)` and check `httr::status_code(resp) == 200`.
+However, this makes another HTTP request to the URL in addition to that executed by `read_html()`.
+This is inefficient and would duplicate the server load we incur.
+A *better* alternative is to use `rvest::session()` instead of `read_html()`, which is discussed in tutorial "204-rvest-advanced".
+
+*Caveat:* 
+It turns out that http://quotes.toscrape.com/author/ awlays returns a valid response (try opening https://quotes.toscrape.com/author/xc%3Cgrgh/ in your browser), so `read_html(url)` never raises an error in this particular example. 
+Our code example should be usefule in many other scenarios, however.
+
+### Handling data extraction errors
+
+We could do a similar thing with the code extracting the relevant data.
+Why? 
+Because, for example, the code `author_name <- html_text(html_element(page, ".author-title"))` implicitly 
+
+1. expects that an element with class '.author-title' can be located
+2. `html_text()` to this elements returns a single character value
+3. if no such element is found the code still returns a single character value
+
+It turns out that in this particular case, these assumptions are well grounded:
+
+```{r func-data-extraction}
+page <- read_html("http://quotes.toscrape.com/author/Marilyn-Monroe/")
+
+# element that exists
+tmp <- html_text(html_element(page, ".author-title"))
+is.character(tmp) & length(tmp) == 1L
+tmp
+
+# element that _does not_ exist
+tmp <- html_text(html_element(page, "cwergfbaxcyeer"))
+is.character(tmp) & length(tmp) == 1L
+tmp
+```
+
+But in other case it might be safe to ensure against such implicit assumptions by implementing error handling.
+For example: 
+
+```{r exercise = FALSE, eval = FALSE}
+author_name <- tryCatch(
+  html_text(html_element(page, ".author-title")), 
+  error = function(err) NA_character_
+)
+```
+
+In our case an example where this might be important is that there is no birth place/date inforamtion reported on an author's page.
+If no such data is reported, the corresponding HTML elements we expect to be there will, in fact, *not* be there!
+In this case `NA` (not available) is the correct return value and character is the expected return type.
+
+### Ensuring return formats
+
+Finally, you could also define beforehand what data you want to return and in what format you want to return it.
+Above we have returned 
+
+1. a *data frame*
+2. with one row,
+3. three columns,
+4. column names were pre-defined ('author_name', 'author_born_on', and  'author_born_at'), and
+5. all columns were type character.
+
+We can make this explicit by defining an output object before we execute any other code inside the function body:
+
+```{r function-return-format}
+out <- data.frame(
+  author_name = NA_character_, 
+  author_born_on = NA_character_, 
+  author_born_at = NA_character_
+)
+
+# verify:
+
+# has 1 row?
+nrow(out)
+# all columns are type character?
+all( purrr::map_chr(out, is.character) )
+```
+
+If we then fail to get a valid response from `read_html(url)` we can return the *default return object* `out`  instead of raising an error:
+```{r exercise = FALSE, eval = FALSE}
+page <- tryCatch(read_html(url), error = function(err) err)
+
+if (inherits(page, "error")) {
+  warning("could not read page", url)
+  return(out)
+}
+```
+
+In this way we can iterate over many URLs without running the risk that a single failed requests stops our loop from continuing to iterate
+
+Simiarly, we change the data extraction part as follows:
+
+```{r exercise = FALSE, eval = FALSE}
+# To Do: extract the relevant information and assign to columns of `out``
+out$author_name <- tryCatch(
+  html_text(html_element(page, ".author-title")), 
+  error = function(err) NA_character_
+)
+# ... and so on
+````
+
+In this way, *if* there is a matching HTML element and *if* it has text, the `NA` value is overwritten.
+Otherwise the default `NA_character_` is kept.
+
+We can then simply return `out` at the end of the function body
+
+### The improved function at a glance
+
+```{r exercise = FALSE, eval = FALSE}
+scrape_author_page <- function(url) {
+  
+  # check inputs
+  stopifnot(
+    "`url` must be a character value" = is.character(url) ,
+    "`url` must be have only one element" = length(url) == 1L ,
+    "`url` must start with 'http://' or 'https://'" = grepl("^https?://", url) 
+  )
+  
+  # define default return object
+  out <- data.frame(
+    author_name = NA_character_, 
+    author_born_on = NA_character_, 
+    author_born_at = NA_character_
+  )
+
+  # try read page 
+  page <- tryCatch(read_html(url), error = function(err) err)
+
+  if (inherits(page, "error")) {
+    warning("could not read page", url)
+    return(out)
+  }
+  
+  # try extract the relevant information
+  out$author_name <- tryCatch(
+    html_text(html_element(page, ".author-title")), 
+    error = function(err) NA_character_
+  )
+   
+  out$author_born_on <- tryCatch(
+    html_text(html_element(page, ".author-born-date")), 
+    error = function(err) NA_character_
+  )
+  
+  out$author_born_at <- tryCatch(
+    html_text(html_element(page, ".author-born-location")), 
+    error = function(err) NA_character_
+  )
+  
+  # return data
+  return(out)
+}
+```
+
+
+
+## Wrap-up
+
+Fantastic, you're done with this lesson! We will repeat to similar tasks in the next days, also using `apply()` and other ways of looping. Still, `for`-loops are super practical for many simple scraping tasks!
+
+The more you learn to use loops, functions and apply commands, the easier the scraping will be. In the end, scraping is just a small step in the whole process of getting data so if you improve your programming skills in R - which is rewarding anyway - you will also get better at scraping in R.
