@@ -218,7 +218,6 @@ We can now inspect the parsed response:
 dat <- content(resp, "parsed")
 
 str(dat, 1)
-)
 ```
 </details>
 
@@ -475,7 +474,7 @@ for (page in pages) {
 
 <details>
 <summary>**_Example Solution (click)_**</summary>
-```{r , exercise = FALSE}
+```{r , exercise = FALSE,eval=F}
 # make initial query
 resp <- GET(endpoint, accept_json())
 dat <- content(resp, "parsed")

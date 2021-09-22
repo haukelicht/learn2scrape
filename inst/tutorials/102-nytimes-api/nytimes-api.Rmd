@@ -66,7 +66,7 @@ So please first create a developer account at: https://developer.nytimes.com/acc
 
 ### Create an App
 
-Once you have created and verified your account, sing in at https://developer.nytimes.com/accounts/login. 
+Once you have created and verified your account, sign in at https://developer.nytimes.com/accounts/login. If you run this from within `learnr`, you can skip these steps.
 
 To use the Article Search API, we next need to create an App:
 
