@@ -34,7 +34,7 @@ library(learnr)
 library(learn2scrape)
 library(rvest)
 
-quotepage <- system.file("extdata", "quotepage.html", package = "learn2scrape")
+page <- system.file("extdata", "quotepage.html", package = "learn2scrape")
 ```
 
 
@@ -67,10 +67,19 @@ Here is what you need to do:
 Please first assign the page URL http://quotes.toscrape.com/ to an object called 'url.'
 Next, use the `read_html()` function to read and parse this page.
 
-```{r read-html, exercise.lines = 2}
-# TO DO: read the HTML code of this URL
+```{r read-html, exercise.lines = 3}
+# To Do: read the HTML code of this URL
 "http://quotes.toscrape.com/"
 ```
+
+<details>
+<summary>**_Click here to see the solution!_**</summary>
+
+```{r page-setup, exercise = FALSE}
+# read the HTML code of this URL
+page <- read_html("http://quotes.toscrape.com/")
+```
+</details>
 
 ### HTML source code in R 
 
@@ -95,40 +104,11 @@ knitr::include_graphics("images/source-code.png")
 *Note:* If you have trouble, [google has an up-to-date explanation](https://www.google.com/search?hl=&site=&q=how+to+view+webpage+source+code+in+browser){target="_blank"}. 
 
 
-## Extracting text
-
-The function `read_html()` parses the HTML code, similar to what your browser does. 
-Still, it gives us the entire source code including all HTML elements and their attributes. 
-
-For now, we are only interested in the text of this webpage.
-We can use the function `html_text()`.
-
-**Try it yourself!**
-
-1. assign the parsed page to an object called 'page' 
-2. call `html_text()` on 'page' and assign the result to an object called 'page_text' (*hint:* set argument `strip = TRUE`)
-3. print the fist six lines of extracted text (*hint:* try to use `cat()` isntead of `print()`)
-
-```{r extract-text}
-url <- "http://quotes.toscrape.com/"
-
-# TO DO: write the result of the below line to an object called 'page'
-read_html(url)
-
-# TO DO: extract the HTML text from 'page'
-
-# TO DO: print the fist six lines of extracted text 
-```
-
-
-Admittedly, this still looks very messy. 
-Maybe you are thinking: If only there was a way to tell R to just get the text of the quotes!
-Luckily, there is.
 
 ## Extracting specific elements
 
-The `html_elements()` command allows us to select specific elements from the HTML code. 
-Please have a look at the documentation of the `?html_elements()` command (see Figure 3).
+The `html_elements()` function allows us to select specific elements from the HTML code. 
+Please have a look at the documentation of the `?html_elements()` function (see Figure 3).
 
 
 ```{r echo = FALSE, exercise = FALSE, fig.cap="*Fig 3* --- R documentation of `html_elements()`"}
@@ -195,11 +175,9 @@ CSS selectors are a type of *grammar* or *pattern description* that helps us sel
 <!-- - of a certain class `x` is '**.**x' -->
 <!-- - with a certain ID `x` is '**#**x' -->
 
-We will speak more about CSS selectors in later tutorials.
-For now, we will just use a tool that helps us determine the correct selectors. 
-<!-- But that is not a problem: many people use these tools for scraping and only learn the basics of CSS selectors. -->
-
 For this lesson, we will focus on two of the most important selector: *tag name* and *class* selectors.
+
+#### *Selecting by tag name*
 
 To select elements of a specific *tag* type, just pass its name to the `css` argument of the `html_elements()` function (without the leading and trailing '<' and '>').
 The CSS selector will select all elements with that tag name.
@@ -212,9 +190,11 @@ Select all 'a' (anchor) tags
 ```{r select-tag}
 url <- "http://quotes.toscrape.com/"
 page <- read_html(url)
-# TO DO: select all 'a' tags using CSS selectors
+# To Do: select all 'a' tags using CSS selectors
 html_elements(page, css = ...)
 ```
+
+#### *Selecting by class*
 
 To select elements with a specific **class**, just pass the class name to the `css` argument of the `html_elements()` function with a '.' (full stop) in front.
 
@@ -225,7 +205,7 @@ Select all HTML elements with class 'quote'.
 ```{r select-class,}
 url <- "http://quotes.toscrape.com/"
 page <- read_html(url)
-# TO DO: select elements with class 'quote'
+# To Do: select elements with class 'quote'
 html_elements(page, css = ...)
 ```
 
@@ -292,22 +272,59 @@ quiz(
 
 ### Applying CSS Selectors
 
-Now, we try to use this CSS selector with the `html_elements()` command. 
+Now, we try to use this CSS selector with the `html_elements()` function. 
 Since each exercise chunk is independent, there will be a bit of repetition involved but it aids the memory: Parse the page, use the CSS selector to select only the quotes from the parsed HTML and assign them to a new object called 'selected_nodes'. 
 Then, inspect the results by calling the object using `str()`!
 
 
 ```{r select-text-nodes, exercise.setup="page-setup"}
-# TO DO: extract all elements from the quotes webpage
+# To Do: extract all elements from the quotes webpage
 #        that match the '.text' CSS selector
 ```
 
 This already looks more structured! 
-But we should get rid of the HTML tags. 
-Try applying the `html_text()` command we used before to the nodes which we extracted in the last step. 
-This way, we get just the text from the nodes we selected. 
-You can copy the code you used to extract the nodes and continue working on that!
+But we should get rid of the HTML tags.
+
+This is what we deal with next.
+
+## Extracting text
+
+The function `read_html()` parses the HTML code, similar to what your browser does. 
+Still, it gives us the entire source code including all HTML elements and their attributes. 
+
+For now, we are only interested in the text of this webpage.
+We can use the function `html_text()`.
+
+**Try it yourself!**
+
+1. assign the parsed page to an object called 'page' 
+2. call `html_text()` on 'page' and assign the result to an object called 'page_text' (*hint:* set argument `strip = TRUE`)
+3. print the fist six lines of extracted text (*hint:* try to use `cat()` isntead of `print()`)
+
+```{r extract-text}
+url <- "http://quotes.toscrape.com/"
+
+# To Do: write the result of the below line to an object called 'page'
+read_html(url)
+
+# To Do: extract the HTML text from 'page'
+
+# To Do: print the fist six lines of extracted text 
+```
+
+
+Admittedly, this still looks very messy. 
+Maybe you are thinking: If only there was a way to tell R to just get the text of the quotes!
+Luckily, this is just what we've learned above.
+
+**Try it yourself!**
+
+1. From the quotes webpage, extract all elements with class 'text'.
+2. Extract their text.
 
 ```{r select-text-nodes-texts,  exercise.setup='page-setup'}
+# To Do: extract all elements with class 'text'
 
+# To Do: extract the text of these elements
 ```
+
