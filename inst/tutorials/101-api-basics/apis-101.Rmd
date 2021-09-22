@@ -141,7 +141,7 @@ resp <- GET(endpoint, config = accept_json())
 **Try it yourself!**
 Check the [docu](https://icanhazdadjoke.com/api#api-response-format) and try to obtain the response in plain text format
 
-```{r text, exercise.lines = 3}
+```{r text, exercise.lines = 3,eval=F}
 resp <- GET(endpoint, config = ...)
 ```
 
@@ -218,7 +218,6 @@ We can now inspect the parsed response:
 dat <- content(resp, "parsed")
 
 str(dat, 1)
-)
 ```
 </details>
 
@@ -475,7 +474,7 @@ for (page in pages) {
 
 <details>
 <summary>**_Example Solution (click)_**</summary>
-```{r , exercise = FALSE}
+```{r , exercise = FALSE,eval=F}
 # make initial query
 resp <- GET(endpoint, accept_json())
 dat <- content(resp, "parsed")

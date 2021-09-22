@@ -13,11 +13,11 @@ output:
 runtime: shiny_prerendered
 ---
 
-```{r knitr, include=FALSE}
+```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   # code chunk options
   echo = TRUE
-  , eval = TRUE
+  , eval = F
   , warning = FALSE
   , message = FALSE
   , cached = FALSE 
@@ -47,7 +47,7 @@ The Twitter REST API provides you with access to the tweets of all users or othe
 
 We will use the following R packages:
 
-```{r setup, eval = TRUE, exercise = FALSE}
+```{r, eval = TRUE, exercise = FALSE}
 # to access Twitter REST API
 library(rtweet)
 
@@ -60,11 +60,6 @@ library(stringr)
 # visualizating
 library(ggplot2)
 library(maps)
-
-# text analyses
-library(quanteda)
-library(quanteda.textplots)
-options(quanteda_threads = 1L)
 ```
 
 #### *Twitter API access token*
@@ -72,7 +67,7 @@ options(quanteda_threads = 1L)
 Make sure that you have your Twitter API credentials ready:
 
 
-```{r create-token, exercise.eval = FALSE}
+```{r create-token, exercise.eval = FALSE,eval=F}
 # ToDo: specify path to your secrets JSON file
 fp <- file.path(...)
 credentials <- fromJSON(fp)
@@ -80,7 +75,7 @@ token <- do.call(create_token, credentials)
 ```
 
 
-```{r , exercise = FALSE, echo = FALSE}
+```{r , exercise = FALSE, echo = FALSE,eval=T}
 credentials <- fromJSON(system.file("extdata", "tw_credentials.json", package = "learn2scrape"))
 token <- do.call(create_token, credentials)
 ```
@@ -106,27 +101,9 @@ head(tweets, 3)
 By default, the Twitter API allows you to download up to 18.000 Tweets. 
 To return more than 18.000 tweets with a single search, you can set `retryonratelimit = TRUE`.
 
-## Searching by Geocode
-
-Now, we can again search for tweets with a geocode. Hopefully, when also including past tweets, we will receive more results, so we will try to do this with Tweets 50km around *GESIS*.
-(You can lookup places' coordinates like described [here](https://support.google.com/maps/answer/18539).)
-
-```{r search-tweets-by-geocode}
-# search for tweets created (by users) near GESIS
-gesis <- search_tweets(geocode = "50.94268842250975, 6.952277084819257,50km", n = 100)
-
-# convert to latitude and longitude
-gesis <- rtweet::lat_lng(gesis)
-
-# plot
-maps::map("world", regions = "Germany")
-with(gesis, points(lng, lat, col = rgb(0, .3, .7, .75)))
-```
-
-
 ## Downloading user's tweets and bios
 
-Instead of just looking for key words or geo-coded tweets, you can also analyze specific users.
+Instead of just looking for key words, you can also analyze specific users.
 
 You can download **up to 3,200 most recent tweets** from a Twitter account using `get_timeline()`. 
 `rtweet` also has some in-built functions for plotting the results, namely `ts_plot()`.
@@ -212,45 +189,6 @@ follower_network <- friends %>%
 with(follower_network, table(follows_ipz, ipz_follows))
 ```
 
-### Anaylzing followers bios
-
-What are the most common words that friends of my department's account use to describe themselves on Twitter?
-
-We do a bit more text analysis now by visualizing the results with a word cloud using the `quanteda` R package.
-This allows us to remove things like URLs or non-meaningful words before we visualize the user descriptions.
-
-```{r bios-wordcloud}
-# extract profile descriptions
-users <- lookup_users(user = friends$user_id)
-
-# create corpus of user descriptions
-corp <- users %>% 
-  filter(!is.na(description), trimws(description) != "") %>% 
-  select(user_id, screen_name, name, description, account_created_at) %>% 
-  corpus(text_field = "description", docid_field = "user_id")
-
-# convert to document-term matrix (bag-of-words)
-bow <- corp %>% 
-  tokens(
-    remove_punct = TRUE,
-    remove_symbols = TRUE,
-    remove_url = TRUE
-  ) %>% 
-  tokens_remove(c(stopwords("en"), stopwords("de"))) %>% 
-  dfm()
-
-topfeatures(bow, n = 15)
-
-# create a wordcloud
-textplot_wordcloud(
-  bow,
-  rotation = 0,
-  min_size = 1,
-  max_size = 5,
-  max_words = 100
-)
-```
-
 ## Other types of data
 
 The REST API offers also a long list of other endpoints that could be of use in your projects.
@@ -290,7 +228,7 @@ status$text
 "Lists" of Twitter users, compiled by other users, are also accessible through the API. 
 There are many lists of politicians, leaders etc. that you can use.
 
-You can search by 'slug', that is name, if you specify the list owner, otherwise you have to find the `list_id`. Try to find information about this <a href="https://twitter.com/i/lists/1044685725369815040">list of world leaders</a>.
+You can search by 'slug', that is name, if you specify the list owner, otherwise you have to find the `list_id`. Try to find information about this <a href="https://twitter.com/i/lists/15299140">list of world leaders</a>.
 
 ```{r lists-members}
 
@@ -303,7 +241,7 @@ You can search by 'slug', that is name, if you specify the list owner, otherwise
 # download user information from a list
 world_leaders <- lists_members(
   list_id = "1044685725369815040",
-  owner_user = "@TwitterGov"
+  owner_user = "@verified"
 )
 world_leaders
 ```
@@ -334,4 +272,50 @@ List of users who retweeted a particular tweet --- unfortunately, it's limited t
 
 ```{r get-retweets, exercise.lines = 1}
 rts <- get_retweets(status_id = "896523232098078720")
+```
+
+
+
+## Optional: Analyzing followers bios
+
+What are the most common words that friends of my department's account use to describe themselves on Twitter?
+
+We can do a bit more text analysis now by visualizing the results with a word cloud using the `quanteda` R package.
+This allows us to remove things like URLs or non-meaningful words before we visualize the user descriptions.
+
+```{r bios-wordcloud,eval=F}
+# text analyses
+library(quanteda)
+library(quanteda.textplots)
+options(quanteda_threads = 1L)
+
+# extract profile descriptions
+users <- lookup_users(user = friends$user_id)
+
+# create corpus of user descriptions
+corp <- users %>% 
+  filter(!is.na(description), trimws(description) != "") %>% 
+  select(user_id, screen_name, name, description, account_created_at) %>% 
+  corpus(text_field = "description", docid_field = "user_id")
+
+# convert to document-term matrix (bag-of-words)
+bow <- corp %>% 
+  tokens(
+    remove_punct = TRUE,
+    remove_symbols = TRUE,
+    remove_url = TRUE
+  ) %>% 
+  tokens_remove(c(stopwords("en"), stopwords("de"))) %>% 
+  dfm()
+
+topfeatures(bow, n = 15)
+
+# create a wordcloud
+textplot_wordcloud(
+  bow,
+  rotation = 0,
+  min_size = 1,
+  max_size = 5,
+  max_words = 100
+)
 ```
