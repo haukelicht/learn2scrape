@@ -1,12 +1,12 @@
 # learn2scrape: Learn to Web Scrape
 
 This package enables to learn web scraping in R with interactive tutorials.
-It accompanies the *GESIS Fall Seminar in Computational Social Sciences 2021* course "Automated Web Data Collection in R".
+It accompanies the *GESIS Fall Seminar in Computational Social Sciences 2022* course "Automated Web Data Collection in R" ([link](https://training.gesis.org/?site=pDetails&child=full&pID=0xB75F899267F14C648AED7D43EBFF3BFB&subID=0x44757916B99049C88889E388D33CF4EE)).
  
 ## Installation
 
 ```r
-remotes::install_github("haukelicht/learn2scrape", ref = "gesis2021")
+remotes::install_github("haukelicht/learn2scrape", ref = "gesis2022")
 ```
 
 ## Tutorials
@@ -29,7 +29,7 @@ If you are running R using the Rstudio IDE (≥ version 1.3), you can alternativ
 
 ## Feedback and Issues
 
-Please contact [Hauke Licht](mailto:hauke.licht@uzh.ch) or [Theresa Gessler](mailto:gessler@ipz.uzh.ch) with feedback.
+Please contact [Hauke Licht](mailto:hauke.licht@wiso.uni-koeln.de) or [Theresa Gessler](mailto:gessler@ipz.uzh.ch) with feedback.
 
 Should you encounter any problems when trying to launch tutorials or run code in a tutorial, please open an Issue on Github at https://github.com/haukelicht/learn2scrape/issues.
 
